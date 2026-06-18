@@ -57,7 +57,7 @@ Kortex AI solves this problem by acting as a local, secure **AI Second Brain**. 
 
 ## 🎨 Bauhaus Design System & Aesthetics
 
-Kortex AI adopts a **print-Bauhaus** design system characterized by high contrast, structural layouts, and cinematic dark mode aesthetics.
+<!-- Kortex AI adopts a **print-Bauhaus** design system characterized by high contrast, structural layouts, and cinematic dark mode aesthetics. -->
 
 ### Key Design Tokens
 * **Color Palette**: Highly tailored HSL colors. Sleek charcoal and deep obsidian backgrounds contrast with cream highlights, crimson accents, and muted primary colors. Generic browser primary colors are strictly avoided in favor of harmonized, premium tones.
