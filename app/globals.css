@@ -3,33 +3,17 @@
 @source "../app";
 
 @theme {
-  /* ================================
-     KORTEX AI — BAUHAUS DESIGN TOKENS
-     Constructivist Modernist Style
-  ================================ */
-
-  /* Bauhaus Primary Colors */
   --color-bauhaus-red: #D02020;
   --color-bauhaus-blue: #1040C0;
   --color-bauhaus-yellow: #F0C020;
   --color-bauhaus-black: #121212;
-  --color-bauhaus-white: #FFFFFF;
   --color-bauhaus-canvas: #F0F0F0;
   --color-bauhaus-muted: #E0E0E0;
-
-  /* Semantic Aliases */
   --color-background: #F0F0F0;
   --color-foreground: #121212;
-  --color-border: #121212;
-
-  /* Typography */
   --font-sans: var(--font-outfit), system-ui, sans-serif;
   --font-display: var(--font-outfit), system-ui, sans-serif;
 }
-
-/* ================================
-   GLOBAL RESET & BASE
-================================ */
 
 * {
   box-sizing: border-box;
@@ -42,418 +26,52 @@ html {
 }
 
 body {
-  background-color: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-outfit), system-ui, sans-serif;
+  background-color: #F0F0F0;
+  color: #121212;
+  font-family: var(--font-outfit), 'Outfit', system-ui, sans-serif;
   font-weight: 500;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
-/* ================================
-   SCROLLBAR — Bauhaus Black
-================================ */
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #F0F0F0; }
+::-webkit-scrollbar-thumb { background: #121212; border-radius: 0; }
 
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+/* Selection */
+::selection { background: #F0C020; color: #121212; }
 
-::-webkit-scrollbar-track {
-  background: var(--color-bauhaus-canvas);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-bauhaus-black);
-  border-radius: 0;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #333;
-}
-
-/* ================================
-   SELECTION — Yellow Highlight
-================================ */
-
-::selection {
-  background: var(--color-bauhaus-yellow);
-  color: var(--color-bauhaus-black);
-}
-
-/* ================================
-   TYPOGRAPHY UTILITIES
-================================ */
-
-.font-display {
-  font-family: var(--font-outfit), system-ui, sans-serif;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: -0.02em;
-  line-height: 0.95;
-}
-
-.font-label {
-  font-family: var(--font-outfit), system-ui, sans-serif;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 0.75rem;
-}
-
-/* ================================
-   BAUHAUS SHADOW SYSTEM
-   Hard offset shadows, no blur
-================================ */
-
-.shadow-hard-sm {
-  box-shadow: 3px 3px 0px 0px #121212;
-}
-
-.shadow-hard {
-  box-shadow: 4px 4px 0px 0px #121212;
-}
-
-.shadow-hard-md {
-  box-shadow: 6px 6px 0px 0px #121212;
-}
-
-.shadow-hard-lg {
-  box-shadow: 8px 8px 0px 0px #121212;
-}
-
-/* White versions for colored backgrounds */
-.shadow-hard-white {
-  box-shadow: 4px 4px 0px 0px #ffffff;
-}
-
-.shadow-hard-white-lg {
-  box-shadow: 8px 8px 0px 0px #ffffff;
-}
-
-/* ================================
-   BUTTONS — Bauhaus Primary Colors
-================================ */
-
-/* Red Button (Primary CTA) */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 32px;
-  background: #D02020;
-  color: #ffffff;
-  border: 2px solid #121212;
-  border-radius: 0;
-  font-family: var(--font-outfit), system-ui, sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: all 0.15s ease-out;
-  position: relative;
-  box-shadow: 4px 4px 0px 0px #121212;
-}
-
-.btn-primary:hover {
-  background: #b01a1a;
-  transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0px 0px #121212;
-}
-
-.btn-primary:active {
-  transform: translate(2px, 2px);
-  box-shadow: none;
-}
-
-/* Blue Button (Secondary CTA) */
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 32px;
-  background: #1040C0;
-  color: #ffffff;
-  border: 2px solid #121212;
-  border-radius: 0;
-  font-family: var(--font-outfit), system-ui, sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: all 0.15s ease-out;
-  box-shadow: 4px 4px 0px 0px #121212;
-}
-
-.btn-secondary:hover {
-  background: #0c30a0;
-  transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0px 0px #121212;
-}
-
-.btn-secondary:active {
-  transform: translate(2px, 2px);
-  box-shadow: none;
-}
-
-/* Yellow Button */
-.btn-yellow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 32px;
-  background: #F0C020;
-  color: #121212;
-  border: 2px solid #121212;
-  border-radius: 0;
-  font-family: var(--font-outfit), system-ui, sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: all 0.15s ease-out;
-  box-shadow: 4px 4px 0px 0px #121212;
-}
-
-.btn-yellow:hover {
-  background: #d4a818;
-  transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0px 0px #121212;
-}
-
-.btn-yellow:active {
-  transform: translate(2px, 2px);
-  box-shadow: none;
-}
-
-/* Outline Button (White) */
-.btn-outline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 32px;
-  background: #ffffff;
-  color: #121212;
-  border: 2px solid #121212;
-  border-radius: 0;
-  font-family: var(--font-outfit), system-ui, sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: all 0.15s ease-out;
-  box-shadow: 4px 4px 0px 0px #121212;
-}
-
-.btn-outline:hover {
-  background: #f0f0f0;
-  transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0px 0px #121212;
-}
-
-.btn-outline:active {
-  transform: translate(2px, 2px);
-  box-shadow: none;
-}
-
-/* ================================
-   BAUHAUS CARD COMPONENT
-================================ */
-
-.card-bauhaus {
-  background: #ffffff;
-  border: 4px solid #121212;
-  box-shadow: 8px 8px 0px 0px #121212;
-  transition: transform 0.2s ease-out;
-}
-
-.card-bauhaus:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 10px 10px 0px 0px #121212;
-}
-
-.card-bauhaus-sm {
-  background: #ffffff;
-  border: 2px solid #121212;
-  box-shadow: 4px 4px 0px 0px #121212;
-  transition: transform 0.2s ease-out;
-}
-
-.card-bauhaus-sm:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0px 0px #121212;
-}
-
-/* ================================
-   GEOMETRIC DECORATORS
-================================ */
-
-/* Small corner decorators for cards */
-.geo-circle-red {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #D02020;
-  border: 2px solid #121212;
-  flex-shrink: 0;
-}
-
-.geo-circle-blue {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #1040C0;
-  border: 2px solid #121212;
-  flex-shrink: 0;
-}
-
-.geo-circle-yellow {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #F0C020;
-  border: 2px solid #121212;
-  flex-shrink: 0;
-}
-
-.geo-square-red {
-  width: 12px;
-  height: 12px;
-  background: #D02020;
-  border: 2px solid #121212;
-  flex-shrink: 0;
-}
-
-.geo-square-blue {
-  width: 12px;
-  height: 12px;
-  background: #1040C0;
-  border: 2px solid #121212;
-  flex-shrink: 0;
-}
-
-.geo-square-yellow {
-  width: 12px;
-  height: 12px;
-  background: #F0C020;
-  border: 2px solid #121212;
-  flex-shrink: 0;
-}
-
-/* ================================
-   DOT GRID BACKGROUND PATTERN
-================================ */
-
+/* =====================================
+   DOT GRID BACKGROUND PATTERNS
+===================================== */
 .bg-dot-grid {
-  background-image: radial-gradient(#121212 1.5px, transparent 1.5px);
+  background-image: radial-gradient(#12121230 1.5px, transparent 1.5px);
   background-size: 20px 20px;
-  background-color: #F0F0F0;
 }
-
 .bg-dot-grid-white {
-  background-image: radial-gradient(rgba(255,255,255,0.3) 1.5px, transparent 1.5px);
+  background-image: radial-gradient(rgba(255,255,255,0.25) 1.5px, transparent 1.5px);
   background-size: 20px 20px;
 }
 
-/* ================================
-   ANIMATIONS — Mechanical, Snappy
-================================ */
-
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slide-in-left {
-  from {
-    opacity: 0;
-    transform: translateX(-32px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(32px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes bauhaus-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.5s ease-out forwards;
-}
-
-.animate-slide-in-left {
-  animation: slide-in-left 0.5s ease-out forwards;
-}
-
-.animate-slide-in-right {
-  animation: slide-in-right 0.5s ease-out forwards;
-}
-
-.animate-bauhaus-spin {
-  animation: bauhaus-spin 20s linear infinite;
-}
-
-/* ================================
+/* =====================================
    REACT FLOW OVERRIDES
-================================ */
-
-.react-flow__background {
-  background-color: #F0F0F0 !important;
-}
-
-.react-flow__edge-path {
-  stroke: #121212 !important;
-  stroke-width: 2px !important;
-}
-
+===================================== */
+.react-flow__background { background-color: #F0F0F0 !important; }
+.react-flow__edge-path { stroke: #121212 !important; stroke-width: 2px !important; }
 .react-flow__controls {
   background: #ffffff !important;
   border: 2px solid #121212 !important;
   border-radius: 0 !important;
   box-shadow: 4px 4px 0px 0px #121212 !important;
 }
-
 .react-flow__controls-button {
   background: transparent !important;
   border: none !important;
   color: #121212 !important;
   border-bottom: 1px solid #e0e0e0 !important;
 }
-
-.react-flow__controls-button:hover {
-  background: #F0C020 !important;
-  color: #121212 !important;
-}
-
+.react-flow__controls-button:hover { background: #F0C020 !important; }
 .react-flow__minimap {
   background: #F0F0F0 !important;
   border: 2px solid #121212 !important;
