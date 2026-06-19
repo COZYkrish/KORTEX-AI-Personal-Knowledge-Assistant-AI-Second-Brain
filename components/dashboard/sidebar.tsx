@@ -138,7 +138,6 @@ export function DashboardSidebar() {
         className="flex items-center justify-center gap-2 w-full transition-colors duration-200"
         style={{
           padding: "12px 16px",
-          borderTop: B.border4,
           background: B.CANVAS,
           fontFamily: "'Outfit', system-ui, sans-serif",
           fontWeight: 700,

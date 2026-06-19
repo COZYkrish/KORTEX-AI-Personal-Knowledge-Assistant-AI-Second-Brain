@@ -8,13 +8,14 @@ import {
   BookOpen, MessageSquare, Search, PenTool, BarChart3,
   ChevronRight,
 } from "lucide-react";
+import { B } from "@/lib/bauhaus";
 
 const AGENT_MODES = [
-  { id: "general", label: "General AI", icon: Bot, color: "#7c3aed" },
-  { id: "research", label: "Research", icon: Search, color: "#00d4ff" },
-  { id: "study", label: "Study Coach", icon: BookOpen, color: "#10b981" },
-  { id: "summarize", label: "Summarize", icon: PenTool, color: "#f59e0b" },
-  { id: "quiz", label: "Quiz Me", icon: BarChart3, color: "#ef4444" },
+  { id: "general", label: "General AI", icon: Bot, color: B.BLUE },
+  { id: "research", label: "Research", icon: Search, color: B.RED },
+  { id: "study", label: "Study Coach", icon: BookOpen, color: B.YELLOW },
+  { id: "summarize", label: "Summarize", icon: PenTool, color: B.BLUE },
+  { id: "quiz", label: "Quiz Me", icon: BarChart3, color: B.RED },
 ];
 
 const EXAMPLE_QUESTIONS = [
@@ -38,18 +39,20 @@ const AI_RESPONSES: Record<string, string> = {
 };
 
 function WaveformBar({ active, height }: { active: boolean; height: number }) {
+  // Rotate colors between Red, Blue, Yellow
+  const colors = [B.BLUE, B.RED, B.YELLOW];
+  const barColor = colors[Math.floor(Math.random() * 3)];
   return (
     <motion.div
       animate={active ? {
         scaleY: [1, height, 0.5, height * 0.7, 1],
         transition: { repeat: Infinity, duration: 0.6 + Math.random() * 0.4, ease: "easeInOut" }
       } : { scaleY: 0.15 }}
-      className="w-1 rounded-full origin-bottom"
+      className="w-1.5 rounded-none origin-bottom shrink-0"
       style={{
         height: "40px",
-        background: active
-          ? "linear-gradient(to top, #7c3aed, #00d4ff)"
-          : "rgba(124,58,237,0.3)",
+        background: active ? barColor : "#12121225",
+        border: active ? "1.5px solid #121212" : "none",
       }}
     />
   );
@@ -144,34 +147,39 @@ export default function VoicePage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 h-full flex flex-col">
+    <div className="max-w-4xl mx-auto space-y-8 pb-12 h-full flex flex-col">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between shrink-0">
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shrink-0">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white">Voice AI</h1>
-          <p className="text-[#a8b2d8] text-sm mt-0.5">Talk to your knowledge base naturally</p>
+          <h1 className="font-display text-4xl font-black uppercase tracking-tight text-[#121212]" style={B.displayStyle}>
+            Voice AI
+          </h1>
+          <p className="text-gray-600 text-xs font-bold uppercase tracking-wider mt-1" style={B.labelStyle}>
+            Speak queries to your documents with natural speech interaction
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          {/* Mute toggle */}
+        <div className="flex items-center gap-3 self-start sm:self-center">
+          {/* Mute button */}
           <button
-            id="voice-mute-button"
             onClick={() => setMuted(!muted)}
-            className={`p-2.5 glass rounded-xl transition-all ${muted ? "text-[#ef4444] border-[rgba(239,68,68,0.3)]" : "text-[#64748b] hover:text-white"}`}
+            id="voice-mute-button"
+            className="p-3 bg-white border-2 border-[#121212] text-[#121212] font-black shadow-[3px_3px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none hover:bg-gray-50"
             title={muted ? "Unmute AI voice" : "Mute AI voice"}
           >
-            {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            {muted ? <VolumeX className="w-5 h-5 text-[#D02020]" /> : <Volume2 className="w-5 h-5 text-[#1040C0]" />}
           </button>
 
-          {/* Agent mode */}
+          {/* Agent selection drop */}
           <div className="relative">
             <button
               id="voice-agent-selector"
               onClick={() => setShowModes(!showModes)}
-              className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white hover:border-[rgba(124,58,237,0.5)] transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-[#121212] text-sm text-[#121212] font-bold uppercase tracking-wider shadow-[3px_3px_0px_0px_#121212] cursor-pointer rounded-none hover:bg-gray-50"
+              style={{ fontFamily: "'Outfit', sans-serif" }}
             >
-              <activeAgent.icon className="w-4 h-4" style={{ color: activeAgent.color }} />
-              {activeAgent.label}
-              <ChevronDown className={`w-3.5 h-3.5 text-[#64748b] transition-transform ${showModes ? "rotate-180" : ""}`} />
+              <activeAgent.icon className="w-4.5 h-4.5 text-[#1040C0]" />
+              <span>{activeAgent.label}</span>
+              <ChevronDown className={`w-4 h-4 text-[#121212] transition-transform ${showModes ? "rotate-180" : ""}`} />
             </button>
             <AnimatePresence>
               {showModes && (
@@ -179,18 +187,22 @@ export default function VoicePage() {
                   initial={{ opacity: 0, y: 8, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                  className="absolute top-full right-0 mt-2 w-48 glass-bright rounded-2xl p-2 z-20 shadow-xl"
+                  className="absolute top-full right-0 mt-2 w-56 bg-white border-2 border-[#121212] p-2 z-20 shadow-[6px_6px_0px_0px_#121212] rounded-none"
                 >
                   {AGENT_MODES.map((agent) => {
                     const Icon = agent.icon;
+                    const isSelected = agentMode === agent.id;
                     return (
                       <button
                         key={agent.id}
                         onClick={() => { setAgentMode(agent.id); setShowModes(false); }}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${agentMode === agent.id ? "bg-[rgba(124,58,237,0.25)] text-white" : "text-[#a8b2d8] hover:bg-[rgba(124,58,237,0.1)] hover:text-white"}`}
+                        className={`w-full flex items-center gap-3 px-3 py-2 border ${
+                          isSelected ? "bg-[#1040C0] text-white border-[#121212]" : "text-[#121212] border-transparent hover:bg-gray-100"
+                        } cursor-pointer rounded-none font-bold uppercase text-xs tracking-wide`}
+                        style={{ fontFamily: "'Outfit', sans-serif" }}
                       >
-                        <Icon className="w-4 h-4" style={{ color: agent.color }} />
-                        <span className="text-sm">{agent.label}</span>
+                        <Icon className={`w-4.5 h-4.5 ${isSelected ? "text-white" : "text-[#1040C0]"}`} />
+                        <span>{agent.label}</span>
                       </button>
                     );
                   })}
@@ -201,128 +213,113 @@ export default function VoicePage() {
         </div>
       </motion.div>
 
-      {/* Central mic area */}
+      {/* Central Mic Box */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.1 }}
-        className="glass-bright rounded-3xl p-10 flex flex-col items-center gap-6 shrink-0"
-        style={{
-          background: "radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.12) 0%, transparent 60%), rgba(13,20,64,0.8)",
-        }}
+        transition={{ delay: 0.05 }}
+        className="bg-white border-4 border-[#121212] p-12 flex flex-col items-center gap-8 shadow-[8px_8px_0px_0px_#121212] rounded-none text-center shrink-0"
       >
-        {/* Waveform */}
-        <div className="flex items-end gap-1 h-10">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <WaveformBar key={i} active={listening || speaking} height={0.3 + Math.sin(i * 0.5) * 0.7} />
+        {/* Visualizer Waveform */}
+        <div className="flex items-end gap-1.5 h-12">
+          {Array.from({ length: 30 }).map((_, i) => (
+            <WaveformBar key={i} active={listening || speaking} height={0.3 + Math.sin(i * 0.4) * 0.7} />
           ))}
         </div>
 
         {/* Mic Button */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          animate={listening ? {
-            boxShadow: [
-              "0 0 0 0 rgba(124,58,237,0.4)",
-              "0 0 0 20px rgba(124,58,237,0)",
-            ],
-            transition: { repeat: Infinity, duration: 1.2 }
-          } : {}}
+        <button
           onClick={toggleListening}
           disabled={!supported}
           id="voice-mic-button"
-          className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
-            listening
-              ? "bg-gradient-to-br from-[#ef4444] to-[#dc2626]"
-              : "bg-gradient-to-br from-[#7c3aed] to-[#5b21b6]"
-          } disabled:opacity-50 disabled:cursor-not-allowed`}
-          style={{
-            boxShadow: listening
-              ? "0 0 40px rgba(239,68,68,0.5)"
-              : "0 0 40px rgba(124,58,237,0.5), 0 0 80px rgba(124,58,237,0.2)",
-          }}
+          className={`w-24 h-24 border-4 border-[#121212] rounded-full flex items-center justify-center transition-all shadow-[6px_6px_0px_0px_#121212] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_#121212] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+            listening ? "bg-[#D02020]" : "bg-[#1040C0]"
+          }`}
         >
           {listening ? (
             <MicOff className="w-10 h-10 text-white" />
           ) : (
             <Mic className="w-10 h-10 text-white" />
           )}
-        </motion.button>
+        </button>
 
-        {/* Status text */}
-        <div className="text-center min-h-[48px]">
+        {/* Text / Recognition Display */}
+        <div className="min-h-[48px] max-w-xl">
           {!supported ? (
-            <p className="text-[#ef4444] text-sm">Voice recognition not supported in this browser. Use Chrome.</p>
+            <p className="text-[#D02020] font-black uppercase text-xs tracking-wider" style={B.labelStyle}>Speech recognition API is unsupported in this browser environment.</p>
           ) : listening ? (
             <div>
-              <p className="text-[#a78bfa] text-sm font-medium animate-pulse">Listening...</p>
+              <p className="text-[#1040C0] font-black uppercase text-xs tracking-wider animate-pulse" style={B.labelStyle}>Ingesting Audio feed...</p>
               {currentText && (
-                <p className="text-white text-base mt-1 font-medium">&quot;{currentText}&quot;</p>
+                <p className="text-[#121212] font-black text-xl mt-3 leading-snug" style={{ fontFamily: "'Outfit', sans-serif" }}>&quot;{currentText}&quot;</p>
               )}
             </div>
           ) : loading ? (
-            <div className="flex items-center gap-2 text-[#a8b2d8]">
-              <Loader2 className="w-4 h-4 animate-spin text-[#7c3aed]" />
-              <span className="text-sm">Processing...</span>
+            <div className="flex items-center justify-center gap-2 text-gray-500 font-bold uppercase tracking-wider text-xs" style={B.labelStyle}>
+              <Loader2 className="w-4 h-4 animate-spin text-[#1040C0]" />
+              <span>Processing NLP response...</span>
             </div>
           ) : speaking ? (
-            <p className="text-[#10b981] text-sm font-medium">AI is speaking...</p>
+            <p className="text-[#1040C0] font-black uppercase text-xs tracking-wider animate-bounce" style={B.labelStyle}>Synthesizing voice response...</p>
           ) : (
-            <p className="text-[#64748b] text-sm">Tap the microphone to start talking</p>
+            <p className="text-gray-500 font-bold uppercase tracking-wider text-xs" style={B.labelStyle}>Tap the microphone unit to initiate session</p>
           )}
         </div>
 
-        {/* AI model indicator */}
-        <div className="flex items-center gap-2 px-4 py-2 rounded-full glass">
-          <Sparkles className="w-3.5 h-3.5 text-[#10b981]" />
-          <span className="text-xs text-[#10b981] font-medium">Gemini 2.5 Flash</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
-          <span className="text-xs text-[#64748b] ml-1">Web Speech API</span>
+        {/* System parameters indicator */}
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-[#F0C020] border-2 border-[#121212] text-[#121212] font-black uppercase text-xs tracking-wider shadow-[2px_2px_0px_0px_#121212]" style={{ fontFamily: "'Outfit', sans-serif" }}>
+          <Sparkles className="w-4 h-4" />
+          <span>Gemini 2.5 Active</span>
+          <span className="w-1.5 h-1.5 bg-emerald-600 border border-black rounded-none animate-pulse" />
         </div>
       </motion.div>
 
-      {/* Two columns: Transcript + Examples */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">
-        {/* Transcript */}
+      {/* Two columns: Dialogue transcript + Example Questions */}
+      <div className="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8 min-h-0">
+        {/* Transcript Box */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="lg:col-span-2 glass rounded-2xl p-5 flex flex-col min-h-0"
-          style={{ maxHeight: "320px" }}
+          transition={{ delay: 0.1 }}
+          className="lg:col-span-2 bg-white border-2 border-[#121212] p-5 flex flex-col min-h-0 shadow-[4px_4px_0px_0px_#121212] rounded-none"
+          style={{ maxHeight: "350px" }}
         >
-          <div className="flex items-center gap-2 mb-4 shrink-0">
-            <MessageSquare className="w-4 h-4 text-[#7c3aed]" />
-            <span className="text-sm font-semibold text-white">Conversation</span>
+          <div className="flex items-center gap-2 mb-4 border-b border-[#121212] pb-2 shrink-0">
+            <MessageSquare className="w-4.5 h-4.5 text-[#1040C0]" />
+            <span className="text-xs font-black uppercase tracking-wider text-black" style={B.labelStyle}>Dialogue Transcript</span>
           </div>
-          <div className="flex-1 overflow-y-auto space-y-3" style={{ scrollbarWidth: "thin" }}>
+          <div className="flex-grow overflow-y-auto space-y-4 pr-1" style={{ scrollbarWidth: "thin", scrollbarColor: "#121212 #ffffff" }}>
             {transcript.length === 0 ? (
-              <div className="text-center py-8">
-                <Mic className="w-8 h-8 text-[rgba(124,58,237,0.3)] mx-auto mb-2" />
-                <p className="text-sm text-[#4a5568]">Your conversation will appear here</p>
+              <div className="text-center py-12">
+                <Mic className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider" style={B.labelStyle}>Conversation history is empty</p>
               </div>
             ) : (
-              transcript.map((t) => (
-                <div key={t.id} className={`flex gap-3 ${t.role === "user" ? "flex-row-reverse" : ""}`}>
-                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${t.role === "ai" ? "bg-gradient-to-br from-[#7c3aed] to-[#5b21b6]" : "glass border border-[rgba(124,58,237,0.3)]"}`}>
-                    {t.role === "ai" ? <Bot className="w-4 h-4 text-white" /> : <User className="w-4 h-4 text-[#a78bfa]" />}
+              transcript.map((t) => {
+                const isAI = t.role === "ai";
+                return (
+                  <div key={t.id} className={`flex gap-3 ${!isAI ? "flex-row-reverse" : ""}`}>
+                    <div className={`w-8 h-8 border-2 border-[#121212] flex items-center justify-center shrink-0 shadow-[1px_1px_0px_0px_#121212] rounded-none ${isAI ? "bg-[#D02020] text-white" : "bg-[#1040C0] text-white"}`}>
+                      {isAI ? <Bot className="w-4.5 h-4.5" /> : <User className="w-4.5 h-4.5" />}
+                    </div>
+                    <div className={`max-w-[80%] border-2 border-[#121212] px-4 py-2.5 shadow-[2px_2px_0px_0px_#121212] text-xs font-bold uppercase tracking-wider rounded-none ${
+                      isAI ? "bg-white text-[#121212]" : "bg-[#F0C020] text-[#121212]"
+                    }`} style={{ fontFamily: "'Outfit', sans-serif" }}>
+                      {t.text}
+                    </div>
                   </div>
-                  <div className={`max-w-[80%] px-3 py-2 rounded-xl text-sm ${t.role === "ai" ? "glass text-[#c8d0e8]" : "bg-gradient-to-br from-[#7c3aed] to-[#5b21b6] text-white"}`}>
-                    {t.text}
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
             {loading && (
               <div className="flex gap-3">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#7c3aed] to-[#5b21b6] flex items-center justify-center">
-                  <Bot className="w-4 h-4 text-white" />
+                <div className="w-8 h-8 border-2 border-[#121212] bg-[#D02020] text-white flex items-center justify-center shadow-[1px_1px_0px_0px_#121212] rounded-none">
+                  <Bot className="w-4.5 h-4.5" />
                 </div>
-                <div className="glass px-3 py-2 rounded-xl">
-                  <div className="flex gap-1">
+                <div className="bg-white border-2 border-[#121212] px-4 py-2 shadow-[2px_2px_0px_0px_#121212] rounded-none">
+                  <div className="flex gap-1.5 py-1">
                     {[0, 1, 2].map((i) => (
-                      <motion.div key={i} animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 0.7, delay: i * 0.15 }} className="w-1.5 h-1.5 rounded-full bg-[#7c3aed]" />
+                      <motion.div key={i} animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 0.7, delay: i * 0.15 }} className="w-1.5 h-1.5 bg-[#121212]" />
                     ))}
                   </div>
                 </div>
@@ -332,29 +329,29 @@ export default function VoicePage() {
           </div>
         </motion.div>
 
-        {/* Example questions */}
+        {/* Examples questions box */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-          className="glass rounded-2xl p-5"
-          style={{ maxHeight: "320px", overflow: "hidden" }}
+          transition={{ delay: 0.15 }}
+          className="bg-white border-2 border-[#121212] p-5 shadow-[4px_4px_0px_0px_#121212] rounded-none flex flex-col"
+          style={{ maxHeight: "350px" }}
         >
-          <div className="flex items-center gap-2 mb-4">
-            <Settings2 className="w-4 h-4 text-[#7c3aed]" />
-            <span className="text-sm font-semibold text-white">Try Asking</span>
+          <div className="flex items-center gap-2 mb-4 border-b border-[#121212] pb-2 shrink-0">
+            <Settings2 className="w-4.5 h-4.5 text-[#1040C0]" />
+            <span className="text-xs font-black uppercase tracking-wider text-black" style={B.labelStyle}>Suggested Prompts</span>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3 overflow-y-auto pr-1 flex-grow" style={{ scrollbarWidth: "none" }}>
             {EXAMPLE_QUESTIONS.map((q) => (
-              <motion.button
+              <button
                 key={q}
-                whileHover={{ x: 3 }}
                 onClick={() => askExample(q)}
-                className="w-full text-left px-3 py-2.5 rounded-xl glass text-xs text-[#a8b2d8] hover:text-white hover:border-[rgba(124,58,237,0.4)] transition-all group"
+                className="w-full text-left px-3 py-3 bg-white border border-[#121212] shadow-[2px_2px_0px_0px_#121212] text-xs font-bold uppercase tracking-wide text-black hover:bg-gray-55 active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none flex items-center justify-between"
+                style={{ fontFamily: "'Outfit', sans-serif" }}
               >
-                <ChevronRight className="w-3.5 h-3.5 text-[#7c3aed] inline mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                &quot;{q}&quot;
-              </motion.button>
+                <span>{q}</span>
+                <ChevronRight className="w-4 h-4 text-[#1040C0]" />
+              </button>
             ))}
           </div>
         </motion.div>

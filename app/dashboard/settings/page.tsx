@@ -8,6 +8,7 @@ import {
   Globe, Mail, Smartphone, KeyRound, Download,
   Trash2, ExternalLink,
 } from "lucide-react";
+import { B } from "@/lib/bauhaus";
 
 const TABS = [
   { id: "profile", label: "Profile", icon: User },
@@ -24,12 +25,14 @@ function Toggle({ enabled, onChange, id }: { enabled: boolean; onChange: (v: boo
       role="switch"
       aria-checked={enabled}
       onClick={() => onChange(!enabled)}
-      className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${enabled ? "bg-[#7c3aed]" : "bg-[rgba(100,116,139,0.3)]"}`}
+      className={`relative w-12 h-6 border-2 border-[#121212] transition-colors duration-200 cursor-pointer rounded-none ${
+        enabled ? "bg-[#1040C0]" : "bg-white"
+      }`}
     >
-      <motion.div
-        animate={{ x: enabled ? 22 : 2 }}
-        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-        className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm"
+      <div
+        className={`absolute top-[2px] w-4 h-4 border border-[#121212] bg-white transition-all ${
+          enabled ? "left-[24px]" : "left-[2px]"
+        }`}
       />
     </button>
   );
@@ -37,10 +40,10 @@ function Toggle({ enabled, onChange, id }: { enabled: boolean; onChange: (v: boo
 
 function SettingRow({ label, description, children }: { label: string; description?: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between py-4 border-b border-[rgba(124,58,237,0.08)] last:border-0">
+    <div className="flex items-center justify-between py-4 border-b-2 border-dashed border-[#121212] last:border-0">
       <div className="flex-1 min-w-0 mr-6">
-        <p className="text-sm font-medium text-white">{label}</p>
-        {description && <p className="text-xs text-[#64748b] mt-0.5 leading-relaxed">{description}</p>}
+        <p className="text-sm font-extrabold text-[#121212]" style={{ fontFamily: "'Outfit', sans-serif" }}>{label}</p>
+        {description && <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mt-1" style={B.labelStyle}>{description}</p>}
       </div>
       <div className="shrink-0">{children}</div>
     </div>
@@ -49,9 +52,9 @@ function SettingRow({ label, description, children }: { label: string; descripti
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="glass-bright rounded-2xl p-6">
-      <h3 className="text-base font-semibold text-white mb-4">{title}</h3>
-      <div className="divide-y divide-[rgba(124,58,237,0.08)]">{children}</div>
+    <div className="bg-white border-2 border-[#121212] p-6 shadow-[4px_4px_0px_0px_#121212] rounded-none">
+      <h3 className="text-lg font-black uppercase tracking-tight text-[#121212] border-b-2 border-[#121212] pb-3 mb-4" style={B.displayStyle}>{title}</h3>
+      <div className="divide-y divide-[#121212]">{children}</div>
     </div>
   );
 }
@@ -61,35 +64,35 @@ const INTEGRATIONS = [
     name: "Google Gemini",
     description: "AI model for chat, generation, and embeddings",
     status: "connected",
-    color: "#10b981",
+    color: B.BLUE,
     icon: Sparkles,
   },
   {
     name: "Neon PostgreSQL",
     description: "Primary database with pgvector extension",
     status: "connected",
-    color: "#10b981",
+    color: B.RED,
     icon: Database,
   },
   {
     name: "Clerk Auth",
     description: "User authentication and session management",
     status: "connected",
-    color: "#10b981",
+    color: B.YELLOW,
     icon: Shield,
   },
   {
     name: "Vercel Blob Storage",
     description: "File storage for uploaded documents",
     status: "not_configured",
-    color: "#f59e0b",
+    color: B.BLUE,
     icon: ExternalLink,
   },
   {
     name: "Redis / BullMQ",
     description: "Background job queue for document processing",
     status: "not_configured",
-    color: "#f59e0b",
+    color: B.RED,
     icon: ExternalLink,
   },
 ];
@@ -102,8 +105,8 @@ export default function SettingsPage() {
   const [language, setLanguage] = useState("en");
 
   // Appearance
-  const [darkMode] = useState(true);
-  const [accentColor, setAccentColor] = useState("#7c3aed");
+  const [darkMode, setDarkMode] = useState(false);
+  const [accentColor, setAccentColor] = useState("#1040C0");
   const [compactMode, setCompactMode] = useState(false);
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
 
@@ -121,52 +124,57 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const ACCENT_COLORS = ["#7c3aed", "#00d4ff", "#10b981", "#f59e0b", "#ef4444", "#ec4899"];
+  const ACCENT_COLORS = [B.BLUE, B.RED, B.YELLOW, "#121212"];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-8 pb-12">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white">Settings</h1>
-          <p className="text-[#a8b2d8] text-sm mt-0.5">Manage your account and preferences</p>
+          <h1 className="font-display text-4xl font-black uppercase tracking-tight text-[#121212]" style={B.displayStyle}>
+            Settings
+          </h1>
+          <p className="text-gray-600 text-xs font-bold uppercase tracking-wider mt-1" style={B.labelStyle}>
+            Manage your account configurations and user preferences
+          </p>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.97 }}
+        <button
           onClick={handleSave}
           id="save-settings-button"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#7c3aed] to-[#5b21b6] text-white text-sm font-medium"
+          className="inline-flex items-center justify-center gap-2 bg-[#D02020] text-white border-2 border-[#121212] font-black uppercase tracking-wider text-xs shadow-[3px_3px_0px_0px_#121212] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none px-5 py-3 self-start sm:self-center"
+          style={{ fontFamily: "'Outfit', sans-serif" }}
         >
-          {saved ? <Check className="w-4 h-4 text-[#10b981]" /> : <Settings className="w-4 h-4" />}
-          {saved ? "Saved!" : "Save Changes"}
-        </motion.button>
+          {saved ? <Check className="w-4.5 h-4.5 text-[#F0C020]" /> : <Settings className="w-4.5 h-4.5 text-white" />}
+          <span>{saved ? "Changes Saved!" : "Save Changes"}</span>
+        </button>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Tab nav */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Tab navigation */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: -15 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
-          className="lg:col-span-1 space-y-1"
+          transition={{ delay: 0.05 }}
+          className="lg:col-span-1 space-y-3"
         >
           {TABS.map((tab) => {
             const Icon = tab.icon;
+            const isSelected = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 id={`settings-tab-${tab.id}`}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
-                  activeTab === tab.id
-                    ? "bg-[rgba(124,58,237,0.2)] text-white border border-[rgba(124,58,237,0.3)]"
-                    : "text-[#64748b] hover:text-[#a8b2d8] hover:bg-[rgba(124,58,237,0.05)]"
+                className={`w-full flex items-center gap-3 px-4 py-3.5 border-2 text-left transition-all rounded-none cursor-pointer font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_#121212] ${
+                  isSelected
+                    ? "bg-[#1040C0] text-white border-black"
+                    : "bg-white text-[#121212] border-black hover:bg-gray-50"
                 }`}
+                style={{ fontFamily: "'Outfit', sans-serif" }}
               >
-                <Icon className={`w-4 h-4 shrink-0 ${activeTab === tab.id ? "text-[#7c3aed]" : ""}`} />
-                <span className="text-sm font-medium">{tab.label}</span>
-                {activeTab === tab.id && <ChevronRight className="w-3.5 h-3.5 ml-auto text-[#7c3aed]" />}
+                <Icon className={`w-4.5 h-4.5 shrink-0 ${isSelected ? "text-white" : "text-[#1040C0]"}`} />
+                <span>{tab.label}</span>
+                {isSelected && <ChevronRight className="w-4 h-4 ml-auto text-white" />}
               </button>
             );
           })}
@@ -175,58 +183,62 @@ export default function SettingsPage() {
         {/* Tab content */}
         <motion.div
           key={activeTab}
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: 15 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.25 }}
-          className="lg:col-span-3 space-y-4"
+          transition={{ duration: 0.2 }}
+          className="lg:col-span-3 space-y-6"
         >
           {/* PROFILE */}
           {activeTab === "profile" && (
             <>
               <SectionCard title="Personal Information">
-                <SettingRow label="Display Name" description="How you appear in the dashboard">
+                <SettingRow label="Display Name" description="Used for greeting and references">
                   <input
                     id="display-name-input"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    className="px-3 py-1.5 rounded-xl bg-[rgba(13,20,64,0.6)] border border-[rgba(124,58,237,0.3)] text-white text-sm w-40 focus:outline-none focus:border-[rgba(124,58,237,0.6)] transition-colors"
+                    className="px-3 py-2 border-2 border-[#121212] bg-white text-[#121212] text-sm font-semibold rounded-none focus:outline-none focus:bg-gray-50 w-44 shadow-[2px_2px_0px_0px_#121212]"
+                    style={{ fontFamily: "'Outfit', sans-serif" }}
                   />
                 </SettingRow>
-                <SettingRow label="Language" description="Interface language preference">
-                  <select
-                    id="language-select"
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                    className="px-3 py-1.5 rounded-xl bg-[rgba(13,20,64,0.6)] border border-[rgba(124,58,237,0.3)] text-white text-sm focus:outline-none appearance-none cursor-pointer"
-                  >
-                    <option value="en">English</option>
-                    <option value="es">Español</option>
-                    <option value="fr">Français</option>
-                    <option value="de">Deutsch</option>
-                    <option value="ja">日本語</option>
-                    <option value="zh">中文</option>
-                  </select>
+                <SettingRow label="Language" description="Choose interface locale">
+                  <div className="relative inline-block w-44">
+                    <select
+                      id="language-select"
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value)}
+                      className="w-full px-3 py-2 border-2 border-[#121212] bg-white text-[#121212] text-sm font-semibold rounded-none focus:outline-none focus:bg-gray-50 shadow-[2px_2px_0px_0px_#121212] cursor-pointer"
+                      style={{ fontFamily: "'Outfit', sans-serif" }}
+                    >
+                      <option value="en">English</option>
+                      <option value="es">Español</option>
+                      <option value="fr">Français</option>
+                      <option value="de">Deutsch</option>
+                      <option value="ja">日本語</option>
+                      <option value="zh">中文</option>
+                    </select>
+                  </div>
                 </SettingRow>
               </SectionCard>
 
-              <SectionCard title="Account">
-                <SettingRow label="Email address" description="Managed by Clerk authentication">
-                  <div className="flex items-center gap-2 text-[#64748b] text-sm">
-                    <Mail className="w-4 h-4" />
+              <SectionCard title="Account Integration">
+                <SettingRow label="Email Address" description="Managed via Clerk authentication">
+                  <div className="flex items-center gap-2 text-gray-500 font-bold uppercase tracking-wider text-xs" style={B.labelStyle}>
+                    <Mail className="w-4 h-4 text-[#121212]" />
                     <span>via Clerk</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
+                    <ExternalLink className="w-3.5 h-3.5 text-[#121212]" />
                   </div>
                 </SettingRow>
-                <SettingRow label="Password & Security" description="Manage your login credentials">
-                  <button className="flex items-center gap-2 px-3 py-1.5 glass rounded-xl text-sm text-[#a8b2d8] hover:text-white transition-colors">
-                    <KeyRound className="w-4 h-4" />
-                    Manage in Clerk
+                <SettingRow label="Password & Security" description="Verify credentials through authentication manager">
+                  <button className="flex items-center justify-center gap-2 px-4 py-2 bg-white border-2 border-[#121212] text-[#121212] font-black uppercase text-xs tracking-wider shadow-[2px_2px_0px_0px_#121212] hover:bg-gray-55 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                    <KeyRound className="w-4 h-4 text-[#121212]" />
+                    Manage Clerk
                   </button>
                 </SettingRow>
-                <SettingRow label="Connected devices" description="Devices where you are signed in">
-                  <div className="flex items-center gap-2 text-[#64748b] text-sm">
-                    <Smartphone className="w-4 h-4" />
-                    <span>1 device</span>
+                <SettingRow label="Active Sessions" description="Devices authenticated to Kortex AI">
+                  <div className="flex items-center gap-2 text-gray-500 font-bold uppercase tracking-wider text-xs" style={B.labelStyle}>
+                    <Smartphone className="w-4 h-4 text-[#121212]" />
+                    <span>1 Active Session</span>
                   </div>
                 </SettingRow>
               </SectionCard>
@@ -236,49 +248,58 @@ export default function SettingsPage() {
           {/* APPEARANCE */}
           {activeTab === "appearance" && (
             <>
-              <SectionCard title="Theme">
-                <SettingRow label="Dark Mode" description="Kortex AI is optimized for dark mode">
+              <SectionCard title="Styling Options">
+                <SettingRow label="Dark Bauhaus Mode" description="Invert canvas background (Light canvas recommended for true print Bauhaus)">
                   <div className="flex items-center gap-2">
                     {darkMode ? (
-                      <Moon className="w-4 h-4 text-[#7c3aed]" />
+                      <Moon className="w-4.5 h-4.5 text-[#1040C0]" />
                     ) : (
-                      <Sun className="w-4 h-4 text-[#f59e0b]" />
+                      <Sun className="w-4.5 h-4.5 text-[#F0C020]" />
                     )}
-                    <Toggle enabled={darkMode} onChange={() => {}} id="dark-mode-toggle" />
+                    <Toggle enabled={darkMode} onChange={setDarkMode} id="dark-mode-toggle" />
                   </div>
                 </SettingRow>
-                <SettingRow label="Compact Mode" description="Reduce padding and spacing in the dashboard">
+                <SettingRow label="Compact Padding" description="Tighter boundaries for higher density grids">
                   <Toggle enabled={compactMode} onChange={setCompactMode} id="compact-mode-toggle" />
                 </SettingRow>
-                <SettingRow label="Animations" description="Enable smooth transitions and micro-animations">
+                <SettingRow label="Transitions & Effects" description="Enable physics micro-animations">
                   <Toggle enabled={animationsEnabled} onChange={setAnimationsEnabled} id="animations-toggle" />
                 </SettingRow>
               </SectionCard>
 
-              <SectionCard title="Accent Color">
-                <div className="flex items-center gap-3 py-2">
-                  {ACCENT_COLORS.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => setAccentColor(color)}
-                      className="w-8 h-8 rounded-xl transition-all hover:scale-110"
-                      style={{
-                        background: color,
-                        boxShadow: accentColor === color ? `0 0 0 2px #050816, 0 0 0 4px ${color}` : "none",
-                      }}
-                    />
-                  ))}
+              <SectionCard title="System Accent Color">
+                <div className="flex flex-wrap gap-4 py-2">
+                  {ACCENT_COLORS.map((color) => {
+                    const isSelected = accentColor === color;
+                    return (
+                      <button
+                        key={color}
+                        onClick={() => setAccentColor(color)}
+                        className={`w-10 h-10 border-2 border-black rounded-none cursor-pointer transition-all ${
+                          isSelected
+                            ? "scale-105 border-4 shadow-[4px_4px_0px_0px_#121212] -translate-y-0.5"
+                            : "shadow-[2px_2px_0px_0px_#121212] hover:scale-102"
+                        }`}
+                        style={{ background: color }}
+                      />
+                    );
+                  })}
                 </div>
-                <p className="text-xs text-[#64748b] mt-2">Current: <span className="font-mono" style={{ color: accentColor }}>{accentColor}</span></p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mt-3" style={B.labelStyle}>
+                  Selected Hex Value: <span className="font-mono text-[#121212] font-black">{accentColor}</span>
+                </p>
               </SectionCard>
 
               <SectionCard title="Typography">
-                <SettingRow label="Font Size" description="Base text size across the application">
-                  <div className="flex items-center gap-1 glass rounded-xl p-1">
-                    {["S", "M", "L"].map((size, i) => (
+                <SettingRow label="Base Font Size" description="Configure size scale across dashboard page text">
+                  <div className="flex items-center bg-white border-2 border-black p-1 shadow-[2px_2px_0px_0px_#121212] rounded-none">
+                    {["S", "M", "L"].map((size, idx) => (
                       <button
                         key={size}
-                        className={`w-8 h-7 rounded-lg text-xs font-medium transition-all ${i === 1 ? "bg-[rgba(124,58,237,0.3)] text-white" : "text-[#64748b] hover:text-white"}`}
+                        className={`w-9 h-8 font-bold text-xs rounded-none transition-all cursor-pointer border ${
+                          idx === 1 ? "bg-[#1040C0] text-white border-black" : "text-[#121212] border-transparent hover:bg-gray-100"
+                        }`}
+                        style={{ fontFamily: "'Outfit', sans-serif" }}
                       >
                         {size}
                       </button>
@@ -292,23 +313,23 @@ export default function SettingsPage() {
           {/* NOTIFICATIONS */}
           {activeTab === "notifications" && (
             <>
-              <SectionCard title="Email Notifications">
-                <SettingRow label="Daily Digest" description="Receive a summary of your learning activity each morning">
+              <SectionCard title="Email Digest Options">
+                <SettingRow label="Morning Digest" description="Receive progress breakdown at 8:00 AM daily">
                   <Toggle enabled={emailDigest} onChange={setEmailDigest} id="email-digest-toggle" />
                 </SettingRow>
-                <SettingRow label="Weekly Report" description="Detailed weekly learning report with insights and recommendations">
+                <SettingRow label="Weekly Insights Report" description="Deeper analysis of topic mastery scores and quiz histories">
                   <Toggle enabled={weeklyReport} onChange={setWeeklyReport} id="weekly-report-toggle" />
                 </SettingRow>
-                <SettingRow label="Document Processed" description="Notify when a document finishes processing and is ready">
+                <SettingRow label="File Parsing Notifications" description="Receive alert when document ingestion pipeline finishes">
                   <Toggle enabled={documentProcessed} onChange={setDocumentProcessed} id="doc-processed-toggle" />
                 </SettingRow>
               </SectionCard>
 
-              <SectionCard title="Push Notifications">
-                <SettingRow label="Browser Notifications" description="Receive push notifications in the browser">
+              <SectionCard title="Browser Alerts">
+                <SettingRow label="Push Alerts" description="Allow instant push events from workspace">
                   <Toggle enabled={pushNotifications} onChange={setPushNotifications} id="push-notifications-toggle" />
                 </SettingRow>
-                <SettingRow label="Quiz Reminders" description="Remind you when flashcards or quizzes are due for review">
+                <SettingRow label="System Repetition Reminders" description="Remind when cards or study paths reach scheduled interval">
                   <Toggle enabled={quizReminders} onChange={setQuizReminders} id="quiz-reminders-toggle" />
                 </SettingRow>
               </SectionCard>
@@ -318,42 +339,42 @@ export default function SettingsPage() {
           {/* INTEGRATIONS */}
           {activeTab === "integrations" && (
             <>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {INTEGRATIONS.map((integration) => {
                   const Icon = integration.icon;
+                  const isConnected = integration.status === "connected";
                   return (
-                    <div key={integration.name} className="glass rounded-2xl p-5 flex items-center gap-4">
+                    <div key={integration.name} className="bg-white border-2 border-[#121212] p-5 flex items-center gap-4 shadow-[3px_3px_0px_0px_#121212] rounded-none">
                       <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                        style={{ background: `${integration.color}20` }}
+                        className="w-10 h-10 border-2 border-[#121212] flex items-center justify-center shrink-0 shadow-[2px_2px_0px_0px_#121212] rounded-none"
+                        style={{ background: integration.color, color: "#ffffff" }}
                       >
-                        <Icon className="w-5 h-5" style={{ color: integration.color }} />
+                        <Icon className="w-5 h-5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-white">{integration.name}</p>
-                        <p className="text-xs text-[#64748b] mt-0.5">{integration.description}</p>
+                        <p className="text-sm font-extrabold text-[#121212] uppercase tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>{integration.name}</p>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mt-0.5" style={B.labelStyle}>{integration.description}</p>
                       </div>
                       <span
-                        className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
-                        style={{
-                          background: integration.status === "connected" ? "rgba(16,185,129,0.15)" : "rgba(245,158,11,0.15)",
-                          color: integration.status === "connected" ? "#10b981" : "#f59e0b",
-                        }}
+                        className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-1 border border-[#121212] rounded-none text-white ${
+                          isConnected ? "bg-[#1040C0]" : "bg-[#D02020]"
+                        }`}
+                        style={{ fontFamily: "'Outfit', sans-serif" }}
                       >
-                        {integration.status === "connected" ? "Connected" : "Not Configured"}
+                        {isConnected ? "Connected" : "Missing Config"}
                       </span>
                     </div>
                   );
                 })}
               </div>
 
-              <div className="glass rounded-2xl p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <KeyRound className="w-4 h-4 text-[#7c3aed]" />
-                  <h3 className="text-sm font-semibold text-white">API Keys</h3>
+              <div className="bg-white border-2 border-[#121212] p-5 shadow-[4px_4px_0px_0px_#121212] rounded-none">
+                <div className="flex items-center gap-2 mb-3 border-b border-[#121212] pb-2">
+                  <KeyRound className="w-4.5 h-4.5 text-[#1040C0]" />
+                  <h3 className="text-sm font-black uppercase text-[#121212]" style={{ fontFamily: "'Outfit', sans-serif" }}>API Keys configuration</h3>
                 </div>
-                <p className="text-xs text-[#64748b] mb-4">API keys are stored in your .env file and never exposed to the client.</p>
-                <div className="space-y-2">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4" style={B.labelStyle}>API keys are stored in secure server environment variables (.env) only.</p>
+                <div className="space-y-3">
                   {[
                     { key: "GEMINI_API_KEY", status: "configured" },
                     { key: "DATABASE_URL", status: "configured" },
@@ -361,10 +382,15 @@ export default function SettingsPage() {
                     { key: "BLOB_READ_WRITE_TOKEN", status: "missing" },
                     { key: "REDIS_URL", status: "missing" },
                   ].map((item) => (
-                    <div key={item.key} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-[rgba(13,20,64,0.4)]">
-                      <code className="text-xs text-[#a78bfa] flex-1 font-mono">{item.key}</code>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full ${item.status === "configured" ? "bg-[rgba(16,185,129,0.15)] text-[#10b981]" : "bg-[rgba(245,158,11,0.15)] text-[#f59e0b]"}`}>
-                        {item.status === "configured" ? "✓ Set" : "Missing"}
+                    <div key={item.key} className="flex items-center gap-3 px-3 py-2 border border-[#121212] bg-[#F0F0F0] rounded-none">
+                      <code className="text-xs text-[#121212] font-black flex-1 font-mono">{item.key}</code>
+                      <span
+                        className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 border border-[#121212] rounded-none text-white ${
+                          item.status === "configured" ? "bg-[#1040C0]" : "bg-[#D02020]"
+                        }`}
+                        style={{ fontFamily: "'Outfit', sans-serif" }}
+                      >
+                        {item.status === "configured" ? "✓ Conf" : "Missing"}
                       </span>
                     </div>
                   ))}
@@ -377,58 +403,58 @@ export default function SettingsPage() {
           {activeTab === "data" && (
             <>
               <SectionCard title="Your Data">
-                <SettingRow label="Export All Data" description="Download all your documents, chats, flashcards, and analytics as a ZIP file">
-                  <button className="flex items-center gap-2 px-3 py-1.5 glass rounded-xl text-sm text-[#a8b2d8] hover:text-white transition-colors">
+                <SettingRow label="Export Workspace Data" description="Compile and download ZIP of documents, flashcard statistics, and chats">
+                  <button className="flex items-center justify-center gap-2 px-4 py-2 bg-white border-2 border-[#121212] text-[#121212] font-black uppercase text-xs tracking-wider shadow-[2px_2px_0px_0px_#121212] hover:bg-gray-50 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none" style={{ fontFamily: "'Outfit', sans-serif" }}>
                     <Download className="w-4 h-4" />
-                    Export
+                    Export ZIP
                   </button>
                 </SettingRow>
-                <SettingRow label="Clear Chat History" description="Delete all AI conversations — this cannot be undone">
-                  <button className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[rgba(245,158,11,0.3)] text-[#f59e0b] text-sm hover:bg-[rgba(245,158,11,0.1)] transition-colors">
-                    <Trash2 className="w-4 h-4" />
-                    Clear
+                <SettingRow label="Wipe Dialogue History" description="Delete all conversation data permanently">
+                  <button className="flex items-center justify-center gap-2 px-4 py-2 bg-[#D02020] text-white border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[2px_2px_0px_0px_#121212] hover:bg-[#b01a1a] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                    <Trash2 className="w-4 h-4 text-white" />
+                    Wipe History
                   </button>
                 </SettingRow>
               </SectionCard>
 
-              <div className="glass-bright rounded-2xl p-5 border border-[rgba(239,68,68,0.2)]" style={{ background: "rgba(239,68,68,0.05)" }}>
-                <div className="flex items-center gap-2 mb-3">
-                  <Trash2 className="w-4 h-4 text-[#ef4444]" />
-                  <h3 className="text-sm font-semibold text-[#ef4444]">Danger Zone</h3>
+              {/* Danger Zone */}
+              <div className="bg-white border-4 border-[#D02020] p-6 shadow-[6px_6px_0px_0px_#121212] rounded-none">
+                <div className="flex items-center gap-2 mb-3 border-b-2 border-[#D02020] pb-2">
+                  <Trash2 className="w-4.5 h-4.5 text-[#D02020]" />
+                  <h3 className="text-sm font-black uppercase text-[#D02020]" style={{ fontFamily: "'Outfit', sans-serif" }}>Danger Zone</h3>
                 </div>
-                <p className="text-xs text-[#64748b] mb-4">These actions are permanent and cannot be reversed. Please be certain before proceeding.</p>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-5" style={B.labelStyle}>Irreversible procedures. Use with caution.</p>
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                      <p className="text-sm text-white font-medium">Delete all documents</p>
-                      <p className="text-xs text-[#64748b]">Remove all uploaded files and their embeddings</p>
+                      <p className="text-sm font-extrabold text-[#121212]" style={{ fontFamily: "'Outfit', sans-serif" }}>Delete All Documents</p>
+                      <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mt-0.5" style={B.labelStyle}>Deletes document storage and vector indexes</p>
                     </div>
-                    <button className="px-4 py-2 rounded-xl border border-[rgba(239,68,68,0.4)] text-[#ef4444] text-sm hover:bg-[rgba(239,68,68,0.1)] transition-colors">
-                      Delete All
+                    <button className="px-4 py-2 bg-white border-2 border-[#121212] text-[#D02020] hover:bg-[#D02020] hover:text-white font-black uppercase text-xs tracking-wider shadow-[2px_2px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] rounded-none cursor-pointer transition-colors">
+                      Delete Files
                     </button>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-[#121212] pt-4">
                     <div>
-                      <p className="text-sm text-white font-medium">Delete account</p>
-                      <p className="text-xs text-[#64748b]">Permanently remove your account and all data</p>
+                      <p className="text-sm font-extrabold text-[#121212]" style={{ fontFamily: "'Outfit', sans-serif" }}>Terminate Account</p>
+                      <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mt-0.5" style={B.labelStyle}>Wipes account membership metadata completely</p>
                     </div>
-                    <button className="px-4 py-2 rounded-xl bg-[rgba(239,68,68,0.15)] border border-[rgba(239,68,68,0.4)] text-[#ef4444] text-sm hover:bg-[rgba(239,68,68,0.25)] transition-colors">
-                      Delete Account
+                    <button className="px-4 py-2 bg-[#D02020] text-white border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[2px_2px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] rounded-none cursor-pointer">
+                      Terminate User
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div className="glass rounded-2xl p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Globe className="w-4 h-4 text-[#7c3aed]" />
-                  <h3 className="text-sm font-semibold text-white">Privacy</h3>
+              <div className="bg-white border-2 border-[#121212] p-5 shadow-[4px_4px_0px_0px_#121212] rounded-none">
+                <div className="flex items-center gap-2 mb-3 border-b border-[#121212] pb-2">
+                  <Globe className="w-4.5 h-4.5 text-[#1040C0]" />
+                  <h3 className="text-sm font-black uppercase text-[#121212]" style={{ fontFamily: "'Outfit', sans-serif" }}>Privacy Statement</h3>
                 </div>
-                <div className="space-y-3 text-xs text-[#64748b]">
-                  <p>• Your documents are processed server-side using Gemini AI and stored securely in your Neon PostgreSQL database.</p>
-                  <p>• Embeddings are stored as 768-dimensional vectors in your private pgvector database.</p>
-                  <p>• Kortex AI does not share your data with third parties.</p>
-                  <p>• All API keys are stored in environment variables and never exposed to the client.</p>
+                <div className="space-y-2 text-xs font-bold text-gray-600 uppercase tracking-wider" style={B.labelStyle}>
+                  <p>• Data processed in Kortex AI is stored strictly in personal postgres databases.</p>
+                  <p>• Text embeddings are stored inside your private pgvector instance.</p>
+                  <p>• Interface metadata is maintained locally using Clerk security headers.</p>
                 </div>
               </div>
             </>

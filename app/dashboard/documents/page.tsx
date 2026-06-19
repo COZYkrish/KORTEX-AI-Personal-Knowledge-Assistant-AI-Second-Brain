@@ -7,6 +7,7 @@ import {
   AlertCircle, Trash2, Eye, Star, StarOff, Tag,
   Search, Filter, Grid3X3, List, X, Clock,
 } from "lucide-react";
+import { B } from "@/lib/bauhaus";
 
 interface Document {
   id: string;
@@ -21,12 +22,12 @@ interface Document {
 }
 
 const STATUS_CONFIG = {
-  PENDING: { label: "Queued", color: "#64748b", icon: Clock },
-  EXTRACTING: { label: "Extracting", color: "#f59e0b", icon: Loader2 },
-  EMBEDDING: { label: "Embedding", color: "#00d4ff", icon: Loader2 },
-  GRAPHING: { label: "Building Graph", color: "#a855f7", icon: Loader2 },
-  READY: { label: "Ready", color: "#10b981", icon: CheckCircle2 },
-  ERROR: { label: "Error", color: "#ef4444", icon: AlertCircle },
+  PENDING: { label: "Queued", color: "#121212", icon: Clock },
+  EXTRACTING: { label: "Extracting", color: "#1040C0", icon: Loader2 },
+  EMBEDDING: { label: "Embedding", color: "#F0C020", icon: Loader2 },
+  GRAPHING: { label: "Building Graph", color: "#D02020", icon: Loader2 },
+  READY: { label: "Ready", color: "#1040C0", icon: CheckCircle2 },
+  ERROR: { label: "Error", color: "#D02020", icon: AlertCircle },
 };
 
 function formatBytes(bytes: number): string {
@@ -54,13 +55,15 @@ function DropZone({ onFiles }: { onFiles: (files: File[]) => void }) {
   );
 
   return (
-    <motion.div
+    <div
       onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
-      animate={{ borderColor: dragging ? "rgba(124,58,237,0.8)" : "rgba(124,58,237,0.2)", scale: dragging ? 1.01 : 1 }}
-      className="border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all"
-      style={{ background: dragging ? "rgba(124,58,237,0.08)" : "rgba(13,20,64,0.4)" }}
+      className={`border-4 border-dashed p-10 text-center cursor-pointer transition-all rounded-none ${
+        dragging
+          ? "border-[#D02020] bg-red-50 shadow-[6px_6px_0px_0px_#121212]"
+          : "border-[#121212] bg-white shadow-[4px_4px_0px_0px_#121212]"
+      }`}
       onClick={() => document.getElementById("file-input")?.click()}
       id="document-dropzone"
     >
@@ -72,27 +75,23 @@ function DropZone({ onFiles }: { onFiles: (files: File[]) => void }) {
         className="hidden"
         onChange={(e) => e.target.files && onFiles(Array.from(e.target.files))}
       />
-      <motion.div
-        animate={{ y: dragging ? -8 : 0 }}
-        className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#7c3aed] to-[#5b21b6] flex items-center justify-center mx-auto mb-4"
-      >
-        <Upload className="w-8 h-8 text-white" />
-      </motion.div>
-      <h3 className="text-white font-semibold text-lg mb-2">
+      <div className="w-14 h-14 border-2 border-[#121212] bg-[#1040C0] text-white flex items-center justify-center mx-auto mb-4 shadow-[3px_3px_0px_0px_#121212]">
+        <Upload className="w-6 h-6" />
+      </div>
+      <h3 className="text-[#121212] font-black text-lg uppercase tracking-tight mb-2" style={{ fontFamily: "'Outfit', sans-serif" }}>
         {dragging ? "Drop files here" : "Upload Documents"}
       </h3>
-      <p className="text-[#64748b] text-sm">
+      <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-4" style={B.labelStyle}>
         Drag & drop PDFs, DOCX, or TXT files · Max 50MB each
       </p>
-      <motion.div
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.97 }}
-        className="inline-flex items-center gap-2 mt-5 px-5 py-2.5 rounded-xl bg-[rgba(124,58,237,0.2)] border border-[rgba(124,58,237,0.4)] text-[#a78bfa] text-sm font-medium"
+      <button
+        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D02020] text-white border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-[#b01a1a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
+        style={{ fontFamily: "'Outfit', sans-serif" }}
       >
         <Upload className="w-4 h-4" />
         Choose Files
-      </motion.div>
-    </motion.div>
+      </button>
+    </div>
   );
 }
 
@@ -105,33 +104,38 @@ function DocumentCard({ doc, view }: { doc: Document; view: "grid" | "list" }) {
     return (
       <motion.div
         layout
-        initial={{ opacity: 0, x: -20 }}
+        initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        whileHover={{ x: 4 }}
-        className="glass flex items-center gap-4 px-5 py-4 cursor-pointer group"
+        exit={{ opacity: 0, x: -10 }}
+        className="bg-white border-2 border-[#121212] flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-4 cursor-pointer shadow-[3px_3px_0px_0px_#121212] rounded-none hover:translate-x-1 transition-all group"
       >
-        <div className="w-10 h-10 rounded-xl bg-[rgba(124,58,237,0.15)] flex items-center justify-center shrink-0">
-          <FileText className="w-5 h-5 text-[#7c3aed]" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-white font-medium truncate">{doc.title}</span>
-            {doc.isFavorite && <Star className="w-3.5 h-3.5 text-[#f59e0b] fill-current shrink-0" />}
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="w-10 h-10 border-2 border-[#121212] bg-[#F0C020] text-[#121212] flex items-center justify-center shrink-0 shadow-[2px_2px_0px_0px_#121212]">
+            <FileText className="w-5 h-5" />
           </div>
-          <span className="text-xs text-[#64748b]">{doc.fileName} · {formatBytes(doc.fileSize)}</span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[#121212] font-extrabold truncate" style={{ fontFamily: "'Outfit', sans-serif" }}>{doc.title}</span>
+              {doc.isFavorite && <Star className="w-4 h-4 text-[#F0C020] fill-[#F0C020] stroke-[#121212] stroke-2 shrink-0" />}
+            </div>
+            <span className="text-xs text-gray-500 font-bold uppercase tracking-wider block mt-0.5" style={B.labelStyle}>
+              {doc.fileName} · {formatBytes(doc.fileSize)}
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <StatusIcon className={`w-4 h-4 ${isProcessing ? "animate-spin" : ""}`} style={{ color: status.color }} />
-          <span className="text-xs font-medium" style={{ color: status.color }}>{status.label}</span>
-        </div>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="p-1.5 rounded-lg hover:bg-[rgba(124,58,237,0.2)] text-[#64748b] hover:text-[#a78bfa] transition-colors" title="View">
-            <Eye className="w-4 h-4" />
-          </button>
-          <button className="p-1.5 rounded-lg hover:bg-[rgba(239,68,68,0.1)] text-[#64748b] hover:text-[#ef4444] transition-colors" title="Delete">
-            <Trash2 className="w-4 h-4" />
-          </button>
+        <div className="flex items-center justify-between sm:justify-end gap-6 shrink-0">
+          <div className="flex items-center gap-2">
+            <StatusIcon className={`w-4 h-4 ${isProcessing ? "animate-spin" : ""}`} style={{ color: status.color }} />
+            <span className="text-xs font-black uppercase tracking-wider" style={{ color: status.color, fontFamily: "'Outfit', sans-serif" }}>{status.label}</span>
+          </div>
+          <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+            <button className="p-2 border-2 border-[#121212] bg-white text-[#121212] hover:bg-[#1040C0] hover:text-white transition-all cursor-pointer shadow-[2px_2px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] rounded-none" title="View">
+              <Eye className="w-4 h-4" />
+            </button>
+            <button className="p-2 border-2 border-[#121212] bg-white text-[#121212] hover:bg-[#D02020] hover:text-white transition-all cursor-pointer shadow-[2px_2px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] rounded-none" title="Delete">
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </motion.div>
     );
@@ -143,38 +147,37 @@ function DocumentCard({ doc, view }: { doc: Document; view: "grid" | "list" }) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      whileHover={{ y: -4 }}
-      className="glass p-5 cursor-pointer group flex flex-col gap-3"
+      className="bg-white border-2 border-[#121212] p-5 cursor-pointer shadow-[4px_4px_0px_0px_#121212] flex flex-col gap-4 rounded-none hover:-translate-y-1 transition-all group"
     >
       <div className="flex items-start justify-between">
-        <div className="w-10 h-10 rounded-xl bg-[rgba(124,58,237,0.15)] flex items-center justify-center">
-          <FileText className="w-5 h-5 text-[#7c3aed]" />
+        <div className="w-10 h-10 border-2 border-[#121212] bg-[#F0C020] text-[#121212] flex items-center justify-center shadow-[2px_2px_0px_0px_#121212]">
+          <FileText className="w-5 h-5" />
         </div>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="p-1.5 rounded-lg hover:bg-[rgba(124,58,237,0.2)] text-[#64748b] hover:text-[#a78bfa] transition-colors">
-            {doc.isFavorite ? <Star className="w-4 h-4 text-[#f59e0b] fill-current" /> : <StarOff className="w-4 h-4" />}
+        <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+          <button className="p-1.5 border border-[#121212] bg-white text-[#121212] hover:bg-[#F0C020] transition-colors cursor-pointer rounded-none">
+            {doc.isFavorite ? <Star className="w-4 h-4 text-[#F0C020] fill-[#F0C020]" /> : <StarOff className="w-4 h-4" />}
           </button>
-          <button className="p-1.5 rounded-lg hover:bg-[rgba(239,68,68,0.1)] text-[#64748b] hover:text-[#ef4444] transition-colors">
+          <button className="p-1.5 border border-[#121212] bg-white text-[#121212] hover:bg-[#D02020] hover:text-white transition-colors cursor-pointer rounded-none">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
       </div>
       <div>
-        <h3 className="text-white font-medium text-sm leading-snug mb-1 line-clamp-2">{doc.title}</h3>
-        <p className="text-[#64748b] text-xs">{formatBytes(doc.fileSize)}</p>
+        <h3 className="text-[#121212] font-extrabold text-sm leading-snug mb-1 line-clamp-2" style={{ fontFamily: "'Outfit', sans-serif" }}>{doc.title}</h3>
+        <p className="text-gray-500 text-xs font-bold uppercase tracking-wider" style={B.labelStyle}>{formatBytes(doc.fileSize)}</p>
       </div>
       {doc.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">
-          {doc.tags.slice(0, 2).map((tag) => (
-            <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(124,58,237,0.15)] text-[#a78bfa]">
+          {doc.tags.slice(0, 2).map((tag, idx) => (
+            <span key={tag} className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 border border-[#121212] rounded-none text-white ${idx % 2 === 0 ? "bg-[#1040C0]" : "bg-[#D02020]"}`} style={{ fontFamily: "'Outfit', sans-serif" }}>
               {tag}
             </span>
           ))}
         </div>
       )}
-      <div className="flex items-center gap-1.5 mt-auto pt-2 border-t border-[rgba(124,58,237,0.1)]">
+      <div className="flex items-center gap-1.5 mt-auto pt-3 border-t border-dashed border-[#121212]">
         <StatusIcon className={`w-3.5 h-3.5 ${isProcessing ? "animate-spin" : ""}`} style={{ color: status.color }} />
-        <span className="text-xs font-medium" style={{ color: status.color }}>{status.label}</span>
+        <span className="text-xs font-black uppercase tracking-wider" style={{ color: status.color, fontFamily: "'Outfit', sans-serif" }}>{status.label}</span>
       </div>
     </motion.div>
   );
@@ -208,23 +211,26 @@ export default function DocumentsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-8 pb-12">
       {/* Page header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white">Documents</h1>
-          <p className="text-[#a8b2d8] text-sm mt-0.5">{docs.length} documents in your knowledge base</p>
+          <h1 className="font-display text-4xl font-black uppercase tracking-tight text-[#121212]" style={B.displayStyle}>
+            Documents
+          </h1>
+          <p className="text-gray-600 text-xs font-bold uppercase tracking-wider mt-1" style={B.labelStyle}>
+            {docs.length} documents in your knowledge base
+          </p>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.97 }}
+        <button
           onClick={() => setShowUpload(true)}
           id="upload-document-button"
-          className="btn-primary flex items-center gap-2"
+          className="inline-flex items-center justify-center gap-2 bg-[#D02020] text-white border-2 border-[#121212] font-black uppercase tracking-wider text-xs shadow-[3px_3px_0px_0px_#121212] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none px-5 py-3 h-fit sm:self-center"
+          style={{ fontFamily: "'Outfit', sans-serif" }}
         >
           <Upload className="w-4 h-4" />
-          Upload
-        </motion.button>
+          Upload Document
+        </button>
       </motion.div>
 
       {/* Upload modal */}
@@ -234,25 +240,27 @@ export default function DocumentsPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-6"
-            style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm"
             onClick={() => setShowUpload(false)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-2xl glass-bright rounded-2xl p-8 relative"
+              className="w-full max-w-2xl bg-[#F0F0F0] border-4 border-[#121212] p-8 relative shadow-[8px_8px_0px_0px_#121212] rounded-none"
               onClick={(e) => e.stopPropagation()}
             >
-              <button onClick={() => setShowUpload(false)} className="absolute top-4 right-4 text-[#64748b] hover:text-white transition-colors">
+              <button
+                onClick={() => setShowUpload(false)}
+                className="absolute top-4 right-4 p-1.5 border-2 border-[#121212] bg-white text-[#121212] hover:bg-[#D02020] hover:text-white transition-all cursor-pointer rounded-none shadow-[2px_2px_0px_0px_#121212]"
+              >
                 <X className="w-5 h-5" />
               </button>
-              <h2 className="font-display text-xl font-bold text-white mb-6">Upload Documents</h2>
+              <h2 className="font-display text-2xl font-black uppercase tracking-tight text-[#121212] mb-6" style={B.displayStyle}>Upload Documents</h2>
               {uploading ? (
                 <div className="flex flex-col items-center py-12 gap-4">
-                  <Loader2 className="w-10 h-10 text-[#7c3aed] animate-spin" />
-                  <p className="text-[#a8b2d8]">Processing your documents...</p>
+                  <Loader2 className="w-10 h-10 text-[#1040C0] animate-spin" />
+                  <p className="text-[#121212] font-bold uppercase tracking-wider text-xs" style={B.labelStyle}>Processing your documents...</p>
                 </div>
               ) : (
                 <DropZone onFiles={handleFiles} />
@@ -263,40 +271,51 @@ export default function DocumentsPage() {
       </AnimatePresence>
 
       {/* Filters bar */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b]" />
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="flex flex-col md:flex-row md:items-center gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#121212]" />
           <input
             id="document-search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search documents..."
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-[rgba(13,20,64,0.6)] border border-[rgba(124,58,237,0.2)] text-white placeholder-[#64748b] text-sm focus:outline-none focus:border-[rgba(124,58,237,0.6)] transition-colors"
+            className="w-full pl-9 pr-4 py-2.5 border-2 border-[#121212] bg-white text-[#121212] placeholder-gray-400 text-sm font-semibold rounded-none focus:outline-none focus:bg-gray-50 transition-colors shadow-[3px_3px_0px_0px_#121212]"
+            style={{ fontFamily: "'Outfit', sans-serif" }}
           />
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-xl glass text-sm text-[#a8b2d8] hover:text-white hover:border-[rgba(124,58,237,0.4)] transition-all">
-          <Filter className="w-4 h-4" />
-          Filter
-        </button>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-xl glass text-sm text-[#a8b2d8] hover:text-white hover:border-[rgba(124,58,237,0.4)] transition-all">
-          <Tag className="w-4 h-4" />
-          Tags
-        </button>
-        <div className="flex items-center gap-1 glass rounded-xl p-1 ml-auto">
-          <button
-            onClick={() => setView("grid")}
-            id="view-grid-button"
-            className={`p-2 rounded-lg transition-all ${view === "grid" ? "bg-[rgba(124,58,237,0.3)] text-white" : "text-[#64748b] hover:text-white"}`}
-          >
-            <Grid3X3 className="w-4 h-4" />
+        <div className="flex flex-wrap items-center gap-3">
+          <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border-2 border-[#121212] text-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-gray-50 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_#121212] transition-all cursor-pointer rounded-none" style={{ fontFamily: "'Outfit', sans-serif" }}>
+            <Filter className="w-4 h-4" />
+            Filter
           </button>
-          <button
-            onClick={() => setView("list")}
-            id="view-list-button"
-            className={`p-2 rounded-lg transition-all ${view === "list" ? "bg-[rgba(124,58,237,0.3)] text-white" : "text-[#64748b] hover:text-white"}`}
-          >
-            <List className="w-4 h-4" />
+          <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border-2 border-[#121212] text-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-gray-50 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_#121212] transition-all cursor-pointer rounded-none" style={{ fontFamily: "'Outfit', sans-serif" }}>
+            <Tag className="w-4 h-4" />
+            Tags
           </button>
+          <div className="flex items-center bg-white border-2 border-[#121212] p-1 shadow-[3px_3px_0px_0px_#121212] rounded-none ml-auto md:ml-0">
+            <button
+              onClick={() => setView("grid")}
+              id="view-grid-button"
+              className={`p-2 transition-all rounded-none cursor-pointer border ${
+                view === "grid"
+                  ? "bg-[#1040C0] text-white border-[#121212]"
+                  : "text-[#121212] border-transparent hover:bg-gray-100"
+              }`}
+            >
+              <Grid3X3 className="w-4.5 h-4.5" />
+            </button>
+            <button
+              onClick={() => setView("list")}
+              id="view-list-button"
+              className={`p-2 transition-all rounded-none cursor-pointer border ${
+                view === "list"
+                  ? "bg-[#1040C0] text-white border-[#121212]"
+                  : "text-[#121212] border-transparent hover:bg-gray-100"
+              }`}
+            >
+              <List className="w-4.5 h-4.5" />
+            </button>
+          </div>
         </div>
       </motion.div>
 
@@ -308,14 +327,14 @@ export default function DocumentsPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           >
             {filtered.map((doc) => (
               <DocumentCard key={doc.id} doc={doc} view="grid" />
             ))}
           </motion.div>
         ) : (
-          <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
+          <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
             {filtered.map((doc) => (
               <DocumentCard key={doc.id} doc={doc} view="list" />
             ))}
@@ -324,9 +343,9 @@ export default function DocumentsPage() {
       </AnimatePresence>
 
       {filtered.length === 0 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20">
-          <File className="w-12 h-12 text-[#64748b] mx-auto mb-4" />
-          <p className="text-[#64748b]">No documents found</p>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-24 bg-white border-2 border-dashed border-[#121212] shadow-[4px_4px_0px_0px_#121212]">
+          <File className="w-12 h-12 text-[#121212] mx-auto mb-4" />
+          <p className="text-[#121212] font-black uppercase tracking-wider text-sm" style={B.labelStyle}>No documents found</p>
         </motion.div>
       )}
     </div>

@@ -8,13 +8,14 @@ import {
   BackgroundVariant,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Search, ZoomIn, ZoomOut, Maximize2, RefreshCw, Filter, Sparkles } from "lucide-react";
+import { Search, RefreshCw, Sparkles, X } from "lucide-react";
+import { B } from "@/lib/bauhaus";
 
 const CONCEPT_COLORS: Record<string, string> = {
-  concept: "#7c3aed",
-  entity: "#00d4ff",
-  topic: "#10b981",
-  technology: "#f59e0b",
+  concept: "#1040C0",       // Blue
+  entity: "#D02020",        // Red
+  topic: "#F0C020",         // Yellow
+  technology: "#121212",    // Black
 };
 
 const INITIAL_NODES: Node[] = [
@@ -40,15 +41,18 @@ const INITIAL_EDGES: Edge[] = [
 ];
 
 const nodeStyles = {
-  background: "rgba(13, 20, 64, 0.9)",
-  border: "1px solid rgba(124, 58, 237, 0.4)",
-  borderRadius: "12px",
+  background: "#ffffff",
+  border: "2px solid #121212",
+  borderRadius: "0px",
   padding: "10px 16px",
-  color: "#e2e8f0",
-  fontSize: "13px",
-  fontWeight: 600,
-  backdropFilter: "blur(12px)",
-  boxShadow: "0 0 20px rgba(124, 58, 237, 0.2)",
+  color: "#121212",
+  fontSize: "12px",
+  fontWeight: 800,
+  boxShadow: "3px 3px 0px 0px #121212",
+  fontFamily: "'Outfit', sans-serif",
+  textTransform: "uppercase" as const,
+  width: "180px",
+  textAlign: "center" as const,
 };
 
 export default function KnowledgeGraphPage() {
@@ -63,75 +67,93 @@ export default function KnowledgeGraphPage() {
     [setEdges]
   );
 
-  const filteredNodes = nodes.map((n) => ({
-    ...n,
-    style: {
-      ...nodeStyles,
-      border: `1px solid ${CONCEPT_COLORS[(n.data as any).type] ?? "#7c3aed"}40`,
-      boxShadow: `0 0 20px ${CONCEPT_COLORS[(n.data as any).type] ?? "#7c3aed"}20`,
-      opacity:
-        (search && !(n.data as any).label.toLowerCase().includes(search.toLowerCase())) ||
-        (filter && (n.data as any).type !== filter)
-          ? 0.2
-          : 1,
-    },
-  }));
+  const filteredNodes = nodes.map((n) => {
+    const isSelected = selectedNode?.id === n.id;
+    const typeColor = CONCEPT_COLORS[(n.data as any).type] ?? "#1040C0";
+    return {
+      ...n,
+      style: {
+        ...nodeStyles,
+        border: isSelected ? `3px solid ${typeColor}` : `2px solid #121212`,
+        borderTop: `6px solid ${typeColor}`,
+        boxShadow: isSelected ? "5px 5px 0px 0px #121212" : "3px 3px 0px 0px #121212",
+        opacity:
+          (search && !(n.data as any).label.toLowerCase().includes(search.toLowerCase())) ||
+          (filter && (n.data as any).type !== filter)
+            ? 0.2
+            : 1,
+      },
+    };
+  });
 
   return (
-    <div className="h-full flex flex-col gap-4 max-w-7xl mx-auto">
+    <div className="h-full flex flex-col gap-6 max-w-7xl mx-auto pb-6 relative">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between shrink-0">
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shrink-0">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white">Knowledge Graph</h1>
-          <p className="text-[#a8b2d8] text-sm mt-0.5">{nodes.length} concepts · {edges.length} relationships</p>
+          <h1 className="font-display text-4xl font-black uppercase tracking-tight text-[#121212]" style={B.displayStyle}>
+            Knowledge Graph
+          </h1>
+          <p className="text-gray-600 text-xs font-bold uppercase tracking-wider mt-1" style={B.labelStyle}>
+            {nodes.length} concepts · {edges.length} relationships
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.97 }}
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => {
+              setNodes(INITIAL_NODES);
+              setEdges(INITIAL_EDGES);
+              setSelectedNode(null);
+            }}
             id="regenerate-graph-button"
-            className="flex items-center gap-2 px-4 py-2 glass rounded-xl text-sm text-[#a8b2d8] hover:text-white transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border-2 border-[#121212] text-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-gray-50 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
+            style={{ fontFamily: "'Outfit', sans-serif" }}
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-4 h-4 text-[#121212]" />
             Regenerate
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.04 }}
+          </button>
+          <button
             id="expand-graph-button"
-            className="btn-primary flex items-center gap-2"
+            className="inline-flex items-center justify-center gap-2 bg-[#D02020] text-white border-2 border-[#121212] font-black uppercase tracking-wider text-xs shadow-[3px_3px_0px_0px_#121212] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none px-4 py-2.5"
+            style={{ fontFamily: "'Outfit', sans-serif" }}
           >
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-4 h-4 text-white" />
             AI Expand
-          </motion.button>
+          </button>
         </div>
       </motion.div>
 
       {/* Controls */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex items-center gap-3 flex-wrap shrink-0">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b]" />
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="flex flex-col md:flex-row md:items-center gap-4 shrink-0">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#121212]" />
           <input
             id="graph-search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search concepts..."
-            className="pl-9 pr-4 py-2 rounded-xl bg-[rgba(13,20,64,0.6)] border border-[rgba(124,58,237,0.2)] text-white placeholder-[#64748b] text-sm focus:outline-none focus:border-[rgba(124,58,237,0.6)] transition-colors w-52"
+            className="w-full pl-9 pr-4 py-2.5 border-2 border-[#121212] bg-white text-[#121212] placeholder-gray-400 text-sm font-semibold rounded-none focus:outline-none focus:bg-gray-50 shadow-[3px_3px_0px_0px_#121212]"
+            style={{ fontFamily: "'Outfit', sans-serif" }}
           />
         </div>
-        <div className="flex items-center gap-2">
-          {Object.entries(CONCEPT_COLORS).map(([type, color]) => (
-            <button
-              key={type}
-              onClick={() => setFilter(filter === type ? null : type)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium capitalize transition-all border ${filter === type ? "text-white" : "text-[#64748b] hover:text-white"}`}
-              style={{
-                borderColor: filter === type ? color : "rgba(124,58,237,0.2)",
-                background: filter === type ? `${color}20` : "transparent",
-              }}
-            >
-              {type}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-2">
+          {Object.entries(CONCEPT_COLORS).map(([type, color]) => {
+            const isActive = filter === type;
+            return (
+              <button
+                key={type}
+                onClick={() => setFilter(filter === type ? null : type)}
+                className="px-3.5 py-1.5 border-2 border-[#121212] font-black uppercase text-[10px] tracking-wider transition-all cursor-pointer rounded-none shadow-[2px_2px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212]"
+                style={{
+                  fontFamily: "'Outfit', sans-serif",
+                  background: isActive ? color : "transparent",
+                  color: isActive ? (type === "topic" ? "#121212" : "#ffffff") : "#121212",
+                }}
+              >
+                {type}
+              </button>
+            );
+          })}
         </div>
       </motion.div>
 
@@ -139,17 +161,19 @@ export default function KnowledgeGraphPage() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="flex-1 rounded-2xl overflow-hidden border border-[rgba(124,58,237,0.2)]"
+        transition={{ delay: 0.1 }}
+        className="flex-1 border-4 border-[#121212] shadow-[8px_8px_0px_0px_#121212] rounded-none bg-[#F0F0F0]"
         style={{ minHeight: "500px" }}
       >
         <ReactFlowComponent
           nodes={filteredNodes}
           edges={edges.map((e) => ({
             ...e,
-            style: { stroke: "rgba(124,58,237,0.5)", strokeWidth: 1.5 },
-            labelStyle: { fill: "#64748b", fontSize: 10 },
-            labelBgStyle: { fill: "rgba(5,8,22,0.8)" },
+            style: { stroke: "#121212", strokeWidth: 2 },
+            labelStyle: { fill: "#121212", fontSize: 10, fontWeight: "bold", fontFamily: "'Outfit', sans-serif" },
+            labelBgStyle: { fill: "#ffffff", stroke: "#121212", strokeWidth: 1 },
+            labelBgPadding: [6, 4],
+            labelBgBorderRadius: 0,
           }))}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
@@ -161,24 +185,29 @@ export default function KnowledgeGraphPage() {
           <Background
             variant={BackgroundVariant.Dots}
             gap={24}
-            size={1}
-            color="rgba(124,58,237,0.15)"
-            style={{ background: "#050816" }}
+            size={1.5}
+            color="#12121220"
+            style={{ background: "#F0F0F0" }}
           />
           <Controls
             style={{
-              background: "rgba(13,20,64,0.9)",
-              border: "1px solid rgba(124,58,237,0.2)",
-              borderRadius: "12px",
+              background: "#ffffff",
+              border: "2px solid #121212",
+              borderRadius: "0px",
+              boxShadow: "3px 3px 0px 0px #121212",
+              display: "flex",
+              flexDirection: "column",
             }}
           />
           <MiniMap
             style={{
-              background: "rgba(5,8,22,0.9)",
-              border: "1px solid rgba(124,58,237,0.2)",
-              borderRadius: "12px",
+              background: "#ffffff",
+              border: "2px solid #121212",
+              borderRadius: "0px",
+              boxShadow: "4px 4px 0px 0px #121212",
             }}
-            nodeColor={(n) => CONCEPT_COLORS[(n.data as any).type] ?? "#7c3aed"}
+            nodeColor={(n) => CONCEPT_COLORS[(n.data as any).type] ?? "#121212"}
+            maskColor="rgba(240, 240, 240, 0.6)"
           />
         </ReactFlowComponent>
       </motion.div>
@@ -190,30 +219,46 @@ export default function KnowledgeGraphPage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            className="absolute top-24 right-8 w-72 glass-bright rounded-2xl p-5 border border-[rgba(124,58,237,0.3)] z-10"
+            className="absolute top-36 right-6 w-80 bg-white border-4 border-[#121212] p-5 shadow-[6px_6px_0px_0px_#121212] rounded-none z-10"
           >
-            <div className="flex items-start justify-between mb-3">
+            <div className="flex items-start justify-between mb-4">
               <div>
                 <span
-                  className="text-xs px-2 py-0.5 rounded-full font-medium capitalize"
+                  className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 border border-[#121212] rounded-none"
                   style={{
-                    background: `${CONCEPT_COLORS[(selectedNode.data as any).type] ?? "#7c3aed"}20`,
-                    color: CONCEPT_COLORS[(selectedNode.data as any).type] ?? "#7c3aed",
+                    background: CONCEPT_COLORS[(selectedNode.data as any).type] ?? "#1040C0",
+                    color: (selectedNode.data as any).type === "topic" ? "#121212" : "#ffffff",
+                    fontFamily: "'Outfit', sans-serif",
                   }}
                 >
                   {(selectedNode.data as any).type}
                 </span>
-                <h3 className="text-white font-semibold mt-2">{(selectedNode.data as any).label as string}</h3>
+                <h3 className="text-[#121212] font-black mt-2 text-xl uppercase tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                  {(selectedNode.data as any).label as string}
+                </h3>
               </div>
-              <button onClick={() => setSelectedNode(null)} className="text-[#64748b] hover:text-white transition-colors text-lg leading-none">×</button>
+              <button
+                onClick={() => setSelectedNode(null)}
+                className="p-1 border border-[#121212] bg-white text-[#121212] hover:bg-[#D02020] hover:text-white transition-all cursor-pointer rounded-none"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <p className="text-sm text-[#a8b2d8]">{(selectedNode.data as any).description as string}</p>
-            <div className="mt-4 flex gap-2">
-              <button className="flex-1 text-xs py-2 rounded-xl bg-[rgba(124,58,237,0.2)] border border-[rgba(124,58,237,0.3)] text-[#a78bfa] hover:bg-[rgba(124,58,237,0.3)] transition-colors">
+            <p className="text-sm font-semibold text-gray-700 leading-relaxed" style={{ fontFamily: "'Outfit', sans-serif" }}>
+              {(selectedNode.data as any).description as string}
+            </p>
+            <div className="mt-6 flex gap-3 border-t-2 border-dashed border-[#121212] pt-4">
+              <button
+                className="flex-1 text-[10px] font-black uppercase tracking-wider py-2.5 bg-[#1040C0] text-white border-2 border-[#121212] shadow-[2px_2px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
+                style={{ fontFamily: "'Outfit', sans-serif" }}
+              >
                 Expand Node
               </button>
-              <button className="flex-1 text-xs py-2 rounded-xl bg-[rgba(16,185,129,0.1)] border border-[rgba(16,185,129,0.2)] text-[#10b981] hover:bg-[rgba(16,185,129,0.2)] transition-colors">
-                Generate Flashcard
+              <button
+                className="flex-1 text-[10px] font-black uppercase tracking-wider py-2.5 bg-[#F0C020] text-[#121212] border-2 border-[#121212] shadow-[2px_2px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
+                style={{ fontFamily: "'Outfit', sans-serif" }}
+              >
+                Generate Card
               </button>
             </div>
           </motion.div>

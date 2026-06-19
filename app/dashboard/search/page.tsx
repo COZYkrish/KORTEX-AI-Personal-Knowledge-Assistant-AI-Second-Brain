@@ -3,10 +3,11 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Search, FileText, Filter, Clock, Star,
+  Search, FileText, Clock, Star,
   ChevronRight, X, Sparkles, SlidersHorizontal,
   Tag, Calendar, Hash, Loader2,
 } from "lucide-react";
+import { B } from "@/lib/bauhaus";
 
 interface SearchResult {
   id: string;
@@ -82,7 +83,7 @@ function HighlightedExcerpt({ text, query }: { text: string; query: string }) {
     <>
       {parts.map((part, i) =>
         part.toLowerCase() === query.toLowerCase() ? (
-          <mark key={i} className="bg-[rgba(124,58,237,0.3)] text-[#c4b5fd] rounded px-0.5 not-italic">
+          <mark key={i} className="bg-[#F0C020] text-[#121212] border border-[#121212] font-black px-1 not-italic" style={{ fontFamily: "'Outfit', sans-serif" }}>
             {part}
           </mark>
         ) : (
@@ -94,11 +95,10 @@ function HighlightedExcerpt({ text, query }: { text: string; query: string }) {
 }
 
 function ScoreBadge({ score }: { score: number }) {
-  const color = score >= 0.9 ? "#10b981" : score >= 0.75 ? "#f59e0b" : "#64748b";
   return (
     <span
-      className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0"
-      style={{ background: `${color}20`, color }}
+      className="text-[9px] px-2 py-0.5 border border-[#121212] bg-[#1040C0] text-white font-black uppercase tracking-wider rounded-none shrink-0"
+      style={{ fontFamily: "'Outfit', sans-serif" }}
     >
       {Math.round(score * 100)}% match
     </span>
@@ -130,73 +130,77 @@ export default function SearchPage() {
     setLoading(false);
   };
 
-  const clearFilter = (key: string) => {
-    setActiveFilters((prev) => ({ ...prev, [key]: null }));
-  };
-
   const activeFilterCount = Object.values(activeFilters).filter(Boolean).length;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 h-full flex flex-col">
+    <div className="max-w-5xl mx-auto space-y-8 pb-12 h-full flex flex-col">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="shrink-0">
-        <h1 className="font-display text-2xl font-bold text-white">Semantic Search</h1>
-        <p className="text-[#a8b2d8] text-sm mt-0.5">
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="shrink-0">
+        <h1 className="font-display text-4xl font-black uppercase tracking-tight text-[#121212]" style={B.displayStyle}>
+          Semantic Search
+        </h1>
+        <p className="text-gray-600 text-xs font-bold uppercase tracking-wider mt-1" style={B.labelStyle}>
           Hybrid vector + keyword search across your entire knowledge base
         </p>
       </motion.div>
 
       {/* Search Box */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="shrink-0"
+        transition={{ delay: 0.05 }}
+        className="shrink-0 space-y-3"
       >
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#7c3aed]" />
-          <input
-            ref={inputRef}
-            id="semantic-search-input"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            placeholder="Search across all your documents with natural language..."
-            className="w-full pl-12 pr-36 py-4 rounded-2xl glass-bright text-white placeholder-[#4a5568] text-base focus:outline-none focus:border-[rgba(124,58,237,0.6)] transition-colors"
-            style={{ border: "1px solid rgba(124,58,237,0.3)" }}
-          />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-            {query && (
+        <div className="relative border-4 border-[#121212] bg-white shadow-[6px_6px_0px_0px_#121212] rounded-none p-1">
+          <div className="flex items-center">
+            <Search className="w-5 h-5 text-[#121212] ml-3 shrink-0" />
+            <input
+              ref={inputRef}
+              id="semantic-search-input"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              placeholder="Search documents with natural language queries..."
+              className="w-full pl-3 pr-40 py-3.5 bg-transparent text-[#121212] placeholder-gray-400 text-sm font-semibold focus:outline-none"
+              style={{ fontFamily: "'Outfit', sans-serif" }}
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+              {query && (
+                <button
+                  onClick={() => { setQuery(""); setSearched(false); setResults([]); }}
+                  className="p-1 border border-transparent hover:border-[#121212] hover:bg-gray-100 text-gray-500 hover:text-black transition-colors cursor-pointer rounded-none hidden sm:block"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
               <button
-                onClick={() => { setQuery(""); setSearched(false); setResults([]); }}
-                className="p-1.5 rounded-lg text-[#64748b] hover:text-white transition-colors"
+                onClick={() => setShowFilters(!showFilters)}
+                id="search-filters-toggle"
+                className={`flex items-center gap-1.5 px-3 py-1.5 border border-[#121212] text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_0px_#121212] cursor-pointer rounded-none active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] transition-all ${
+                  showFilters || activeFilterCount > 0
+                    ? "bg-[#F0C020] text-[#121212]"
+                    : "bg-white text-[#121212] hover:bg-gray-55"
+                }`}
+                style={{ fontFamily: "'Outfit', sans-serif" }}
               >
-                <X className="w-4 h-4" />
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Filters {activeFilterCount > 0 && `(${activeFilterCount})`}</span>
               </button>
-            )}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              id="search-filters-toggle"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${showFilters || activeFilterCount > 0 ? "bg-[rgba(124,58,237,0.25)] text-[#a78bfa] border border-[rgba(124,58,237,0.4)]" : "glass text-[#64748b] hover:text-white"}`}
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
-            </button>
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => handleSearch()}
-              disabled={loading || !query.trim()}
-              id="search-submit-button"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#7c3aed] to-[#5b21b6] text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              Search
-            </motion.button>
+              <button
+                onClick={() => handleSearch()}
+                disabled={loading || !query.trim()}
+                id="search-submit-button"
+                className="flex items-center gap-1.5 px-4 py-2 border-2 border-[#121212] bg-[#D02020] text-white text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ fontFamily: "'Outfit', sans-serif" }}
+              >
+                {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : <Sparkles className="w-3.5 h-3.5 text-white" />}
+                <span>Search</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Filters drawer */}
         <AnimatePresence>
           {showFilters && (
             <motion.div
@@ -205,59 +209,77 @@ export default function SearchPage() {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div className="mt-3 glass rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-white border-2 border-[#121212] p-5 grid grid-cols-1 sm:grid-cols-3 gap-6 shadow-[4px_4px_0px_0px_#121212] rounded-none">
                 {/* Type */}
                 <div>
-                  <div className="flex items-center gap-1.5 text-xs text-[#64748b] mb-2">
-                    <FileText className="w-3.5 h-3.5" />
-                    File Type
+                  <div className="flex items-center gap-1.5 text-xs font-black text-gray-500 uppercase tracking-wider mb-3" style={B.labelStyle}>
+                    <FileText className="w-3.5 h-3.5 text-[#1040C0]" />
+                    <span>File Type</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {FILTER_OPTIONS.type.map((t) => (
-                      <button
-                        key={t}
-                        onClick={() => setActiveFilters((p) => ({ ...p, type: p.type === t ? null : t }))}
-                        className={`px-2.5 py-1 rounded-lg text-xs transition-all ${activeFilters.type === t ? "bg-[rgba(124,58,237,0.3)] text-[#a78bfa] border border-[rgba(124,58,237,0.4)]" : "glass text-[#64748b] hover:text-white"}`}
-                      >
-                        {t}
-                      </button>
-                    ))}
+                    {FILTER_OPTIONS.type.map((t) => {
+                      const isActive = activeFilters.type === t;
+                      return (
+                        <button
+                          key={t}
+                          onClick={() => setActiveFilters((p) => ({ ...p, type: p.type === t ? null : t }))}
+                          className={`px-3 py-1.5 border border-[#121212] text-xs font-black uppercase tracking-wide rounded-none cursor-pointer transition-all shadow-[1.5px_1.5px_0px_0px_#121212] active:translate-x-[0.5px] active:translate-y-[0.5px] ${
+                            isActive ? "bg-[#1040C0] text-white" : "bg-white text-[#121212] hover:bg-gray-100"
+                          }`}
+                          style={{ fontFamily: "'Outfit', sans-serif" }}
+                        >
+                          {t}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
                 {/* Date */}
                 <div>
-                  <div className="flex items-center gap-1.5 text-xs text-[#64748b] mb-2">
-                    <Calendar className="w-3.5 h-3.5" />
-                    Date
+                  <div className="flex items-center gap-1.5 text-xs font-black text-gray-500 uppercase tracking-wider mb-3" style={B.labelStyle}>
+                    <Calendar className="w-3.5 h-3.5 text-[#D02020]" />
+                    <span>Date Range</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {FILTER_OPTIONS.date.map((d) => (
-                      <button
-                        key={d}
-                        onClick={() => setActiveFilters((p) => ({ ...p, date: p.date === d ? null : d }))}
-                        className={`px-2.5 py-1 rounded-lg text-xs transition-all ${activeFilters.date === d ? "bg-[rgba(124,58,237,0.3)] text-[#a78bfa] border border-[rgba(124,58,237,0.4)]" : "glass text-[#64748b] hover:text-white"}`}
-                      >
-                        {d}
-                      </button>
-                    ))}
+                    {FILTER_OPTIONS.date.map((d) => {
+                      const isActive = activeFilters.date === d;
+                      return (
+                        <button
+                          key={d}
+                          onClick={() => setActiveFilters((p) => ({ ...p, date: p.date === d ? null : d }))}
+                          className={`px-3 py-1.5 border border-[#121212] text-xs font-black uppercase tracking-wide rounded-none cursor-pointer transition-all shadow-[1.5px_1.5px_0px_0px_#121212] active:translate-x-[0.5px] active:translate-y-[0.5px] ${
+                            isActive ? "bg-[#D02020] text-white" : "bg-white text-[#121212] hover:bg-gray-100"
+                          }`}
+                          style={{ fontFamily: "'Outfit', sans-serif" }}
+                        >
+                          {d}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
                 {/* Tags */}
                 <div>
-                  <div className="flex items-center gap-1.5 text-xs text-[#64748b] mb-2">
-                    <Tag className="w-3.5 h-3.5" />
-                    Tags
+                  <div className="flex items-center gap-1.5 text-xs font-black text-gray-500 uppercase tracking-wider mb-3" style={B.labelStyle}>
+                    <Tag className="w-3.5 h-3.5 text-[#F0C020]" />
+                    <span>Resource Tags</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {FILTER_OPTIONS.tags.map((tag) => (
-                      <button
-                        key={tag}
-                        onClick={() => setActiveFilters((p) => ({ ...p, tag: p.tag === tag ? null : tag }))}
-                        className={`px-2.5 py-1 rounded-lg text-xs transition-all ${activeFilters.tag === tag ? "bg-[rgba(124,58,237,0.3)] text-[#a78bfa] border border-[rgba(124,58,237,0.4)]" : "glass text-[#64748b] hover:text-white"}`}
-                      >
-                        {tag}
-                      </button>
-                    ))}
+                    {FILTER_OPTIONS.tags.map((tag) => {
+                      const isActive = activeFilters.tag === tag;
+                      return (
+                        <button
+                          key={tag}
+                          onClick={() => setActiveFilters((p) => ({ ...p, tag: p.tag === tag ? null : tag }))}
+                          className={`px-3 py-1.5 border border-[#121212] text-xs font-black uppercase tracking-wide rounded-none cursor-pointer transition-all shadow-[1.5px_1.5px_0px_0px_#121212] active:translate-x-[0.5px] active:translate-y-[0.5px] ${
+                            isActive ? "bg-[#F0C020] text-[#121212]" : "bg-white text-[#121212] hover:bg-gray-100"
+                          }`}
+                          style={{ fontFamily: "'Outfit', sans-serif" }}
+                        >
+                          {tag}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -266,125 +288,119 @@ export default function SearchPage() {
         </AnimatePresence>
       </motion.div>
 
-      {/* Body */}
+      {/* Body Section */}
       <div className="flex-1 min-h-0">
         {!searched ? (
-          /* Recent searches */
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="space-y-6">
-            <div>
-              <div className="flex items-center gap-2 text-sm text-[#64748b] mb-3">
-                <Clock className="w-4 h-4" />
-                Recent Searches
+          /* Recent searches & tips */
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="space-y-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-wider" style={B.labelStyle}>
+                <Clock className="w-4 h-4 text-[#121212]" />
+                <span>Recent Searches</span>
               </div>
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {RECENT_SEARCHES.map((s) => (
-                  <motion.button
+                  <button
                     key={s}
-                    whileHover={{ x: 4 }}
                     onClick={() => handleSearch(s)}
-                    className="w-full flex items-center gap-3 px-4 py-3 glass rounded-xl text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-3.5 bg-white border-2 border-[#121212] shadow-[3px_3px_0px_0px_#121212] text-left hover:translate-x-1 transition-all rounded-none cursor-pointer group"
                   >
-                    <Hash className="w-4 h-4 text-[#7c3aed] shrink-0" />
-                    <span className="text-[#a8b2d8] text-sm group-hover:text-white transition-colors">{s}</span>
-                    <ChevronRight className="w-4 h-4 text-[#4a5568] ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </motion.button>
+                    <Hash className="w-4.5 h-4.5 text-[#1040C0] shrink-0" />
+                    <span className="text-[#121212] text-sm font-extrabold uppercase tracking-wide" style={{ fontFamily: "'Outfit', sans-serif" }}>{s}</span>
+                    <ChevronRight className="w-4 h-4 text-[#121212] ml-auto group-hover:translate-x-0.5 transition-transform" />
+                  </button>
                 ))}
               </div>
             </div>
 
-            {/* Tips */}
-            <div className="glass p-5 rounded-2xl" style={{ background: "radial-gradient(ellipse at 0% 50%, rgba(124,58,237,0.08), transparent 70%), rgba(10,15,46,0.6)" }}>
+            {/* Help guidelines card */}
+            <div className="bg-[#F0C020] border-4 border-[#121212] p-6 shadow-[6px_6px_0px_0px_#121212] rounded-none text-black">
               <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-4 h-4 text-[#7c3aed]" />
-                <span className="text-sm font-semibold text-white">Search Tips</span>
+                <Sparkles className="w-5 h-5 text-black" />
+                <h3 className="text-lg font-black uppercase tracking-tight" style={B.displayStyle}>Semantic Search Capabilities</h3>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
-                  "Ask natural language questions: \"how does attention work?\"",
-                  "Search for specific concepts across multiple documents",
-                  "Use tags and filters to narrow down results",
-                  "Results are ranked by semantic similarity + keyword relevance",
+                  "Ask natural language queries like: \"how does attention mechanism work?\"",
+                  "Query concept maps and relationships across separate files",
+                  "Utilize type and time filters to restrict compilation zones",
+                  "Results match concepts using mathematical vector embeddings",
                 ].map((tip, i) => (
-                  <div key={i} className="flex gap-2 text-xs text-[#64748b]">
-                    <span className="text-[#7c3aed] shrink-0 mt-0.5">•</span>
-                    {tip}
+                  <div key={i} className="flex gap-2 text-xs font-bold leading-relaxed" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                    <span className="text-[#1040C0] shrink-0 text-sm">•</span>
+                    <span>{tip}</span>
                   </div>
                 ))}
               </div>
             </div>
           </motion.div>
         ) : loading ? (
-          <div className="space-y-3">
+          /* Skeletons */
+          <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <motion.div
+              <div
                 key={i}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="glass rounded-2xl p-5 space-y-3"
+                className="bg-white border-2 border-[#121212] p-6 space-y-4 shadow-[4px_4px_0px_0px_#121212] rounded-none animate-pulse"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-[rgba(124,58,237,0.2)] animate-pulse" />
-                  <div className="h-4 rounded-full bg-[rgba(124,58,237,0.15)] animate-pulse" style={{ width: "40%" }} />
-                  <div className="h-4 rounded-full bg-[rgba(124,58,237,0.1)] animate-pulse ml-auto" style={{ width: "15%" }} />
+                  <div className="w-8 h-8 bg-gray-250 border border-[#121212] rounded-none" />
+                  <div className="h-4 bg-gray-250 border border-[#121212] w-1/3" />
+                  <div className="h-4 bg-gray-250 border border-[#121212] w-16 ml-auto" />
                 </div>
                 <div className="space-y-2">
-                  <div className="h-3 rounded-full bg-[rgba(124,58,237,0.1)] animate-pulse" />
-                  <div className="h-3 rounded-full bg-[rgba(124,58,237,0.08)] animate-pulse" style={{ width: "80%" }} />
+                  <div className="h-3.5 bg-gray-200 w-full" />
+                  <div className="h-3.5 bg-gray-200 w-4/5" />
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         ) : (
-          <div className="space-y-3">
-            {/* Results count */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-[#64748b]">
-                <span className="text-white font-medium">{results.length}</span> results for{" "}
-                <span className="text-[#a78bfa]">&quot;{query}&quot;</span>
+          <div className="space-y-4">
+            {/* Results count banner */}
+            <div className="flex items-center justify-between border-b-2 border-[#121212] pb-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-500" style={B.labelStyle}>
+                Found <span className="text-[#121212] font-black">{results.length}</span> documents matching &quot;<span className="text-[#1040C0]">{query}</span>&quot;
               </p>
-              <div className="flex items-center gap-1.5 text-xs text-[#10b981]">
-                <Sparkles className="w-3.5 h-3.5" />
-                Hybrid search
+              <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-emerald-600" style={B.labelStyle}>
+                <Sparkles className="w-4 h-4 text-emerald-600" />
+                <span>Hybrid Vector Engine</span>
               </div>
             </div>
 
             {results.length === 0 ? (
-              <div className="text-center py-20">
-                <Search className="w-12 h-12 text-[#64748b] mx-auto mb-4" />
-                <p className="text-[#64748b]">No results found for &quot;{query}&quot;</p>
-                <p className="text-sm text-[#4a5568] mt-1">Try different keywords or upload more documents</p>
+              <div className="text-center py-20 bg-white border-2 border-[#121212] shadow-[4px_4px_0px_0px_#121212] rounded-none">
+                <Search className="w-12 h-12 text-[#121212] mx-auto mb-4" />
+                <p className="text-[#121212] font-black uppercase tracking-wider text-sm mb-1" style={B.labelStyle}>No results found for &quot;{query}&quot;</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider" style={B.labelStyle}>Try different keywords or upload new files</p>
               </div>
             ) : (
               results.map((result, i) => (
-                <motion.div
+                <div
                   key={result.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.06 }}
-                  whileHover={{ x: 2 }}
                   onClick={() => setSelectedResult(selectedResult?.id === result.id ? null : result)}
-                  className={`glass rounded-2xl p-5 cursor-pointer transition-all ${selectedResult?.id === result.id ? "border-[rgba(124,58,237,0.5)]" : ""}`}
+                  className="bg-white border-2 border-[#121212] p-5 cursor-pointer shadow-[4px_4px_0px_0px_#121212] rounded-none hover:translate-x-0.5 transition-all"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[rgba(124,58,237,0.15)] flex items-center justify-center shrink-0 mt-0.5">
-                      <FileText className="w-4 h-4 text-[#7c3aed]" />
+                  <div className="flex items-start gap-4">
+                    <div className="w-9 h-9 border-2 border-[#121212] bg-[#F0C020] text-[#121212] flex items-center justify-center shrink-0 shadow-[2px_2px_0px_0px_#121212] rounded-none">
+                      <FileText className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-white font-semibold text-sm truncate">{result.documentTitle}</span>
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className="text-[#121212] font-extrabold text-sm uppercase tracking-wide" style={{ fontFamily: "'Outfit', sans-serif" }}>{result.documentTitle}</span>
                         {result.pageNumber && (
-                          <span className="text-xs text-[#64748b] shrink-0">· p.{result.pageNumber}</span>
+                          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider" style={B.labelStyle}>· p.{result.pageNumber}</span>
                         )}
                         <ScoreBadge score={result.score} />
-                        <Star className="w-3.5 h-3.5 text-[#64748b] hover:text-[#f59e0b] transition-colors ml-auto shrink-0" />
+                        <button className="ml-auto p-1.5 border border-[#121212] bg-white text-[#121212] hover:bg-[#F0C020] transition-colors cursor-pointer rounded-none">
+                          <Star className="w-3.5 h-3.5 text-[#121212]" />
+                        </button>
                       </div>
-                      <p className="text-sm text-[#a8b2d8] leading-relaxed line-clamp-2">
+                      <p className="text-xs font-bold text-gray-600 uppercase tracking-wider leading-relaxed line-clamp-2" style={B.labelStyle}>
                         <HighlightedExcerpt text={result.excerpt} query={query} />
                       </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        {result.tags.map((tag) => (
-                          <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(124,58,237,0.12)] text-[#a78bfa]">
+                      <div className="flex items-center gap-1.5 mt-3">
+                        {result.tags.map((tag, idx) => (
+                          <span key={tag} className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 border border-[#121212] rounded-none text-white ${idx % 2 === 0 ? "bg-[#1040C0]" : "bg-[#D02020]"}`} style={{ fontFamily: "'Outfit', sans-serif" }}>
                             {tag}
                           </span>
                         ))}
@@ -398,23 +414,23 @@ export default function SearchPage() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="mt-4 pt-4 border-t border-[rgba(124,58,237,0.15)] overflow-hidden"
+                        className="mt-4 pt-4 border-t-2 border-dashed border-[#121212] overflow-hidden"
                       >
-                        <p className="text-sm text-[#c8d0e8] leading-relaxed mb-3">{result.excerpt}</p>
-                        <div className="flex gap-2">
-                          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[rgba(124,58,237,0.2)] border border-[rgba(124,58,237,0.3)] text-[#a78bfa] text-xs font-medium hover:bg-[rgba(124,58,237,0.3)] transition-colors">
-                            <FileText className="w-3.5 h-3.5" />
+                        <p className="text-sm font-semibold text-gray-700 leading-relaxed mb-4" style={{ fontFamily: "'Outfit', sans-serif" }}>{result.excerpt}</p>
+                        <div className="flex gap-3">
+                          <button className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#1040C0] text-white border-2 border-[#121212] font-black uppercase text-[10px] tracking-wider shadow-[2px_2px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] rounded-none cursor-pointer">
+                            <FileText className="w-3.5 h-3.5 text-white" />
                             Open Document
                           </button>
-                          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl glass text-xs text-[#64748b] hover:text-white transition-colors">
-                            <Sparkles className="w-3.5 h-3.5" />
-                            Ask AI about this
+                          <button className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#F0C020] text-[#121212] border-2 border-[#121212] font-black uppercase text-[10px] tracking-wider shadow-[2px_2px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] rounded-none cursor-pointer">
+                            <Sparkles className="w-3.5 h-3.5 text-[#121212]" />
+                            Ask AI Assistant
                           </button>
                         </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </motion.div>
+                </div>
               ))
             )}
           </div>
