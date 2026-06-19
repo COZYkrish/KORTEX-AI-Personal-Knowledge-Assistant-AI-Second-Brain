@@ -1,0 +1,421 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector")]
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum DocumentStatus {
+  PENDING
+  EXTRACTING
+  EMBEDDING
+  GRAPHING
+  READY
+  ERROR
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum FlashcardDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum QuestionType {
+  MCQ
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
+enum PathNodeStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum EventType {
+  DOCUMENT_UPLOADED
+  DOCUMENT_PROCESSED
+  DOCUMENT_VIEWED
+  CHAT_CREATED
+  CHAT_MESSAGE_SENT
+  SEARCH_EXECUTED
+  SUMMARY_GENERATED
+  FLASHCARD_GENERATED
+  FLASHCARD_REVIEWED
+  QUIZ_COMPLETED
+  GRAPH_VIEWED
+  VOICE_QUERY
+  DIGEST_GENERATED
+  LEARNING_PATH_CREATED
+  WORKSPACE_CREATED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workspaceMembers WorkspaceMember[]
+  events           Event[]
+  settings         UserSettings?
+  quizResults      QuizResult[]
+
+  @@map("users")
+}
+
+model UserSettings {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  theme           String  @default("dark")
+  emailDigest     Boolean @default(true)
+  voiceEnabled    Boolean @default(false)
+  defaultLanguage String  @default("en")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+model Workspace {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members       WorkspaceMember[]
+  invitations   WorkspaceInvitation[]
+  folders       Folder[]
+  documents     Document[]
+  chats         Chat[]
+  concepts      Concept[]
+  flashcards    Flashcard[]
+  quizzes       Quiz[]
+  events        Event[]
+  digests       DailyDigest[]
+  learningPaths LearningPath[]
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String        @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole @default(MEMBER)
+  joinedAt    DateTime      @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+model WorkspaceInvitation {
+  id          String           @id @default(cuid())
+  workspaceId String
+  email       String
+  role        WorkspaceRole    @default(MEMBER)
+  token       String           @unique @default(cuid())
+  status      InvitationStatus @default(PENDING)
+  expiresAt   DateTime
+  createdAt   DateTime         @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("workspace_invitations")
+}
+
+model Folder {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  color       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  documents Document[]
+
+  @@map("folders")
+}
+
+model Document {
+  id           String         @id @default(cuid())
+  workspaceId  String
+  folderId     String?
+  title        String
+  fileName     String
+  fileUrl      String
+  mimeType     String
+  fileSize     Int
+  pageCount    Int?
+  status       DocumentStatus @default(PENDING)
+  errorMessage String?
+  isFavorite   Boolean        @default(false)
+  tags         String[]
+  summary      String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  workspace Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  folder    Folder?           @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  versions  DocumentVersion[]
+  chunks    DocumentChunk[]
+  concepts  Concept[]
+
+  @@map("documents")
+}
+
+model DocumentVersion {
+  id            String   @id @default(cuid())
+  documentId    String
+  versionNumber Int
+  extractedText String
+  changeNote    String?
+  createdAt     DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, versionNumber])
+  @@map("document_versions")
+}
+
+model DocumentChunk {
+  id         String                       @id @default(cuid())
+  documentId String
+  content    String
+  embedding  Unsupported("vector(768)")?
+  chunkIndex Int
+  pageNumber Int?
+  tokenCount Int?
+  metadata   Json?
+  createdAt  DateTime                     @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@map("document_chunks")
+}
+
+model Chat {
+  id          String   @id @default(cuid())
+  workspaceId String
+  title       String   @default("New Chat")
+  agentType   String   @default("general")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  messages  Message[]
+
+  @@map("chats")
+}
+
+model Message {
+  id        String      @id @default(cuid())
+  chatId    String
+  role      MessageRole
+  content   String
+  citations Json?
+  metadata  Json?
+  createdAt DateTime    @default(now())
+
+  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model Concept {
+  id          String   @id @default(cuid())
+  workspaceId String
+  documentId  String?
+  name        String
+  description String?
+  type        String   @default("concept")
+  color       String?
+  x           Float?
+  y           Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace         Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  document          Document?      @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  outgoingRelations Relationship[] @relation("source")
+  incomingRelations Relationship[] @relation("target")
+  flashcards        Flashcard[]
+
+  @@unique([workspaceId, name])
+  @@map("concepts")
+}
+
+model Relationship {
+  id              String @id @default(cuid())
+  sourceConceptId String
+  targetConceptId String
+  type            String
+  label           String?
+  weight          Float  @default(1.0)
+
+  source Concept @relation("source", fields: [sourceConceptId], references: [id], onDelete: Cascade)
+  target Concept @relation("target", fields: [targetConceptId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceConceptId, targetConceptId, type])
+  @@map("relationships")
+}
+
+model Flashcard {
+  id           String              @id @default(cuid())
+  workspaceId  String
+  conceptId    String?
+  front        String
+  back         String
+  difficulty   FlashcardDifficulty @default(MEDIUM)
+  easeFactor   Float               @default(2.5)
+  interval     Int                 @default(1)
+  repetitions  Int                 @default(0)
+  nextReviewAt DateTime            @default(now())
+  masteryScore Float               @default(0.0)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  concept   Concept?  @relation(fields: [conceptId], references: [id], onDelete: SetNull)
+
+  @@map("flashcards")
+}
+
+model Quiz {
+  id          String   @id @default(cuid())
+  workspaceId String
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+
+  workspace Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  questions Question[]
+  results   QuizResult[]
+
+  @@map("quizzes")
+}
+
+model Question {
+  id            String       @id @default(cuid())
+  quizId        String
+  type          QuestionType
+  content       String
+  options       Json?
+  correctAnswer String
+  explanation   String?
+  order         Int
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@map("questions")
+}
+
+model QuizResult {
+  id          String   @id @default(cuid())
+  quizId      String
+  userId      String
+  score       Float
+  timeTaken   Int
+  answers     Json
+  completedAt DateTime @default(now())
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("quiz_results")
+}
+
+model LearningPath {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  topic        String
+  description  String?
+  masteryScore Float    @default(0.0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  nodes     PathNode[]
+
+  @@map("learning_paths")
+}
+
+model PathNode {
+  id             String         @id @default(cuid())
+  learningPathId String
+  title          String
+  description    String?
+  status         PathNodeStatus @default(PENDING)
+  order          Int
+  resources      Json?
+  completedAt    DateTime?
+  createdAt      DateTime       @default(now())
+
+  learningPath LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+
+  @@map("path_nodes")
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String
+  type        EventType
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, type, createdAt])
+  @@index([userId, createdAt])
+  @@map("events")
+}
+
+model DailyDigest {
+  id          String   @id @default(cuid())
+  workspaceId String
+  date        DateTime @db.Date
+  content     Json
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, date])
+  @@map("daily_digests")
+}
