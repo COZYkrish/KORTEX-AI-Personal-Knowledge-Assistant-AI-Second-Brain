@@ -3,26 +3,48 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { B, btnPrimaryStyle, btnOutlineStyle } from "@/lib/bauhaus";
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen flex flex-col overflow-hidden bg-[#F0F0F0] border-b-4 border-[#121212] pt-16">
-      {/* Dot Grid Background */}
-      <div className="absolute inset-0 bg-dot-grid opacity-40" />
+    <section
+      className="relative flex flex-col overflow-hidden"
+      style={{
+        minHeight: "100vh",
+        background: B.CANVAS,
+        borderBottom: B.border4,
+        paddingTop: 64,
+      }}
+    >
+      {/* Dot Grid */}
+      <div className="absolute inset-0 bg-dot-grid opacity-40 pointer-events-none" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 flex flex-col lg:flex-row items-stretch flex-1 w-full gap-0">
+      {/* ── Main Split ── */}
+      <div className="relative z-10 flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full px-8">
 
-        {/* LEFT PANEL — Typography & CTA */}
-        <div className="flex-1 flex flex-col justify-center py-20 lg:pr-12 lg:border-r-4 lg:border-[#121212]">
-          {/* Label */}
+        {/* LEFT — Typography & CTA */}
+        <div
+          className="flex-1 flex flex-col justify-center py-16 lg:py-24"
+          style={{ paddingRight: 0 }}
+        >
+          {/* Badge */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="mb-8"
+            className="mb-8 inline-block"
           >
-            <span className="inline-flex items-center gap-2 bg-[#F0C020] border-2 border-[#121212] px-4 py-2 shadow-hard font-label text-[#121212]">
-              <span className="w-2 h-2 rounded-full bg-[#121212]" />
+            <span
+              className="inline-flex items-center gap-2 px-4 py-2"
+              style={{
+                background: B.YELLOW,
+                border: B.border2,
+                boxShadow: B.shadowMd,
+                ...B.labelStyle,
+                color: B.BLACK,
+              }}
+            >
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: B.BLACK, display: "inline-block" }} />
               Powered by Gemini 2.5 Flash
             </span>
           </motion.div>
@@ -32,42 +54,79 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-            className="font-display text-5xl sm:text-7xl lg:text-8xl text-[#121212] mb-6"
-            style={{ lineHeight: "0.92" }}
+            className="mb-6"
+            style={{
+              ...B.displayStyle,
+              fontSize: "clamp(3.5rem, 10vw, 7rem)",
+              color: B.BLACK,
+            }}
           >
             Your
             <br />
-            <span className="text-[#D02020]">Second</span>
+            <span style={{ color: B.RED }}>Second</span>
             <br />
             Brain.
           </motion.h1>
 
-          {/* Sub-headline */}
+          {/* Body */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-            className="text-lg md:text-xl text-[#121212] font-medium max-w-lg mb-10 leading-relaxed"
+            className="mb-10 max-w-lg"
+            style={{
+              fontFamily: "'Outfit', system-ui, sans-serif",
+              fontWeight: 500,
+              fontSize: "1.1rem",
+              color: B.BLACK,
+              lineHeight: 1.6,
+            }}
           >
             Upload any document. Ask questions with AI. Build your knowledge
             graph. Remember everything — forever.
           </motion.p>
 
-          {/* CTA Row */}
+          {/* CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
-            className="flex flex-col sm:flex-row gap-4"
+            className="flex flex-col sm:flex-row gap-4 mb-10"
           >
             <Link href="/sign-up" id="hero-cta-primary">
-              <button className="btn-primary text-base px-8 py-4">
+              <button
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px]"
+                style={{
+                  ...B.bodyBoldStyle,
+                  fontSize: "0.9rem",
+                  background: B.RED,
+                  color: "#fff",
+                  border: B.border2,
+                  ...btnPrimaryStyle,
+                  cursor: "pointer",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#b01a1a")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = B.RED)}
+              >
                 Start Building Free
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight size={18} />
               </button>
             </Link>
             <Link href="#features" id="hero-cta-secondary">
-              <button className="btn-outline text-base px-8 py-4">
+              <button
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px]"
+                style={{
+                  ...B.bodyBoldStyle,
+                  fontSize: "0.9rem",
+                  background: "#fff",
+                  color: B.BLACK,
+                  border: B.border2,
+                  ...btnOutlineStyle,
+                  cursor: "pointer",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#e8e8e8")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
+              >
                 See Features
               </button>
             </Link>
@@ -78,75 +137,74 @@ export function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.5 }}
-            className="flex flex-wrap items-center gap-6 mt-10 font-label text-[#121212]"
+            className="flex flex-wrap items-center gap-6"
           >
-            <span className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-[#D02020] border-2 border-[#121212]" />
-              Free to Start
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-[#1040C0] border-2 border-[#121212]" />
-              No Credit Card
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-[#F0C020] border-2 border-[#121212]" />
-              AI-Powered
-            </span>
+            {[
+              { label: "Free to Start",    color: B.RED    },
+              { label: "No Credit Card",   color: B.BLUE   },
+              { label: "AI-Powered",       color: B.YELLOW },
+            ].map((badge) => (
+              <span key={badge.label} className="flex items-center gap-2" style={{ ...B.labelStyle, color: B.BLACK }}>
+                <span style={{ width: 10, height: 10, background: badge.color, border: B.border2, display: "inline-block" }} />
+                {badge.label}
+              </span>
+            ))}
           </motion.div>
         </div>
 
-        {/* RIGHT PANEL — Bauhaus Blue Geometric Composition */}
+        {/* RIGHT — Blue Bauhaus Composition */}
         <motion.div
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-          className="hidden lg:flex lg:w-[480px] bg-[#1040C0] border-l-0 items-center justify-center relative overflow-hidden"
+          className="hidden lg:flex items-center justify-center relative overflow-hidden"
+          style={{
+            width: 480,
+            background: B.BLUE,
+            borderLeft: B.border4,
+          }}
         >
-          {/* Background dot grid for the blue panel */}
-          <div className="absolute inset-0 bg-dot-grid-white opacity-20" />
+          <div className="absolute inset-0 bg-dot-grid-white opacity-20 pointer-events-none" />
+          {/* Outer decorative circles */}
+          <div style={{ position: "absolute", bottom: -80, right: -80, width: 280, height: 280, borderRadius: "50%", border: "4px solid rgba(255,255,255,0.15)" }} />
+          <div style={{ position: "absolute", top: -40, left: -40, width: 160, height: 160, borderRadius: "50%", border: "4px solid rgba(255,255,255,0.15)" }} />
 
-          {/* Large background circle — decorative */}
-          <div className="absolute -bottom-32 -right-32 w-80 h-80 rounded-full border-4 border-white opacity-20" />
-          <div className="absolute -top-16 -left-16 w-48 h-48 rounded-full border-4 border-white opacity-20" />
-
-          {/* Central geometric composition */}
-          <div className="relative z-10 flex flex-col items-center gap-8">
-            {/* Large outer circle */}
-            <div className="relative w-64 h-64 rounded-full border-4 border-white flex items-center justify-center">
-              {/* Inner rotated square */}
-              <div
-                className="w-40 h-40 border-4 border-white flex items-center justify-center"
-                style={{ transform: "rotate(45deg)" }}
-              >
-                {/* Inner shape counter-rotated */}
-                <div
-                  className="w-20 h-20 bg-white flex items-center justify-center"
-                  style={{ transform: "rotate(-45deg)" }}
-                >
-                  <div className="w-8 h-8 bg-[#1040C0]" />
-                </div>
+          <div className="relative z-10 flex flex-col items-center gap-10 px-10">
+            {/* Central geometric composition */}
+            <div className="relative flex items-center justify-center" style={{ width: 240, height: 240 }}>
+              {/* Large circle */}
+              <div style={{ position: "absolute", width: 240, height: 240, borderRadius: "50%", border: "4px solid rgba(255,255,255,0.9)" }} />
+              {/* Rotated square */}
+              <div style={{ position: "absolute", width: 150, height: 150, border: "4px solid rgba(255,255,255,0.9)", transform: "rotate(45deg)" }} />
+              {/* Inner white square */}
+              <div style={{ position: "relative", width: 64, height: 64, background: "white", zIndex: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ width: 24, height: 24, background: B.BLUE }} />
               </div>
-
-              {/* Red circle top-right */}
-              <div className="absolute -top-4 -right-4 w-10 h-10 rounded-full bg-[#D02020] border-4 border-white" />
-              {/* Yellow square bottom-left */}
-              <div className="absolute -bottom-4 -left-4 w-10 h-10 bg-[#F0C020] border-4 border-white" />
+              {/* Red circle accent */}
+              <div style={{ position: "absolute", top: 8, right: 8, width: 28, height: 28, borderRadius: "50%", background: B.RED, border: "4px solid white" }} />
+              {/* Yellow square accent */}
+              <div style={{ position: "absolute", bottom: 8, left: 8, width: 24, height: 24, background: B.YELLOW, border: "4px solid white" }} />
             </div>
 
-            {/* Feature Pills */}
-            <div className="flex flex-col gap-3 w-full px-4">
+            {/* Feature pills */}
+            <div className="w-full flex flex-col gap-3">
               {[
-                { label: "AI Knowledge Graph", color: "#F0C020", textColor: "#121212" },
-                { label: "Hybrid RAG Search", color: "#D02020", textColor: "#ffffff" },
-                { label: "Spaced Repetition", color: "#ffffff", textColor: "#121212" },
-              ].map((item) => (
+                { label: "AI Knowledge Graph",  bg: B.YELLOW, color: B.BLACK },
+                { label: "Hybrid RAG Search",   bg: B.RED,    color: "#fff"  },
+                { label: "Spaced Repetition",   bg: "white",  color: B.BLACK },
+              ].map((pill) => (
                 <div
-                  key={item.label}
-                  className="flex items-center gap-3 px-4 py-3 border-2 border-white font-bold uppercase tracking-wider text-sm"
-                  style={{ background: item.color, color: item.textColor }}
+                  key={pill.label}
+                  className="flex items-center gap-3 px-4 py-3"
+                  style={{
+                    ...B.labelStyle,
+                    background: pill.bg,
+                    color: pill.color,
+                    border: "2px solid rgba(255,255,255,0.9)",
+                  }}
                 >
-                  <span className="w-2 h-2 rounded-full border-2 border-current flex-shrink-0" />
-                  {item.label}
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", border: `2px solid currentColor`, display: "inline-block", flexShrink: 0 }} />
+                  {pill.label}
                 </div>
               ))}
             </div>
@@ -154,17 +212,22 @@ export function HeroSection() {
         </motion.div>
       </div>
 
-      {/* Bottom — Stats bar */}
-      <div className="relative z-10 border-t-4 border-[#121212] bg-[#121212]">
-        <div className="max-w-7xl mx-auto px-6 py-5 grid grid-cols-1 sm:grid-cols-3 gap-0 divide-y sm:divide-y-0 sm:divide-x-2 divide-[#333]">
+      {/* ── Stats Bar ── */}
+      <div
+        className="relative z-10"
+        style={{ background: B.BLACK, borderTop: B.border4 }}
+      >
+        <div className="max-w-7xl mx-auto px-8 grid grid-cols-3 divide-x divide-[#333]">
           {[
-            { value: "10+", label: "AI Features" },
+            { value: "10+",  label: "AI Features"     },
             { value: "500MB", label: "Document Limit" },
-            { value: "100%", label: "Privacy First" },
+            { value: "100%", label: "Privacy First"   },
           ].map((stat) => (
-            <div key={stat.label} className="px-8 py-3 sm:py-0 text-center">
-              <div className="text-3xl font-black text-white uppercase">{stat.value}</div>
-              <div className="font-label text-[#a1a1aa]">{stat.label}</div>
+            <div key={stat.label} className="py-5 text-center">
+              <div style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 900, fontSize: "2rem", color: "white", textTransform: "uppercase" }}>
+                {stat.value}
+              </div>
+              <div style={{ ...B.labelStyle, color: "#a1a1aa" }}>{stat.label}</div>
             </div>
           ))}
         </div>
