@@ -1,37 +1,42 @@
 import Link from "next/link";
+import { B } from "@/lib/bauhaus";
 
 export function LandingFooter() {
+  const geo = (
+    <div className="flex items-center gap-1">
+      <div style={{ width: 12, height: 12, borderRadius: "50%", background: B.RED,    border: "2px solid #333" }} />
+      <div style={{ width: 12, height: 12,                       background: B.BLUE,   border: "2px solid #333" }} />
+      <div style={{ width: 12, height: 12,                       background: B.YELLOW, border: "2px solid #333", clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }} />
+    </div>
+  );
+
   return (
-    <footer className="bg-[#121212] border-t-4 border-[#121212] py-16 px-6">
+    <footer style={{ background: B.BLACK, borderTop: `4px solid ${B.BLACK}` }}>
       <div className="max-w-7xl mx-auto">
-        {/* Top section */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border-2 border-[#333] mb-0">
+        {/* Top grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4" style={{ border: "2px solid #333" }}>
           {/* Brand */}
-          <div className="p-8 border-b-2 md:border-b-0 md:border-r-2 border-[#333]">
-            {/* Geometric logo */}
+          <div style={{ padding: "2rem", borderRight: "2px solid #333", borderBottom: "2px solid #333" }}>
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center gap-1">
-                <div className="w-4 h-4 rounded-full bg-[#D02020] border-2 border-[#333]" />
-                <div className="w-4 h-4 bg-[#1040C0] border-2 border-[#333]" />
-                <div
-                  className="w-4 h-4 bg-[#F0C020] border-2 border-[#333]"
-                  style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }}
-                />
-              </div>
-              <span className="font-black uppercase text-white text-sm tracking-tight">Kortex AI</span>
+              {geo}
+              <span style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 900, textTransform: "uppercase", color: "white", fontSize: "0.85rem", letterSpacing: "0.05em" }}>
+                Kortex AI
+              </span>
             </div>
-            <p className="text-sm text-[#888] font-medium leading-relaxed">
+            <p style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 500, fontSize: "0.82rem", color: "#888", lineHeight: 1.6 }}>
               Your AI Second Brain. Upload anything, remember everything, understand instantly.
             </p>
           </div>
 
           {/* Product */}
-          <div className="p-8 border-b-2 md:border-b-0 md:border-r-2 border-[#333]">
-            <h4 className="font-label text-[#F0C020] mb-5">Product</h4>
+          <div style={{ padding: "2rem", borderRight: "2px solid #333", borderBottom: "2px solid #333" }}>
+            <h4 style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: "0.7rem", color: B.YELLOW, marginBottom: 20 }}>Product</h4>
             <ul className="space-y-3">
               {["Features", "Pricing", "Changelog", "Roadmap"].map((link) => (
                 <li key={link}>
-                  <a href="#" className="text-sm text-[#888] hover:text-white font-medium transition-colors duration-200">
+                  <a href="#" style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 500, fontSize: "0.85rem", color: "#888", textDecoration: "none", transition: "color 0.2s" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "white")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}>
                     {link}
                   </a>
                 </li>
@@ -40,12 +45,14 @@ export function LandingFooter() {
           </div>
 
           {/* Company */}
-          <div className="p-8 border-b-2 md:border-b-0 md:border-r-2 border-[#333]">
-            <h4 className="font-label text-[#F0C020] mb-5">Company</h4>
+          <div style={{ padding: "2rem", borderRight: "2px solid #333", borderBottom: "2px solid #333" }}>
+            <h4 style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: "0.7rem", color: B.YELLOW, marginBottom: 20 }}>Company</h4>
             <ul className="space-y-3">
               {["About", "Blog", "Careers", "Contact"].map((link) => (
                 <li key={link}>
-                  <a href="#" className="text-sm text-[#888] hover:text-white font-medium transition-colors duration-200">
+                  <a href="#" style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 500, fontSize: "0.85rem", color: "#888", textDecoration: "none", transition: "color 0.2s" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "white")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}>
                     {link}
                   </a>
                 </li>
@@ -54,12 +61,14 @@ export function LandingFooter() {
           </div>
 
           {/* Legal */}
-          <div className="p-8">
-            <h4 className="font-label text-[#F0C020] mb-5">Legal</h4>
+          <div style={{ padding: "2rem", borderBottom: "2px solid #333" }}>
+            <h4 style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: "0.7rem", color: B.YELLOW, marginBottom: 20 }}>Legal</h4>
             <ul className="space-y-3">
               {["Privacy Policy", "Terms of Service", "Cookie Policy", "Security"].map((link) => (
                 <li key={link}>
-                  <a href="#" className="text-sm text-[#888] hover:text-white font-medium transition-colors duration-200">
+                  <a href="#" style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 500, fontSize: "0.85rem", color: "#888", textDecoration: "none", transition: "color 0.2s" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "white")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}>
                     {link}
                   </a>
                 </li>
@@ -69,17 +78,15 @@ export function LandingFooter() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-2 border-t-0 border-[#333] flex flex-col md:flex-row items-center justify-between px-8 py-5 gap-4">
-          <span className="text-sm text-[#666] font-medium">
+        <div className="flex flex-col md:flex-row items-center justify-between px-8 py-5 gap-4" style={{ borderTop: "2px solid #333", borderLeft: "2px solid #333", borderRight: "2px solid #333", borderBottom: "2px solid #333" }}>
+          <span style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 500, fontSize: "0.82rem", color: "#666" }}>
             © 2024 Kortex AI. All rights reserved.
           </span>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-[#666] font-medium">Built with Gemini 2.5 Flash & Next.js</span>
-            <div className="flex gap-2">
-              <div className="w-3 h-3 rounded-full bg-[#D02020]" />
-              <div className="w-3 h-3 bg-[#1040C0]" />
-              <div className="w-3 h-3 bg-[#F0C020]" style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }} />
-            </div>
+            <span style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 500, fontSize: "0.82rem", color: "#666" }}>
+              Built with Gemini 2.5 Flash & Next.js
+            </span>
+            {geo}
           </div>
         </div>
       </div>
