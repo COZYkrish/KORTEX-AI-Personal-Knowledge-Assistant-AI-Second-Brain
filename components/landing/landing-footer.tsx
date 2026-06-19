@@ -1,73 +1,87 @@
 import Link from "next/link";
-import { Brain, ExternalLink } from "lucide-react";
-
-
 
 export function LandingFooter() {
   return (
-    <footer className="border-t border-[#333] py-16 px-6 bg-black">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
-        {/* Brand */}
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
-              <Brain className="w-4 h-4 text-black" />
+    <footer className="bg-[#121212] border-t-4 border-[#121212] py-16 px-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Top section */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border-2 border-[#333] mb-0">
+          {/* Brand */}
+          <div className="p-8 border-b-2 md:border-b-0 md:border-r-2 border-[#333]">
+            {/* Geometric logo */}
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-1">
+                <div className="w-4 h-4 rounded-full bg-[#D02020] border-2 border-[#333]" />
+                <div className="w-4 h-4 bg-[#1040C0] border-2 border-[#333]" />
+                <div
+                  className="w-4 h-4 bg-[#F0C020] border-2 border-[#333]"
+                  style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }}
+                />
+              </div>
+              <span className="font-black uppercase text-white text-sm tracking-tight">Kortex AI</span>
             </div>
-            <span className="font-display font-bold text-white">Kortex AI</span>
+            <p className="text-sm text-[#888] font-medium leading-relaxed">
+              Your AI Second Brain. Upload anything, remember everything, understand instantly.
+            </p>
           </div>
-          <p className="text-sm text-[#71717a]">
-            Your AI Second Brain. Upload anything, remember everything, understand instantly.
-          </p>
-          <div className="flex gap-4 mt-4">
-            <a href="https://github.com" className="text-[#71717a] hover:text-white transition-colors">
-              <ExternalLink className="w-5 h-5" />
-            </a>
-            <a href="https://twitter.com" className="text-[#71717a] hover:text-white transition-colors">
-              <ExternalLink className="w-5 h-5" />
-            </a>
+
+          {/* Product */}
+          <div className="p-8 border-b-2 md:border-b-0 md:border-r-2 border-[#333]">
+            <h4 className="font-label text-[#F0C020] mb-5">Product</h4>
+            <ul className="space-y-3">
+              {["Features", "Pricing", "Changelog", "Roadmap"].map((link) => (
+                <li key={link}>
+                  <a href="#" className="text-sm text-[#888] hover:text-white font-medium transition-colors duration-200">
+                    {link}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Company */}
+          <div className="p-8 border-b-2 md:border-b-0 md:border-r-2 border-[#333]">
+            <h4 className="font-label text-[#F0C020] mb-5">Company</h4>
+            <ul className="space-y-3">
+              {["About", "Blog", "Careers", "Contact"].map((link) => (
+                <li key={link}>
+                  <a href="#" className="text-sm text-[#888] hover:text-white font-medium transition-colors duration-200">
+                    {link}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div className="p-8">
+            <h4 className="font-label text-[#F0C020] mb-5">Legal</h4>
+            <ul className="space-y-3">
+              {["Privacy Policy", "Terms of Service", "Cookie Policy", "Security"].map((link) => (
+                <li key={link}>
+                  <a href="#" className="text-sm text-[#888] hover:text-white font-medium transition-colors duration-200">
+                    {link}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
-        {/* Product */}
-        <div>
-          <h4 className="font-semibold text-white mb-4 text-sm">Product</h4>
-          <ul className="space-y-2 text-sm text-[#71717a]">
-            {["Features", "Pricing", "Changelog", "Roadmap"].map((link) => (
-              <li key={link}>
-                <a href="#" className="hover:text-white transition-colors">{link}</a>
-              </li>
-            ))}
-          </ul>
+        {/* Bottom bar */}
+        <div className="border-2 border-t-0 border-[#333] flex flex-col md:flex-row items-center justify-between px-8 py-5 gap-4">
+          <span className="text-sm text-[#666] font-medium">
+            © 2024 Kortex AI. All rights reserved.
+          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-[#666] font-medium">Built with Gemini 2.5 Flash & Next.js</span>
+            <div className="flex gap-2">
+              <div className="w-3 h-3 rounded-full bg-[#D02020]" />
+              <div className="w-3 h-3 bg-[#1040C0]" />
+              <div className="w-3 h-3 bg-[#F0C020]" style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }} />
+            </div>
+          </div>
         </div>
-
-        {/* Company */}
-        <div>
-          <h4 className="font-semibold text-white mb-4 text-sm">Company</h4>
-          <ul className="space-y-2 text-sm text-[#71717a]">
-            {["About", "Blog", "Careers", "Contact"].map((link) => (
-              <li key={link}>
-                <a href="#" className="hover:text-white transition-colors">{link}</a>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Legal */}
-        <div>
-          <h4 className="font-semibold text-white mb-4 text-sm">Legal</h4>
-          <ul className="space-y-2 text-sm text-[#71717a]">
-            {["Privacy Policy", "Terms of Service", "Cookie Policy", "Security"].map((link) => (
-              <li key={link}>
-                <a href="#" className="hover:text-white transition-colors">{link}</a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-[#222] flex flex-col md:flex-row items-center justify-between text-sm text-[#71717a]">
-        <span>© 2024 Kortex AI. All rights reserved.</span>
-        <span>Built with ❤️ using Gemini 2.5 Flash & Next.js 15</span>
       </div>
     </footer>
   );

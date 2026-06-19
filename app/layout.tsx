@@ -1,20 +1,14 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { ThemeProvider } from "@/components/providers/theme-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/toaster";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const outfit = Outfit({
   subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
+  variable: "--font-outfit",
+  weight: ["400", "500", "700", "900"],
   display: "swap",
 });
 
@@ -41,8 +35,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: process.env.NEXT_PUBLIC_APP_URL,
     title: "Kortex AI — Your AI Second Brain",
-    description:
-      "Upload anything. Remember everything. Understand instantly.",
+    description: "Upload anything. Remember everything. Understand instantly.",
     siteName: "Kortex AI",
   },
   twitter: {
@@ -62,22 +55,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}
-      >
+    <html lang="en">
+      <body className={`${outfit.variable} antialiased`}>
         <ClerkProvider
           signInUrl="/sign-in"
           signUpUrl="/sign-up"
           signInFallbackRedirectUrl="/dashboard"
           signUpFallbackRedirectUrl="/dashboard"
         >
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-            <QueryProvider>
-              {children}
-              <Toaster />
-            </QueryProvider>
-          </ThemeProvider>
+          <QueryProvider>
+            {children}
+            <Toaster />
+          </QueryProvider>
         </ClerkProvider>
       </body>
     </html>

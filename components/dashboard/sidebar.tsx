@@ -3,27 +3,27 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  Brain, LayoutDashboard, FileText, MessageSquare,
+  LayoutDashboard, FileText, MessageSquare,
   Search, BookOpen, ClipboardList, GitBranch,
-  BarChart3, Settings, Mic, Map, ChevronLeft,
-  ChevronRight, PenTool,
+  BarChart3, Settings, Mic, Map,
+  ChevronLeft, ChevronRight, PenTool,
 } from "lucide-react";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: FileText, label: "Documents", href: "/dashboard/documents" },
-  { icon: MessageSquare, label: "AI Chat", href: "/dashboard/chat" },
-  { icon: PenTool, label: "Workspace", href: "/dashboard/workspace" },
-  { icon: Search, label: "Search", href: "/dashboard/search" },
-  { icon: BookOpen, label: "Flashcards", href: "/dashboard/flashcards" },
-  { icon: ClipboardList, label: "Quizzes", href: "/dashboard/quizzes" },
-  { icon: Map, label: "Learning Paths", href: "/dashboard/learning-paths" },
-  { icon: GitBranch, label: "Knowledge Graph", href: "/dashboard/knowledge-graph" },
-  { icon: Mic, label: "Voice AI", href: "/dashboard/voice" },
-  { icon: BarChart3, label: "Analytics", href: "/dashboard/analytics" },
-  { icon: Settings, label: "Settings", href: "/dashboard/settings" },
+  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", color: "#D02020" },
+  { icon: FileText, label: "Documents", href: "/dashboard/documents", color: "#1040C0" },
+  { icon: MessageSquare, label: "AI Chat", href: "/dashboard/chat", color: "#F0C020" },
+  { icon: PenTool, label: "Workspace", href: "/dashboard/workspace", color: "#D02020" },
+  { icon: Search, label: "Search", href: "/dashboard/search", color: "#1040C0" },
+  { icon: BookOpen, label: "Flashcards", href: "/dashboard/flashcards", color: "#F0C020" },
+  { icon: ClipboardList, label: "Quizzes", href: "/dashboard/quizzes", color: "#D02020" },
+  { icon: Map, label: "Learning Paths", href: "/dashboard/learning-paths", color: "#1040C0" },
+  { icon: GitBranch, label: "Knowledge Graph", href: "/dashboard/knowledge-graph", color: "#F0C020" },
+  { icon: Mic, label: "Voice AI", href: "/dashboard/voice", color: "#D02020" },
+  { icon: BarChart3, label: "Analytics", href: "/dashboard/analytics", color: "#1040C0" },
+  { icon: Settings, label: "Settings", href: "/dashboard/settings", color: "#F0C020" },
 ];
 
 export function DashboardSidebar() {
@@ -32,22 +32,28 @@ export function DashboardSidebar() {
 
   return (
     <motion.aside
-      animate={{ width: collapsed ? 72 : 240 }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="relative flex flex-col h-full border-r border-[#222] bg-black shrink-0"
+      animate={{ width: collapsed ? 64 : 224 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className="relative flex flex-col h-full border-r-4 border-[#121212] bg-white shrink-0 overflow-hidden"
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-[#222]">
-        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0">
-          <Brain className="w-4 h-4 text-black" />
+      <div className={`flex items-center gap-2 px-4 py-4 border-b-4 border-[#121212] bg-[#F0F0F0] ${collapsed ? "justify-center" : ""}`}>
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="w-3 h-3 rounded-full bg-[#D02020] border-2 border-[#121212]" />
+          <div className="w-3 h-3 bg-[#1040C0] border-2 border-[#121212]" />
+          <div
+            className="w-3 h-3 bg-[#F0C020] border-2 border-[#121212]"
+            style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }}
+          />
         </div>
         <AnimatePresence>
           {!collapsed && (
             <motion.span
-              initial={{ opacity: 0, x: -10 }}
+              initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              className="font-display font-bold text-white text-base whitespace-nowrap"
+              exit={{ opacity: 0, x: -8 }}
+              transition={{ duration: 0.15 }}
+              className="font-black uppercase text-[#121212] text-xs tracking-tight whitespace-nowrap"
             >
               Kortex AI
             </motion.span>
@@ -56,10 +62,10 @@ export function DashboardSidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
+      <nav className="flex-1 overflow-y-auto py-2">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
 
           return (
             <Link
@@ -68,34 +74,46 @@ export function DashboardSidebar() {
               id={`nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
               title={collapsed ? item.label : undefined}
             >
-              <motion.div
-                whileHover={{ x: collapsed ? 0 : 2 }}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all relative ${
+              <div
+                className={`flex items-center gap-3 px-3 py-3 border-b-2 border-[#F0F0F0] transition-all duration-150 group relative ${
+                  collapsed ? "justify-center" : ""
+                } ${
                   isActive
-                    ? "bg-[#111] text-white"
-                    : "text-[#71717a] hover:text-[#e4e4e7] hover:bg-[#0a0a0a]"
-                } ${collapsed ? "justify-center" : ""}`}
+                    ? "border-l-4 border-l-[#121212] bg-[#F0F0F0]"
+                    : "hover:bg-[#F0F0F0] border-l-4 border-l-transparent"
+                }`}
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="active-nav"
-                    className="absolute left-0 top-0 bottom-0 w-0.5 rounded-full bg-white"
+                {/* Active color block for icon */}
+                <div
+                  className={`w-8 h-8 flex items-center justify-center flex-shrink-0 border-2 transition-colors duration-150 ${
+                    isActive
+                      ? "border-[#121212]"
+                      : "border-transparent group-hover:border-[#e0e0e0]"
+                  }`}
+                  style={{ background: isActive ? item.color : "transparent" }}
+                >
+                  <Icon
+                    className="w-4 h-4"
+                    style={{ color: isActive ? (item.color === "#F0C020" ? "#121212" : "white") : "#888" }}
                   />
-                )}
-                <Icon className={`w-5 h-5 shrink-0 ${isActive ? "text-white" : ""}`} />
+                </div>
+
                 <AnimatePresence>
                   {!collapsed && (
                     <motion.span
-                      initial={{ opacity: 0, x: -10 }}
+                      initial={{ opacity: 0, x: -8 }}
                       animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      className="text-sm font-medium whitespace-nowrap"
+                      exit={{ opacity: 0, x: -8 }}
+                      transition={{ duration: 0.15 }}
+                      className={`text-xs font-bold uppercase tracking-wider whitespace-nowrap ${
+                        isActive ? "text-[#121212]" : "text-[#888] group-hover:text-[#121212]"
+                      }`}
                     >
                       {item.label}
                     </motion.span>
                   )}
                 </AnimatePresence>
-              </motion.div>
+              </div>
             </Link>
           );
         })}
@@ -105,12 +123,13 @@ export function DashboardSidebar() {
       <button
         onClick={() => setCollapsed(!collapsed)}
         id="sidebar-collapse-toggle"
-        className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-black border border-[#333] flex items-center justify-center text-[#71717a] hover:text-white hover:border-white transition-colors z-10"
+        className="flex items-center justify-center gap-2 px-4 py-3 border-t-4 border-[#121212] bg-[#F0F0F0] hover:bg-[#121212] hover:text-white text-[#121212] transition-colors duration-200 font-bold uppercase text-xs tracking-wider"
       >
-        {collapsed ? (
-          <ChevronRight className="w-3 h-3" />
-        ) : (
-          <ChevronLeft className="w-3 h-3" />
+        {collapsed ? <ChevronRight className="w-4 h-4" /> : (
+          <>
+            <ChevronLeft className="w-4 h-4" />
+            {!collapsed && <span>Collapse</span>}
+          </>
         )}
       </button>
     </motion.aside>

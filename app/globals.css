@@ -4,40 +4,31 @@
 
 @theme {
   /* ================================
-     KORTEX AI DESIGN TOKENS
-     Premium Monochrome / Dark Mode
+     KORTEX AI — BAUHAUS DESIGN TOKENS
+     Constructivist Modernist Style
   ================================ */
 
-  /* Colors */
-  --color-background: #030303;
-  --color-surface: rgba(15, 15, 15, 0.6);
-  --color-surface-elevated: rgba(25, 25, 25, 0.8);
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-bright: rgba(255, 255, 255, 0.15);
+  /* Bauhaus Primary Colors */
+  --color-bauhaus-red: #D02020;
+  --color-bauhaus-blue: #1040C0;
+  --color-bauhaus-yellow: #F0C020;
+  --color-bauhaus-black: #121212;
+  --color-bauhaus-white: #FFFFFF;
+  --color-bauhaus-canvas: #F0F0F0;
+  --color-bauhaus-muted: #E0E0E0;
 
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #a1a1aa;
-  --color-text-muted: #71717a;
+  /* Semantic Aliases */
+  --color-background: #F0F0F0;
+  --color-foreground: #121212;
+  --color-border: #121212;
 
   /* Typography */
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-display: var(--font-space-grotesk), system-ui, sans-serif;
-
-  /* Spacing */
-  --spacing-section: 120px;
-
-  /* Borders */
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-2xl: 32px;
-
-  /* Shadows */
-  --shadow-glow-white: 0 0 40px rgba(255, 255, 255, 0.05), 0 0 80px rgba(255, 255, 255, 0.02);
-  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 1px rgba(255,255,255,0.15);
+  --font-sans: var(--font-outfit), system-ui, sans-serif;
+  --font-display: var(--font-outfit), system-ui, sans-serif;
 }
 
 /* ================================
-   GLOBAL STYLES
+   GLOBAL RESET & BASE
 ================================ */
 
 * {
@@ -52,15 +43,16 @@ html {
 
 body {
   background-color: var(--color-background);
-  color: var(--color-text-primary);
-  font-family: var(--font-inter), system-ui, sans-serif;
+  color: var(--color-foreground);
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  font-weight: 500;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
 /* ================================
-   SCROLLBAR
+   SCROLLBAR — Bauhaus Black
 ================================ */
 
 ::-webkit-scrollbar {
@@ -69,213 +61,317 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #050505;
+  background: var(--color-bauhaus-canvas);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333333;
-  border-radius: 4px;
-  border: 2px solid #050505;
+  background: var(--color-bauhaus-black);
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #666666;
+  background: #333;
 }
 
 /* ================================
-   SELECTION
+   SELECTION — Yellow Highlight
 ================================ */
 
 ::selection {
-  background: rgba(255, 255, 255, 0.9);
-  color: #000000;
+  background: var(--color-bauhaus-yellow);
+  color: var(--color-bauhaus-black);
 }
 
 /* ================================
-   PREMIUM GLASS EFFECTS
+   TYPOGRAPHY UTILITIES
 ================================ */
 
-.glass {
-  background: var(--color-surface);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-card);
-  border-radius: 16px;
-  transition: all 0.3s ease;
+.font-display {
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
 }
 
-.glass:hover {
-  border-color: var(--color-border-bright);
-  background: rgba(20, 20, 20, 0.7);
-}
-
-.glass-bright {
-  background: var(--color-surface-elevated);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9), 0 0 1px rgba(255, 255, 255, 0.3);
-  border-radius: 24px;
+.font-label {
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
 }
 
 /* ================================
-   SLEEK GRADIENT TEXT
+   BAUHAUS SHADOW SYSTEM
+   Hard offset shadows, no blur
 ================================ */
 
-.gradient-text {
-  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 50%, #ffffff 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradient-shift 6s ease infinite;
+.shadow-hard-sm {
+  box-shadow: 3px 3px 0px 0px #121212;
+}
+
+.shadow-hard {
+  box-shadow: 4px 4px 0px 0px #121212;
+}
+
+.shadow-hard-md {
+  box-shadow: 6px 6px 0px 0px #121212;
+}
+
+.shadow-hard-lg {
+  box-shadow: 8px 8px 0px 0px #121212;
+}
+
+/* White versions for colored backgrounds */
+.shadow-hard-white {
+  box-shadow: 4px 4px 0px 0px #ffffff;
+}
+
+.shadow-hard-white-lg {
+  box-shadow: 8px 8px 0px 0px #ffffff;
 }
 
 /* ================================
-   GLOWS
+   BUTTONS — Bauhaus Primary Colors
 ================================ */
 
-.glow-white {
-  box-shadow: 0 0 30px rgba(255, 255, 255, 0.1), 0 0 60px rgba(255, 255, 255, 0.05);
-}
-
-.text-glow-white {
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.1);
-}
-
-/* ================================
-   AURORA BACKGROUND (Silver/Gray)
-================================ */
-
-.aurora-bg {
-  position: relative;
-  overflow: hidden;
-}
-
-.aurora-bg::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(ellipse at 20% 20%, rgba(255, 255, 255, 0.04) 0%, transparent 40%),
-    radial-gradient(ellipse at 80% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 60%);
-  animation: aurora-drift 25s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-
-/* ================================
-   ANIMATED BORDERS
-================================ */
-
-.border-gradient {
-  position: relative;
-  border-radius: 16px;
-  background: #0a0a0a;
-}
-
-.border-gradient::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: 17px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.4), rgba(255,255,255,0.1));
-  background-size: 200% 200%;
-  animation: gradient-shift 4s linear infinite;
-  z-index: -1;
-}
-
-/* ================================
-   BUTTONS
-================================ */
-
+/* Red Button (Primary CTA) */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   padding: 14px 32px;
-  background: linear-gradient(135deg, #ffffff 0%, #e4e4e7 100%);
-  color: #000000;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
+  background: #D02020;
+  color: #ffffff;
+  border: 2px solid #121212;
+  border-radius: 0;
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s ease-out;
   position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.1);
-}
-
-.btn-primary::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(0, 0, 0, 0.05),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
-.btn-primary:hover::before {
-  left: 100%;
+  box-shadow: 4px 4px 0px 0px #121212;
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
-  background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+  background: #b01a1a;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px 0px #121212;
 }
 
 .btn-primary:active {
-  transform: translateY(0);
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+/* Blue Button (Secondary CTA) */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: #1040C0;
+  color: #ffffff;
+  border: 2px solid #121212;
+  border-radius: 0;
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  box-shadow: 4px 4px 0px 0px #121212;
+}
+
+.btn-secondary:hover {
+  background: #0c30a0;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px 0px #121212;
+}
+
+.btn-secondary:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+/* Yellow Button */
+.btn-yellow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: #F0C020;
+  color: #121212;
+  border: 2px solid #121212;
+  border-radius: 0;
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  box-shadow: 4px 4px 0px 0px #121212;
+}
+
+.btn-yellow:hover {
+  background: #d4a818;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px 0px #121212;
+}
+
+.btn-yellow:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+/* Outline Button (White) */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: #ffffff;
+  color: #121212;
+  border: 2px solid #121212;
+  border-radius: 0;
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  box-shadow: 4px 4px 0px 0px #121212;
+}
+
+.btn-outline:hover {
+  background: #f0f0f0;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px 0px #121212;
+}
+
+.btn-outline:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
 }
 
 /* ================================
-   ANIMATIONS
+   BAUHAUS CARD COMPONENT
 ================================ */
 
-@keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.card-bauhaus {
+  background: #ffffff;
+  border: 4px solid #121212;
+  box-shadow: 8px 8px 0px 0px #121212;
+  transition: transform 0.2s ease-out;
 }
 
-@keyframes aurora-drift {
-  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
-  50% { transform: translate(2%, 3%) rotate(2deg) scale(1.02); }
-  100% { transform: translate(-2%, -3%) rotate(-2deg) scale(0.98); }
+.card-bauhaus:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 10px 10px 0px 0px #121212;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
+.card-bauhaus-sm {
+  background: #ffffff;
+  border: 2px solid #121212;
+  box-shadow: 4px 4px 0px 0px #121212;
+  transition: transform 0.2s ease-out;
 }
 
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.05); }
-  50% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.15), 0 0 60px rgba(255, 255, 255, 0.05); }
+.card-bauhaus-sm:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px 0px #121212;
 }
 
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* ================================
+   GEOMETRIC DECORATORS
+================================ */
+
+/* Small corner decorators for cards */
+.geo-circle-red {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #D02020;
+  border: 2px solid #121212;
+  flex-shrink: 0;
 }
+
+.geo-circle-blue {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #1040C0;
+  border: 2px solid #121212;
+  flex-shrink: 0;
+}
+
+.geo-circle-yellow {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #F0C020;
+  border: 2px solid #121212;
+  flex-shrink: 0;
+}
+
+.geo-square-red {
+  width: 12px;
+  height: 12px;
+  background: #D02020;
+  border: 2px solid #121212;
+  flex-shrink: 0;
+}
+
+.geo-square-blue {
+  width: 12px;
+  height: 12px;
+  background: #1040C0;
+  border: 2px solid #121212;
+  flex-shrink: 0;
+}
+
+.geo-square-yellow {
+  width: 12px;
+  height: 12px;
+  background: #F0C020;
+  border: 2px solid #121212;
+  flex-shrink: 0;
+}
+
+/* ================================
+   DOT GRID BACKGROUND PATTERN
+================================ */
+
+.bg-dot-grid {
+  background-image: radial-gradient(#121212 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+  background-color: #F0F0F0;
+}
+
+.bg-dot-grid-white {
+  background-image: radial-gradient(rgba(255,255,255,0.3) 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+}
+
+/* ================================
+   ANIMATIONS — Mechanical, Snappy
+================================ */
 
 @keyframes fade-in-up {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
@@ -283,29 +379,47 @@ body {
   }
 }
 
-/* ================================
-   UTILITY CLASSES
-================================ */
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
+@keyframes bauhaus-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .animate-fade-in-up {
-  animation: fade-in-up 0.6s ease-out forwards;
+  animation: fade-in-up 0.5s ease-out forwards;
 }
 
-.font-display {
-  font-family: var(--font-space-grotesk), system-ui, sans-serif;
-  letter-spacing: -0.02em;
+.animate-slide-in-left {
+  animation: slide-in-left 0.5s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.5s ease-out forwards;
+}
+
+.animate-bauhaus-spin {
+  animation: bauhaus-spin 20s linear infinite;
 }
 
 /* ================================
@@ -313,37 +427,35 @@ body {
 ================================ */
 
 .react-flow__background {
-  background-color: transparent !important;
+  background-color: #F0F0F0 !important;
 }
 
 .react-flow__edge-path {
-  stroke: rgba(255, 255, 255, 0.2) !important;
-  stroke-width: 1.5 !important;
+  stroke: #121212 !important;
+  stroke-width: 2px !important;
 }
 
 .react-flow__controls {
-  background: rgba(20, 20, 20, 0.8) !important;
-  backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+  background: #ffffff !important;
+  border: 2px solid #121212 !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0px 0px #121212 !important;
 }
 
 .react-flow__controls-button {
   background: transparent !important;
   border: none !important;
-  color: #a1a1aa !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  color: #121212 !important;
+  border-bottom: 1px solid #e0e0e0 !important;
 }
 
 .react-flow__controls-button:hover {
-  background: rgba(255, 255, 255, 0.05) !important;
-  color: #ffffff !important;
+  background: #F0C020 !important;
+  color: #121212 !important;
 }
 
 .react-flow__minimap {
-  background: rgba(15, 15, 15, 0.9) !important;
-  backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 12px !important;
+  background: #F0F0F0 !important;
+  border: 2px solid #121212 !important;
+  border-radius: 0 !important;
 }

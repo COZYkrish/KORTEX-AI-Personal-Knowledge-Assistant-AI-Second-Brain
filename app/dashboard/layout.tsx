@@ -12,7 +12,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen overflow-hidden bg-[#050816]">
+    <div className="flex h-screen overflow-hidden bg-[#F0F0F0]">
       <DashboardSidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
         <DashboardHeader />

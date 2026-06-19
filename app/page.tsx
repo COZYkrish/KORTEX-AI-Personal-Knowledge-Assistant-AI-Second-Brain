@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function LandingPage() {
   return (
-    <main className="relative bg-black overflow-x-hidden">
+    <main className="relative bg-[#F0F0F0] overflow-x-hidden">
       <LandingNavbar />
       <HeroSection />
       <ProblemSection />

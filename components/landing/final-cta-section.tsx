@@ -3,68 +3,73 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export function FinalCTASection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
 
   return (
-    <section ref={ref} className="relative py-40 px-6 overflow-hidden bg-black">
-      {/* Background border top */}
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#333] to-transparent" />
+    <section ref={ref} className="relative bg-[#F0C020] border-b-4 border-[#121212] py-32 px-6 overflow-hidden">
+      {/* Background dot grid */}
+      <div className="absolute inset-0 bg-dot-grid opacity-15" />
 
-      {/* Rotating ring decoration - monochrome */}
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-[#222]"
+      {/* Decorative shapes — large geometric at corners */}
+      <div className="absolute -left-24 -top-24 w-64 h-64 rounded-full border-4 border-[#121212] opacity-30" />
+      <div
+        className="absolute -right-16 -bottom-16 w-48 h-48 border-4 border-[#121212] opacity-30"
+        style={{ transform: "rotate(45deg)", background: "transparent" }}
       />
-      <motion.div
-        animate={{ rotate: -360 }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full border border-[#333]"
-      />
+      <div className="absolute right-32 top-16 w-20 h-20 bg-[#D02020] border-4 border-[#121212] opacity-50" />
+      <div className="absolute left-40 bottom-16 w-14 h-14 rounded-full bg-[#1040C0] border-4 border-[#121212] opacity-50" />
 
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.8 }}
-        className="relative z-10 text-center max-w-4xl mx-auto"
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="relative z-10 text-center max-w-5xl mx-auto"
       >
-        <motion.div
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ repeat: Infinity, duration: 4 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#333] bg-[#0a0a0a] mb-8 text-sm text-[#a1a1aa]"
-        >
-          <Sparkles className="w-4 h-4 text-white" />
-          Start your journey today
-        </motion.div>
+        <span className="font-label text-[#D02020] mb-6 block">Start Today — It&apos;s Free</span>
 
-        <h2 className="font-display text-6xl md:text-7xl font-bold leading-tight mb-8 text-white tracking-tight">
-          Never Lose An Idea
+        <h2
+          className="font-display text-6xl sm:text-7xl lg:text-8xl text-[#121212] mb-10"
+          style={{ lineHeight: "0.92" }}
+        >
+          Never Lose
           <br />
-          <span className="text-[#a1a1aa]">Again.</span>
+          An <span className="text-[#1040C0]">Idea</span>
+          <br />
+          Again.
         </h2>
 
-        <p className="text-xl text-[#71717a] mb-12 max-w-2xl mx-auto">
+        <p className="text-xl text-[#121212] font-medium mb-12 max-w-2xl mx-auto">
           Join thousands of students, researchers, and professionals who have
           transformed how they learn and think. Your second brain is waiting.
         </p>
 
-        <Link href="/sign-up" id="final-cta-button">
-          <motion.button
-            whileHover={{ scale: 1.06, y: -4 }}
-            whileTap={{ scale: 0.98 }}
-            className="btn-primary text-lg px-10 py-5 bg-white text-black font-semibold rounded-xl"
-            style={{
-              boxShadow: "0 0 40px rgba(255,255,255,0.1), 0 0 80px rgba(255,255,255,0.05)",
-            }}
-          >
-            Build Your Second Brain — Free
-            <ArrowRight className="w-5 h-5 ml-2 inline-block" />
-          </motion.button>
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+          <Link href="/sign-up" id="final-cta-button">
+            <button className="btn-primary text-base px-10 py-5">
+              Build Your Second Brain — Free
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </Link>
+          <Link href="/sign-in">
+            <button className="btn-outline text-base px-10 py-5">
+              Sign In
+            </button>
+          </Link>
+        </div>
+
+        {/* Feature ticks */}
+        <div className="flex flex-wrap justify-center gap-6 mt-12 font-label text-[#121212]">
+          {["No Credit Card Required", "Free Plan Forever", "AI-Powered"].map((item) => (
+            <span key={item} className="flex items-center gap-2">
+              <span className="w-3 h-3 bg-[#121212] border-2 border-[#121212]" />
+              {item}
+            </span>
+          ))}
+        </div>
       </motion.div>
     </section>
   );

@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { AlertTriangle, Brain, Layers, Archive } from "lucide-react";
+import { AlertTriangle, Brain } from "lucide-react";
 
 const chaosItems = [
   "ResearchPaper_v3_FINAL.pdf",
@@ -18,77 +18,77 @@ export function ProblemSection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section ref={ref} className="relative py-32 px-6 overflow-hidden bg-black">
-      {/* Background border top */}
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#333] to-transparent" />
+    <section ref={ref} className="relative bg-[#D02020] border-b-4 border-[#121212] py-24 px-6 overflow-hidden">
+      {/* Background dot grid on red */}
+      <div className="absolute inset-0 bg-dot-grid-white opacity-10" />
 
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+      {/* Large decorative circle */}
+      <div className="absolute -right-32 -top-32 w-80 h-80 rounded-full border-4 border-white opacity-10" />
+      <div className="absolute -left-16 -bottom-16 w-48 h-48 border-4 border-white opacity-10 rotate-45" />
+
+      <div className="relative z-10 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
           {/* Left — Story text */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.8 }}
-            className="max-w-2xl"
+            transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            <span className="text-sm font-medium text-[#71717a] uppercase tracking-widest mb-4 block">
-              The Problem
-            </span>
-            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-8 leading-tight text-white">
-              We consume more information
+            <span className="font-label text-white opacity-70 mb-4 block">The Problem</span>
+            <h2
+              className="font-display text-5xl sm:text-6xl lg:text-7xl text-white mb-8"
+              style={{ lineHeight: "0.92" }}
+            >
+              Knowledge
               <br />
-              <span className="text-[#a1a1aa]">than ever before.</span>
+              <span className="text-[#F0C020]">Chaos</span>
+              <br />
+              Is Real.
             </h2>
 
-            <div className="space-y-6 text-lg text-[#a1a1aa]">
+            <div className="space-y-5 text-lg text-white font-medium">
               <p>
                 The average knowledge worker reads{" "}
-                <span className="text-white font-semibold">hundreds of pages</span> per
-                week. Research papers, textbooks, meeting notes, articles.
+                <span className="font-black bg-white text-[#D02020] px-2">hundreds of pages</span>{" "}
+                per week. Research papers, textbooks, meeting notes, articles.
               </p>
               <p>
-                But our minds were{" "}
-                <span className="text-white font-semibold">
-                  never designed to manage thousands of ideas
-                </span>
-                . The knowledge disappears as fast as we consume it.
-              </p>
-              <p>
-                The result?{" "}
-                <span className="text-white font-semibold">
-                  Scattered documents. Forgotten insights. Lost connections.
-                </span>
+                But our minds were never designed to manage{" "}
+                <span className="font-black bg-white text-[#D02020] px-2">thousands of ideas</span>.
+                Knowledge disappears as fast as we consume it.
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mt-10">
+            {/* Stats — Bauhaus bordered blocks */}
+            <div className="grid grid-cols-3 gap-0 mt-10 border-2 border-white">
               {[
-                { icon: Layers, label: "Too Many Files", value: "500+" },
-                { icon: Archive, label: "Lost Insights", value: "73%" },
-                { icon: AlertTriangle, label: "Wasted Hours", value: "8h/wk" },
-              ].map((stat) => {
-                const Icon = stat.icon;
-                return (
-                  <div key={stat.label} className="glass p-4 text-center group">
-                    <Icon className="w-6 h-6 text-[#a1a1aa] mx-auto mb-2 group-hover:text-white transition-colors" />
-                    <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
-                    <div className="text-xs text-[#71717a] font-medium uppercase tracking-wider">{stat.label}</div>
-                  </div>
-                );
-              })}
+                { value: "500+", label: "Too Many Files" },
+                { value: "73%", label: "Lost Insights" },
+                { value: "8h/wk", label: "Wasted Time" },
+              ].map((stat, i) => (
+                <div
+                  key={stat.label}
+                  className={`p-5 text-center ${i < 2 ? "border-r-2 border-white" : ""}`}
+                >
+                  <div className="text-3xl font-black text-white">{stat.value}</div>
+                  <div className="font-label text-white opacity-70 mt-1">{stat.label}</div>
+                </div>
+              ))}
             </div>
           </motion.div>
 
-          {/* Right — Chaos visualization */}
+          {/* Right — Before/After visualization */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative w-full max-w-md mx-auto lg:mx-0 lg:ml-auto"
+            transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
+            className="flex flex-col gap-6"
           >
-            {/* Chaos before */}
-            <div className="relative mb-8">
-              <div className="text-xs font-bold text-[#71717a] uppercase tracking-widest mb-4 text-center">
+            {/* BEFORE — Chaos */}
+            <div className="bg-white border-4 border-[#121212] shadow-hard-white-lg p-6">
+              <div className="font-label text-[#D02020] mb-4 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4" />
                 Before Kortex AI
               </div>
               <div className="space-y-2">
@@ -96,18 +96,18 @@ export function ProblemSection() {
                   <motion.div
                     key={item}
                     animate={{
-                      x: [0, (i % 2 === 0 ? 6 : -6), 0],
-                      rotate: [(i - 3) * 2, (i - 3) * 2 + 1, (i - 3) * 2],
+                      x: [0, (i % 2 === 0 ? 4 : -4), 0],
+                      rotate: [(i - 3) * 1.5, (i - 3) * 1.5 + 0.8, (i - 3) * 1.5],
                     }}
                     transition={{
                       repeat: Infinity,
-                      duration: 4 + i * 0.5,
+                      duration: 4 + i * 0.3,
                       ease: "easeInOut",
                     }}
-                    className="glass px-4 py-3 flex items-center gap-3 text-sm text-[#a1a1aa] overflow-hidden"
-                    style={{ transform: `rotate(${(i - 3) * 2}deg)` }}
+                    className="flex items-center gap-3 text-sm font-medium text-[#555] border-2 border-[#e0e0e0] px-3 py-2 bg-[#F0F0F0]"
+                    style={{ transform: `rotate(${(i - 3) * 1.5}deg)` }}
                   >
-                    <AlertTriangle className="w-4 h-4 text-[#71717a] shrink-0" />
+                    <AlertTriangle className="w-3 h-3 text-[#D02020] shrink-0" />
                     <span className="truncate">{item}</span>
                   </motion.div>
                 ))}
@@ -115,27 +115,32 @@ export function ProblemSection() {
             </div>
 
             {/* Arrow */}
-            <div className="flex items-center justify-center my-6 relative z-10">
-              <motion.div
-                animate={{ y: [0, 5, 0] }}
-                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                className="flex flex-col items-center gap-2 bg-black py-2 px-4 rounded-full border border-[#222]"
-              >
-                <Brain className="w-6 h-6 text-white animate-pulse-glow rounded-full" />
-                <div className="text-[#a1a1aa] text-xs font-medium uppercase tracking-widest">Transforms Into</div>
-              </motion.div>
+            <div className="flex items-center justify-center">
+              <div className="flex items-center gap-3 bg-[#121212] border-4 border-white px-5 py-3">
+                <Brain className="w-5 h-5 text-[#F0C020]" />
+                <span className="font-label text-white">Kortex AI Transforms Into</span>
+              </div>
             </div>
 
-            {/* Order after */}
-            <div className="glass-bright p-6 relative z-0 -mt-10 pt-16">
-              <div className="text-xs font-bold text-white uppercase tracking-widest mb-4 text-center">
-                After Kortex AI
-              </div>
+            {/* AFTER — Order */}
+            <div className="bg-[#121212] border-4 border-white shadow-hard-white-lg p-6">
+              <div className="font-label text-[#F0C020] mb-4">After Kortex AI</div>
               <div className="space-y-3">
-                {["Unified Knowledge Base", "AI Knowledge Graph", "Instant Answers", "Auto-generated Flashcards"].map((item) => (
-                  <div key={item} className="flex items-center gap-3 text-sm text-[#e4e4e7] font-medium bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] p-3 rounded-lg">
-                    <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-                    {item}
+                {[
+                  { label: "Unified Knowledge Base", color: "#D02020" },
+                  { label: "AI Knowledge Graph", color: "#1040C0" },
+                  { label: "Instant Answers", color: "#F0C020" },
+                  { label: "Auto-generated Flashcards", color: "#D02020" },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center gap-3 text-sm font-bold text-white border-2 border-[#333] px-4 py-3"
+                  >
+                    <div
+                      className="w-3 h-3 rounded-full border-2 border-white shrink-0"
+                      style={{ background: item.color }}
+                    />
+                    {item.label}
                   </div>
                 ))}
               </div>
