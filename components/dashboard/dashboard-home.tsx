@@ -6,144 +6,135 @@ import {
   GitBranch, TrendingUp, Flame, Zap,
 } from "lucide-react";
 import Link from "next/link";
+import { B } from "@/lib/bauhaus";
 
 interface DashboardHomeProps {
   userName: string;
 }
 
+const ICON_COLORS = [B.RED, B.BLUE, B.YELLOW, B.RED] as const;
+
 const stats = [
-  { icon: FileText, label: "Documents", value: "0", color: "#D02020", href: "/dashboard/documents" },
-  { icon: MessageSquare, label: "Chats", value: "0", color: "#1040C0", href: "/dashboard/chat" },
-  { icon: BookOpen, label: "Flashcards", value: "0", color: "#F0C020", href: "/dashboard/flashcards" },
-  { icon: ClipboardList, label: "Quizzes", value: "0", color: "#D02020", href: "/dashboard/quizzes" },
+  { icon: FileText,      label: "Documents",  value: "0", href: "/dashboard/documents" },
+  { icon: MessageSquare, label: "Chats",       value: "0", href: "/dashboard/chat"      },
+  { icon: BookOpen,      label: "Flashcards",  value: "0", href: "/dashboard/flashcards"},
+  { icon: ClipboardList, label: "Quizzes",     value: "0", href: "/dashboard/quizzes"  },
 ];
 
 const quickActions = [
-  {
-    icon: FileText,
-    label: "Upload Document",
-    description: "Add PDFs, DOCX or TXT files",
-    href: "/dashboard/documents",
-    color: "#D02020",
-  },
-  {
-    icon: MessageSquare,
-    label: "Start AI Chat",
-    description: "Chat with your knowledge base",
-    href: "/dashboard/chat",
-    color: "#1040C0",
-  },
-  {
-    icon: GitBranch,
-    label: "Knowledge Graph",
-    description: "Explore your concept universe",
-    href: "/dashboard/knowledge-graph",
-    color: "#F0C020",
-  },
-  {
-    icon: Zap,
-    label: "Quick Quiz",
-    description: "Test your knowledge now",
-    href: "/dashboard/quizzes",
-    color: "#D02020",
-  },
+  { icon: FileText,  label: "Upload Document",  description: "Add PDFs, DOCX or TXT files",      href: "/dashboard/documents"      },
+  { icon: MessageSquare, label: "Start AI Chat", description: "Chat with your knowledge base",   href: "/dashboard/chat"           },
+  { icon: GitBranch, label: "Knowledge Graph",  description: "Explore your concept universe",     href: "/dashboard/knowledge-graph"},
+  { icon: Zap,       label: "Quick Quiz",        description: "Test your knowledge now",          href: "/dashboard/quizzes"        },
 ];
 
 export function DashboardHome({ userName }: DashboardHomeProps) {
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="max-w-6xl mx-auto space-y-8">
       {/* Greeting */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="border-b-4 border-[#121212] pb-6"
+        className="pb-6"
+        style={{ borderBottom: B.border4 }}
       >
-        <h1
-          className="font-display text-4xl sm:text-5xl text-[#121212]"
-          style={{ lineHeight: "0.92" }}
-        >
+        <h1 style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 900, textTransform: "uppercase" as const, fontSize: "clamp(2rem, 5vw, 3.5rem)", lineHeight: 0.92, color: B.BLACK, letterSpacing: "-0.02em" }}>
           Good Day,
           <br />
-          <span className="text-[#D02020]">{userName}.</span>
+          <span style={{ color: B.RED }}>{userName}.</span>
         </h1>
-        <p className="text-[#888] font-medium mt-3">
+        <p style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 500, fontSize: "0.95rem", color: "#888", marginTop: 12 }}>
           Here&apos;s what&apos;s happening with your knowledge base today.
         </p>
       </motion.div>
 
-      {/* Stats Row — Bauhaus bordered grid */}
+      {/* Stats row */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
-        className="grid grid-cols-2 lg:grid-cols-4 gap-0 border-l-4 border-t-4 border-[#121212]"
+        className="grid grid-cols-2 lg:grid-cols-4"
+        style={{ borderLeft: B.border4, borderTop: B.border4 }}
       >
-        {stats.map((stat) => {
+        {stats.map((stat, i) => {
           const Icon = stat.icon;
+          const color = ICON_COLORS[i];
+          const iconTextColor = color === B.YELLOW ? B.BLACK : "white";
           return (
             <Link key={stat.label} href={stat.href}>
-              <div className="bg-white border-r-4 border-b-4 border-[#121212] p-6 cursor-pointer group hover:-translate-y-1 hover:translate-x-[-1px] transition-transform duration-200">
+              <div
+                className="cursor-pointer"
+                style={{ background: "white", borderRight: B.border4, borderBottom: B.border4, padding: "1.5rem", transition: "transform 0.2s ease-out" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "translate(-2px, -2px)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "translate(0, 0)"; }}
+              >
                 <div className="flex items-center justify-between mb-4">
-                  <div
-                    className="w-10 h-10 border-2 border-[#121212] flex items-center justify-center group-hover:shadow-hard transition-all duration-200"
-                    style={{ background: stat.color }}
-                  >
-                    <Icon className="w-5 h-5" style={{ color: stat.color === "#F0C020" ? "#121212" : "white" }} />
+                  <div style={{ width: 40, height: 40, background: color, border: B.border2, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Icon size={18} color={iconTextColor} />
                   </div>
-                  <TrendingUp className="w-4 h-4 text-[#ccc] group-hover:text-[#121212] transition-colors" />
+                  <TrendingUp size={14} color="#ccc" />
                 </div>
-                <div className="text-4xl font-black text-[#121212]">{stat.value}</div>
-                <div className="font-label text-[#888] mt-1">{stat.label}</div>
+                <div style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 900, fontSize: "2.5rem", color: B.BLACK }}>{stat.value}</div>
+                <div style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.08em", fontSize: "0.68rem", color: "#888", marginTop: 4 }}>{stat.label}</div>
               </div>
             </Link>
           );
         })}
       </motion.div>
 
-      {/* Learning Streak */}
+      {/* Learning streak */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
-        className="bg-[#1040C0] border-4 border-[#121212] shadow-hard p-6"
+        style={{ background: B.BLUE, border: B.border4, boxShadow: "4px 4px 0px 0px #121212", padding: "1.5rem" }}
       >
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 bg-[#F0C020] border-2 border-[#121212] flex items-center justify-center">
-            <Flame className="w-4 h-4 text-[#121212]" />
+          <div style={{ width: 32, height: 32, background: B.YELLOW, border: B.border2, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Flame size={16} color={B.BLACK} />
           </div>
-          <h2 className="font-black uppercase text-white tracking-wider">Learning Streak</h2>
+          <h2 style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 900, textTransform: "uppercase" as const, letterSpacing: "0.08em", fontSize: "0.8rem", color: "white" }}>Learning Streak</h2>
         </div>
         <div className="flex items-center gap-6">
-          <div className="text-6xl font-black text-white">0</div>
+          <div style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 900, fontSize: "4rem", color: "white", lineHeight: 1 }}>0</div>
           <div>
-            <div className="font-black text-white uppercase tracking-wider">Day Streak</div>
-            <div className="text-sm text-white opacity-70 font-medium mt-1">Upload a document to start your streak</div>
+            <div style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 900, textTransform: "uppercase" as const, letterSpacing: "0.08em", fontSize: "0.8rem", color: "white" }}>Day Streak</div>
+            <div style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 500, fontSize: "0.82rem", color: "rgba(255,255,255,0.65)", marginTop: 4 }}>Upload a document to start your streak</div>
           </div>
         </div>
       </motion.div>
 
-      {/* Quick Actions */}
+      {/* Quick actions */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3, ease: "easeOut" }}
       >
-        <h2 className="font-black uppercase text-[#121212] tracking-wider mb-4 border-b-4 border-[#121212] pb-3">Quick Actions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 border-l-4 border-t-4 border-[#121212]">
-          {quickActions.map((action) => {
+        <h2
+          className="pb-3 mb-4"
+          style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 900, textTransform: "uppercase" as const, letterSpacing: "0.08em", fontSize: "0.8rem", color: B.BLACK, borderBottom: B.border4 }}
+        >
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" style={{ borderLeft: B.border4, borderTop: B.border4 }}>
+          {quickActions.map((action, i) => {
             const Icon = action.icon;
+            const color = ICON_COLORS[i];
+            const iconTextColor = color === B.YELLOW ? B.BLACK : "white";
             return (
               <Link key={action.label} href={action.href}>
-                <div className="bg-white border-r-4 border-b-4 border-[#121212] p-6 cursor-pointer group hover:-translate-y-1 transition-transform duration-200">
-                  <div
-                    className="w-10 h-10 border-2 border-[#121212] flex items-center justify-center mb-4 group-hover:shadow-hard transition-all duration-200"
-                    style={{ background: action.color }}
-                  >
-                    <Icon className="w-5 h-5" style={{ color: action.color === "#F0C020" ? "#121212" : "white" }} />
+                <div
+                  className="cursor-pointer"
+                  style={{ background: "white", borderRight: B.border4, borderBottom: B.border4, padding: "1.5rem", transition: "transform 0.2s ease-out" }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-3px)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"; }}
+                >
+                  <div style={{ width: 40, height: 40, background: color, border: B.border2, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+                    <Icon size={18} color={iconTextColor} />
                   </div>
-                  <div className="font-black text-[#121212] text-sm uppercase tracking-wider">{action.label}</div>
-                  <div className="text-xs text-[#888] font-medium mt-1">{action.description}</div>
+                  <div style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 900, textTransform: "uppercase" as const, letterSpacing: "0.06em", fontSize: "0.75rem", color: B.BLACK, marginBottom: 4 }}>{action.label}</div>
+                  <div style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 500, fontSize: "0.78rem", color: "#888" }}>{action.description}</div>
                 </div>
               </Link>
             );
@@ -151,33 +142,46 @@ export function DashboardHome({ userName }: DashboardHomeProps) {
         </div>
       </motion.div>
 
-      {/* Empty State CTA */}
+      {/* Empty state CTA */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.4, ease: "easeOut" }}
-        className="bg-[#F0C020] border-4 border-[#121212] shadow-hard-lg p-10 text-center relative overflow-hidden"
+        className="relative overflow-hidden text-center"
+        style={{ background: B.YELLOW, border: B.border4, boxShadow: "8px 8px 0px 0px #121212", padding: "3rem 2rem" }}
       >
-        {/* Background dot grid */}
-        <div className="absolute inset-0 bg-dot-grid opacity-10" />
-        {/* Decorative shapes */}
-        <div className="absolute -right-8 -top-8 w-24 h-24 bg-[#D02020] border-4 border-[#121212] opacity-30" />
-        <div className="absolute -left-8 -bottom-8 w-20 h-20 rounded-full bg-[#1040C0] border-4 border-[#121212] opacity-30" />
+        <div className="absolute inset-0 bg-dot-grid opacity-10 pointer-events-none" />
+        <div style={{ position: "absolute", right: -24, top: -24, width: 80, height: 80, background: B.RED, border: B.border4, opacity: 0.3 }} />
+        <div style={{ position: "absolute", left: -24, bottom: -24, width: 64, height: 64, borderRadius: "50%", background: B.BLUE, border: B.border4, opacity: 0.3 }} />
 
         <div className="relative z-10">
-          <div className="w-16 h-16 bg-[#121212] border-4 border-[#121212] flex items-center justify-center mx-auto mb-6">
-            <FileText className="w-8 h-8 text-[#F0C020]" />
+          <div style={{ width: 64, height: 64, background: B.BLACK, border: B.border4, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
+            <FileText size={28} color={B.YELLOW} />
           </div>
-          <h3 className="font-display text-3xl sm:text-4xl text-[#121212] mb-3" style={{ lineHeight: "0.92" }}>
+          <h3 style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 900, textTransform: "uppercase" as const, fontSize: "clamp(1.6rem, 4vw, 2.8rem)", color: B.BLACK, lineHeight: 0.92, letterSpacing: "-0.02em", marginBottom: 16 }}>
             Build Your
             <br />
             Second Brain.
           </h3>
-          <p className="text-[#121212] font-medium mb-8 max-w-md mx-auto">
+          <p style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 500, fontSize: "0.95rem", color: B.BLACK, lineHeight: 1.6, marginBottom: 32, maxWidth: 480, margin: "0 auto 32px" }}>
             Upload your first document and watch as Kortex AI extracts knowledge, builds your graph, and generates learning materials.
           </p>
           <Link href="/dashboard/documents">
-            <button className="btn-primary text-sm px-8 py-4">
+            <button
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px]"
+              style={{
+                fontFamily: "'Outfit', system-ui, sans-serif",
+                fontWeight: 900,
+                textTransform: "uppercase" as const,
+                letterSpacing: "0.08em",
+                fontSize: "0.82rem",
+                background: B.RED,
+                color: "white",
+                border: B.border2,
+                boxShadow: "4px 4px 0px 0px #121212",
+                cursor: "pointer",
+              }}
+            >
               Upload Your First Document
             </button>
           </Link>

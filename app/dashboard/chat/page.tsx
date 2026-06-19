@@ -7,6 +7,7 @@ import {
   Check, ChevronDown, Mic, MicOff, Sparkles,
   BookOpen, PenTool, BarChart3, Search,
 } from "lucide-react";
+import { B } from "@/lib/bauhaus";
 
 interface Message {
   id: string;
@@ -44,10 +45,11 @@ const DEMO_MESSAGES: Message[] = [
 function CitationBadge({ citation }: { citation: Citation }) {
   const [open, setOpen] = useState(false);
   return (
-    <span className="relative inline-block">
+    <span className="relative inline-block mx-0.5">
       <button
         onClick={() => setOpen(!open)}
-        className="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded bg-[rgba(124,58,237,0.25)] text-[#a78bfa] hover:bg-[rgba(124,58,237,0.4)] transition-colors mx-0.5 border border-[rgba(124,58,237,0.3)]"
+        className="inline-flex items-center text-[10px] font-black px-1.5 py-0.5 bg-[#F0C020] text-[#121212] border border-[#121212] hover:bg-[#d4a818] cursor-pointer"
+        style={{ fontFamily: "'Outfit', sans-serif" }}
       >
         [{citation.index}]
       </button>
@@ -57,13 +59,13 @@ function CitationBadge({ citation }: { citation: Citation }) {
             initial={{ opacity: 0, y: 8, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.95 }}
-            className="absolute bottom-full left-0 mb-2 w-64 glass-bright rounded-xl p-3 z-50 text-left shadow-xl"
+            className="absolute bottom-full left-0 mb-2 w-64 bg-white border-2 border-[#121212] p-3 z-50 text-left shadow-[4px_4px_0px_0px_#121212]"
           >
-            <p className="text-xs font-semibold text-[#a78bfa] mb-1">
+            <p className="text-xs font-black text-[#1040C0] uppercase tracking-wider mb-1" style={B.labelStyle}>
               {citation.documentTitle}
               {citation.pageNumber && ` · p.${citation.pageNumber}`}
             </p>
-            <p className="text-xs text-[#a8b2d8] line-clamp-3">{citation.excerpt}</p>
+            <p className="text-xs text-[#121212] font-semibold leading-relaxed">{citation.excerpt}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -93,7 +95,7 @@ function MessageBubble({ msg }: { msg: Message }) {
       // Convert markdown bold
       const bold = part.split(/(\*\*[^*]+\*\*)/g).map((p, j) => {
         if (p.startsWith("**") && p.endsWith("**")) {
-          return <strong key={j} className="text-white font-semibold">{p.slice(2, -2)}</strong>;
+          return <strong key={j} className="text-[#121212] font-black">{p.slice(2, -2)}</strong>;
         }
         return <span key={j}>{p}</span>;
       });
@@ -105,14 +107,14 @@ function MessageBubble({ msg }: { msg: Message }) {
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`flex gap-3 ${isAI ? "" : "flex-row-reverse"}`}
+      className={`flex gap-4 ${isAI ? "" : "flex-row-reverse"}`}
     >
-      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isAI ? "bg-gradient-to-br from-[#7c3aed] to-[#5b21b6]" : "bg-[rgba(124,58,237,0.2)] border border-[rgba(124,58,237,0.3)]"}`}>
-        {isAI ? <Bot className="w-4 h-4 text-white" /> : <User className="w-4 h-4 text-[#a78bfa]" />}
+      <div className={`w-9 h-9 border-2 border-[#121212] flex items-center justify-center shrink-0 shadow-[2px_2px_0px_0px_#121212] ${isAI ? "bg-[#D02020] text-white" : "bg-[#1040C0] text-white"}`}>
+        {isAI ? <Bot className="w-5 h-5" /> : <User className="w-5 h-5" />}
       </div>
       <div className={`max-w-[80%] group ${isAI ? "" : "items-end flex flex-col"}`}>
-        <div className={`relative rounded-2xl px-4 py-3 text-sm leading-relaxed ${isAI ? "glass text-[#c8d0e8]" : "bg-gradient-to-br from-[#7c3aed] to-[#5b21b6] text-white"}`}>
-          <div className="whitespace-pre-wrap">
+        <div className={`relative border-2 border-[#121212] px-5 py-4 text-sm leading-relaxed shadow-[4px_4px_0px_0px_#121212] ${isAI ? "bg-white text-[#121212]" : "bg-[#F0C020] text-[#121212]"}`}>
+          <div className="whitespace-pre-wrap font-semibold" style={{ fontFamily: "'Outfit', sans-serif" }}>
             {msg.content.split("\n").map((line, i) => (
               <div key={i}>{renderContent(line)}</div>
             ))}
@@ -120,25 +122,25 @@ function MessageBubble({ msg }: { msg: Message }) {
           {isAI && (
             <button
               onClick={copy}
-              className="absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 text-[#64748b] hover:text-white hover:bg-[rgba(124,58,237,0.2)] transition-all"
+              className="absolute top-2 right-2 p-1 border border-transparent hover:border-[#121212] hover:bg-gray-100 opacity-0 group-hover:opacity-100 text-gray-500 hover:text-[#121212] transition-all cursor-pointer"
               title="Copy"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-[#10b981]" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
             </button>
           )}
         </div>
         {isAI && msg.citations && msg.citations.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="mt-3 flex flex-wrap gap-1.5">
             {msg.citations.map((c) => (
-              <span key={c.index} className="text-[10px] flex items-center gap-1 px-2 py-1 rounded-lg bg-[rgba(124,58,237,0.1)] border border-[rgba(124,58,237,0.2)] text-[#64748b]">
-                <FileText className="w-3 h-3 text-[#7c3aed]" />
+              <span key={c.index} className="text-[10px] font-black flex items-center gap-1.5 px-2.5 py-1 bg-white border border-[#121212] text-[#121212]" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                <FileText className="w-3.5 h-3.5 text-[#1040C0]" />
                 {c.documentTitle}
                 {c.pageNumber && ` · p.${c.pageNumber}`}
               </span>
             ))}
           </div>
         )}
-        <p className="text-[10px] text-[#4a5568] mt-1 px-1">
+        <p className="text-[10px] font-bold text-gray-400 uppercase mt-2 tracking-wider px-1" style={B.labelStyle}>
           {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
         </p>
       </div>
@@ -222,18 +224,19 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="h-full flex flex-col max-w-5xl mx-auto">
-      {/* Agent Selector */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 mb-4">
+    <div className="h-full flex flex-col max-w-5xl mx-auto pb-6">
+      {/* Agent Selector & context stats */}
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-wrap items-center gap-3 mb-6">
         <div className="relative">
           <button
             id="agent-selector"
             onClick={() => setShowAgents(!showAgents)}
-            className="flex items-center gap-2 px-4 py-2 glass rounded-xl text-sm text-white hover:border-[rgba(124,58,237,0.5)] transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg.white bg-white border-2 border-[#121212] text-sm text-[#121212] font-bold uppercase tracking-wider shadow-[3px_3px_0px_0px_#121212] cursor-pointer hover:bg-gray-50"
+            style={{ fontFamily: "'Outfit', sans-serif" }}
           >
-            <activeAgent.icon className="w-4 h-4 text-[#7c3aed]" />
+            <activeAgent.icon className="w-4 h-4 text-[#1040C0]" />
             {activeAgent.label}
-            <ChevronDown className={`w-3.5 h-3.5 text-[#64748b] transition-transform ${showAgents ? "rotate-180" : ""}`} />
+            <ChevronDown className={`w-4 h-4 text-[#121212] transition-transform ${showAgents ? "rotate-180" : ""}`} />
           </button>
           <AnimatePresence>
             {showAgents && (
@@ -241,20 +244,21 @@ export default function ChatPage() {
                 initial={{ opacity: 0, y: 8, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                className="absolute top-full left-0 mt-2 w-56 glass-bright rounded-2xl p-2 z-20 shadow-xl"
+                className="absolute top-full left-0 mt-2 w-64 bg-white border-2 border-[#121212] p-2 z-20 shadow-[6px_6px_0px_0px_#121212]"
               >
                 {AGENT_MODES.map((agent) => {
                   const Icon = agent.icon;
+                  const isSelected = agentMode === agent.id;
                   return (
                     <button
                       key={agent.id}
                       onClick={() => { setAgentMode(agent.id); setShowAgents(false); }}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${agentMode === agent.id ? "bg-[rgba(124,58,237,0.25)] text-white" : "text-[#a8b2d8] hover:bg-[rgba(124,58,237,0.1)] hover:text-white"}`}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-left border ${isSelected ? "bg-[#1040C0] text-white border-[#121212]" : "text-[#121212] border-transparent hover:bg-gray-100"} cursor-pointer`}
                     >
-                      <Icon className="w-4 h-4 text-[#7c3aed]" />
+                      <Icon className={`w-5 h-5 ${isSelected ? "text-white" : "text-[#1040C0]"}`} />
                       <div>
-                        <div className="text-sm font-medium">{agent.label}</div>
-                        <div className="text-xs text-[#64748b]">{agent.description}</div>
+                        <div className="text-sm font-black uppercase tracking-wide" style={{ fontFamily: "'Outfit', sans-serif" }}>{agent.label}</div>
+                        <div className={`text-xs ${isSelected ? "text-blue-100" : "text-gray-500"} font-bold`} style={{ fontFamily: "'Outfit', sans-serif" }}>{agent.description}</div>
                       </div>
                     </button>
                   );
@@ -263,31 +267,31 @@ export default function ChatPage() {
             )}
           </AnimatePresence>
         </div>
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[rgba(16,185,129,0.1)] border border-[rgba(16,185,129,0.2)]">
-          <Sparkles className="w-3.5 h-3.5 text-[#10b981]" />
-          <span className="text-xs text-[#10b981] font-medium">Gemini 2.5 Flash</span>
+        <div className="flex items-center gap-1.5 px-3 py-2 bg-[#F0C020] border-2 border-[#121212] text-[#121212] font-black uppercase text-xs tracking-wider shadow-[2px_2px_0px_0px_#121212]" style={{ fontFamily: "'Outfit', sans-serif" }}>
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Gemini 2.5 Flash</span>
         </div>
-        <span className="text-xs text-[#64748b]">3 documents in context</span>
+        <span className="text-xs font-black uppercase tracking-wider text-gray-500" style={B.labelStyle}>3 documents in context</span>
       </motion.div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto space-y-6 pr-2 pb-4" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(124,58,237,0.3) transparent" }}>
+      {/* Messages Scroll Area */}
+      <div className="flex-1 overflow-y-auto space-y-6 pr-2 pb-6 border-2 border-[#121212] bg-white p-6 shadow-[6px_6px_0px_0px_#121212]" style={{ scrollbarWidth: "thin", scrollbarColor: "#121212 #ffffff" }}>
         {messages.map((msg) => (
           <MessageBubble key={msg.id} msg={msg} />
         ))}
         {loading && (
-          <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#5b21b6] flex items-center justify-center shrink-0">
-              <Bot className="w-4 h-4 text-white" />
+          <div className="flex gap-4">
+            <div className="w-9 h-9 border-2 border-[#121212] bg-[#D02020] text-white flex items-center justify-center shrink-0 shadow-[2px_2px_0px_0px_#121212]">
+              <Bot className="w-5 h-5" />
             </div>
-            <div className="glass px-4 py-3 rounded-2xl">
-              <div className="flex gap-1">
+            <div className="bg-white border-2 border-[#121212] px-5 py-3 shadow-[4px_4px_0px_0px_#121212]">
+              <div className="flex gap-1.5 py-1">
                 {[0, 1, 2].map((i) => (
                   <motion.div
                     key={i}
                     animate={{ y: [0, -6, 0] }}
                     transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.15 }}
-                    className="w-1.5 h-1.5 rounded-full bg-[#7c3aed]"
+                    className="w-2 h-2 bg-[#121212]"
                   />
                 ))}
               </div>
@@ -297,8 +301,8 @@ export default function ChatPage() {
         <div ref={endRef} />
       </div>
 
-      {/* Input */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-bright rounded-2xl p-3 mt-4">
+      {/* Message Input Box */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white border-2 border-[#121212] p-4 mt-6 shadow-[6px_6px_0px_0px_#121212]">
         <textarea
           ref={inputRef}
           id="chat-input"
@@ -307,32 +311,37 @@ export default function ChatPage() {
           onKeyDown={handleKeyDown}
           placeholder={`Ask ${activeAgent.label} anything about your documents...`}
           rows={2}
-          className="w-full bg-transparent text-white placeholder-[#4a5568] text-sm resize-none focus:outline-none"
-          style={{ maxHeight: "120px" }}
+          className="w-full bg-transparent text-[#121212] placeholder-gray-400 text-sm font-semibold resize-none focus:outline-none"
+          style={{ maxHeight: "120px", fontFamily: "'Outfit', sans-serif" }}
         />
-        <div className="flex items-center justify-between mt-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-3 border-t-2 border-dashed border-[#121212] pt-3">
           <div className="flex items-center gap-2">
             <button
               id="voice-input-button"
               onClick={toggleVoice}
-              className={`p-2 rounded-xl transition-all ${listening ? "bg-[rgba(239,68,68,0.2)] text-[#ef4444] border border-[rgba(239,68,68,0.3)]" : "text-[#64748b] hover:text-[#a78bfa] hover:bg-[rgba(124,58,237,0.1)]"}`}
+              className={`p-2 border-2 border-[#121212] transition-all cursor-pointer shadow-[2px_2px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] ${
+                listening
+                  ? "bg-[#D02020] text-white"
+                  : "bg-white text-[#121212] hover:bg-gray-100"
+              }`}
               title="Voice input (Web Speech API)"
             >
               {listening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             </button>
-            <span className="text-xs text-[#4a5568]">Enter to send · Shift+Enter for new line</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-gray-500" style={B.labelStyle}>
+              Enter to send · Shift+Enter for new line
+            </span>
           </div>
-          <motion.button
+          <button
             id="send-message-button"
             onClick={sendMessage}
             disabled={!input.trim() || loading}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#7c3aed] to-[#5b21b6] text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#D02020] text-white border-2 border-[#121212] font-black uppercase tracking-wider text-xs shadow-[3px_3px_0px_0px_#121212] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_0px_#121212]"
+            style={{ fontFamily: "'Outfit', sans-serif" }}
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             Send
-          </motion.button>
+          </button>
         </div>
       </motion.div>
     </div>
