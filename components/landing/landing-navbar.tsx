@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { B, btnPrimaryStyle } from "@/lib/bauhaus";
 
 export function LandingNavbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -15,91 +16,116 @@ export function LandingNavbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
-        scrolled
-          ? "bg-[#F0F0F0] border-b-4 border-[#121212]"
-          : "bg-transparent"
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-200"
+      style={{
+        backgroundColor: scrolled ? B.CANVAS : "transparent",
+        borderBottom: scrolled ? `4px solid ${B.BLACK}` : "none",
+      }}
     >
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
-        {/* Logo — Three Bauhaus geometric shapes */}
+      <div className="max-w-7xl mx-auto px-8 flex items-center justify-between h-16">
+        {/* ── Logo ── */}
         <Link href="/" className="flex items-center gap-3" id="nav-logo">
           <div className="flex items-center gap-1">
-            <div className="w-4 h-4 rounded-full bg-[#D02020] border-2 border-[#121212]" />
-            <div className="w-4 h-4 bg-[#1040C0] border-2 border-[#121212]" />
-            <div
-              className="w-4 h-4 bg-[#F0C020] border-2 border-[#121212]"
-              style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }}
-            />
+            <div style={{ width: 14, height: 14, borderRadius: "50%", background: B.RED, border: `2px solid ${B.BLACK}` }} />
+            <div style={{ width: 14, height: 14, background: B.BLUE, border: `2px solid ${B.BLACK}` }} />
+            <div style={{ width: 14, height: 14, background: B.YELLOW, border: `2px solid ${B.BLACK}`, clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }} />
           </div>
-          <span
-            className="text-[#121212] text-xl tracking-tight"
-            style={{ fontWeight: 900, textTransform: "uppercase" }}
-          >
-            Kortex AI
-          </span>
+          <span style={{ ...B.bodyBoldStyle, fontSize: "1.1rem", color: B.BLACK }}>Kortex AI</span>
         </Link>
 
-        {/* Nav Links — Desktop */}
-        <div className="hidden md:flex items-center gap-0">
-          {["Features", "Pricing", "Docs"].map((item) => (
+        {/* ── Nav Links Desktop ── */}
+        <div className="hidden md:flex items-center">
+          {[
+            { label: "Features", href: "#features" },
+            { label: "Pricing",  href: "#pricing" },
+            { label: "Docs",     href: "/docs" },
+          ].map((item, i) => (
             <Link
-              key={item}
-              href={item === "Features" ? "#features" : item === "Pricing" ? "#pricing" : "/docs"}
-              className="px-5 py-4 font-bold uppercase tracking-wider text-sm text-[#121212] hover:bg-[#121212] hover:text-[#F0F0F0] transition-colors duration-200 border-l-2 border-[#121212] first:border-l-0"
+              key={item.label}
+              href={item.href}
+              className="px-5 py-5 transition-colors duration-150"
+              style={{
+                ...B.bodyBoldStyle,
+                color: B.BLACK,
+                borderLeft: i > 0 ? `2px solid ${B.BLACK}` : "none",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = B.BLACK; (e.currentTarget as HTMLElement).style.color = B.CANVAS; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = "transparent"; (e.currentTarget as HTMLElement).style.color = B.BLACK; }}
             >
-              {item}
+              {item.label}
             </Link>
           ))}
         </div>
 
-        {/* Auth CTA */}
+        {/* ── Auth CTA ── */}
         <div className="hidden md:flex items-center gap-3">
           <Link
             href="/sign-in"
             id="nav-sign-in"
-            className="font-bold uppercase tracking-wider text-sm text-[#121212] hover:text-[#D02020] transition-colors px-4 py-2"
+            style={{ ...B.bodyBoldStyle, color: B.BLACK }}
+            className="px-4 py-2 transition-colors hover:text-[#D02020]"
           >
             Sign In
           </Link>
           <Link href="/sign-up" id="nav-get-started">
-            <button className="btn-primary text-sm px-6 py-3">
+            <button
+              className="inline-flex items-center justify-center px-6 py-3 transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px]"
+              style={{
+                ...B.bodyBoldStyle,
+                background: B.RED,
+                color: "#fff",
+                border: `2px solid ${B.BLACK}`,
+                ...btnPrimaryStyle,
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#b01a1a")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = B.RED)}
+            >
               Get Started
             </button>
           </Link>
         </div>
 
-        {/* Mobile Menu Toggle */}
+        {/* ── Mobile Toggle ── */}
         <button
-          className="md:hidden flex flex-col gap-1.5 p-2 border-2 border-[#121212]"
+          className="md:hidden p-2 transition-colors"
+          style={{ border: `2px solid ${B.BLACK}`, background: "transparent" }}
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
         >
-          <span className={`block w-5 h-0.5 bg-[#121212] transition-transform duration-200 ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
-          <span className={`block w-5 h-0.5 bg-[#121212] transition-opacity duration-200 ${menuOpen ? "opacity-0" : ""}`} />
-          <span className={`block w-5 h-0.5 bg-[#121212] transition-transform duration-200 ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
+          <div style={{ width: 20, height: 2, background: B.BLACK, marginBottom: 5, transform: menuOpen ? "rotate(45deg) translateY(7px)" : "none", transition: "all 0.2s" }} />
+          <div style={{ width: 20, height: 2, background: B.BLACK, opacity: menuOpen ? 0 : 1, transition: "all 0.2s" }} />
+          <div style={{ width: 20, height: 2, background: B.BLACK, marginTop: 5, transform: menuOpen ? "rotate(-45deg) translateY(-7px)" : "none", transition: "all 0.2s" }} />
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* ── Mobile Menu ── */}
       {menuOpen && (
-        <div className="md:hidden bg-[#F0F0F0] border-b-4 border-[#121212]">
-          <div className="flex flex-col border-t-2 border-[#121212]">
-            {["Features", "Pricing", "Sign In"].map((item) => (
-              <Link
-                key={item}
-                href={item === "Features" ? "#features" : item === "Pricing" ? "#pricing" : "/sign-in"}
-                className="px-6 py-4 font-bold uppercase tracking-wider text-sm text-[#121212] hover:bg-[#121212] hover:text-[#F0F0F0] border-b-2 border-[#121212] transition-colors"
-                onClick={() => setMenuOpen(false)}
+        <div style={{ background: B.CANVAS, borderBottom: `4px solid ${B.BLACK}`, borderTop: `2px solid ${B.BLACK}` }}>
+          {[
+            { label: "Features", href: "#features" },
+            { label: "Pricing",  href: "#pricing" },
+            { label: "Sign In",  href: "/sign-in" },
+          ].map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="block px-8 py-4 transition-colors"
+              style={{ ...B.bodyBoldStyle, color: B.BLACK, borderBottom: `2px solid ${B.BLACK}` }}
+              onClick={() => setMenuOpen(false)}
+            >
+              {item.label}
+            </Link>
+          ))}
+          <div className="p-6">
+            <Link href="/sign-up" onClick={() => setMenuOpen(false)}>
+              <button
+                className="w-full py-4 inline-flex items-center justify-center transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px]"
+                style={{ ...B.bodyBoldStyle, background: B.RED, color: "#fff", border: `2px solid ${B.BLACK}`, ...btnPrimaryStyle, cursor: "pointer" }}
               >
-                {item}
-              </Link>
-            ))}
-            <div className="p-4">
-              <Link href="/sign-up" onClick={() => setMenuOpen(false)}>
-                <button className="btn-primary w-full text-sm">Get Started Free</button>
-              </Link>
-            </div>
+                Get Started Free
+              </button>
+            </Link>
           </div>
         </div>
       )}
