@@ -63,6 +63,11 @@ const documentWorker = new Worker<DocumentIngestionPayload>(
       throw err;
     }
 
+    // Clean up any existing versions and chunks from previous attempts
+    await db.documentVersion.deleteMany({ where: { documentId } });
+    await db.documentChunk.deleteMany({ where: { documentId } });
+    await vectorStore.deleteByDocument(documentId).catch(() => {});
+
     // Step 3: Store as DocumentVersion
     await db.documentVersion.create({
       data: {

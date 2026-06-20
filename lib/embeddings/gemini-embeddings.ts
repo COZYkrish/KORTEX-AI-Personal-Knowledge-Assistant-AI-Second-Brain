@@ -17,15 +17,18 @@ if (!process.env.GEMINI_API_KEY) {
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// text-embedding-004 is free, high-quality, and outputs 768-dim vectors
-const EMBEDDING_MODEL = "text-embedding-004";
+// gemini-embedding-001 is the active, stable embedding model
+const EMBEDDING_MODEL = "gemini-embedding-001";
 
 export class GeminiEmbeddingProvider implements EmbeddingProvider {
   readonly dimensions = 768;
 
   async embed(text: string): Promise<number[]> {
     const model = genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
-    const result = await model.embedContent(text.slice(0, 2048));
+    const result = await model.embedContent({
+      content: { role: "user", parts: [{ text: text.slice(0, 2048) }] },
+      outputDimensionality: 768,
+    } as any);
     return result.embedding.values;
   }
 
@@ -41,7 +44,10 @@ export class GeminiEmbeddingProvider implements EmbeddingProvider {
       // Gemini doesn't have a native batch embed endpoint — run concurrently
       const embeddings = await Promise.all(
         batch.map(async (text) => {
-          const result = await model.embedContent(text.slice(0, 2048));
+          const result = await model.embedContent({
+            content: { role: "user", parts: [{ text: text.slice(0, 2048) }] },
+            outputDimensionality: 768,
+          } as any);
           return result.embedding.values;
         })
       );

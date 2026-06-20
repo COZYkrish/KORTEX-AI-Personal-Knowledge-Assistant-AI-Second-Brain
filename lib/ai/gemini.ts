@@ -33,7 +33,8 @@ export class GeminiProvider implements AIProvider {
       generationConfig: {
         temperature: 0.3,
         topP: 0.9,
-        maxOutputTokens: 4096,
+        maxOutputTokens: 8192,
+        responseMimeType: "application/json",
       },
     });
   }
@@ -44,9 +45,7 @@ export class GeminiProvider implements AIProvider {
   }
 
   async generateJSON<T>(prompt: string): Promise<T> {
-    const result = await this.fastModel.generateContent(
-      `${prompt}\n\nRespond ONLY with valid JSON. No markdown, no explanation.`
-    );
+    const result = await this.fastModel.generateContent(prompt);
     const text = result.response.text().trim();
     // Strip any accidental markdown code fences
     const cleaned = text.replace(/^```(?:json)?\n?/m, "").replace(/\n?```$/m, "");
