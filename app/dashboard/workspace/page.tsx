@@ -47,21 +47,29 @@ export default function WorkspacePage() {
     setActiveAction(actionId);
     setAiOutput(null);
 
-    // Simulate AI response
-    await new Promise((r) => setTimeout(r, 1800));
-
-    const outputs: Record<string, string> = {
-      improve: "**Improved Version:**\n\nYour text has been refined for clarity and concision. The key ideas are preserved while the prose flows more naturally. Technical terms are used precisely, and the argument structure is strengthened with better transitions.",
-      summarize: "**Summary:**\n\n• This workspace enables AI-powered writing and research\n• Users can leverage multiple AI actions to transform their content\n• The tool supports brainstorming, note-taking, and knowledge creation\n• Integration with your document knowledge base provides contextual assistance",
-      expand: "**Expanded Version:**\n\nThis AI Workspace represents a paradigm shift in how knowledge workers interact with their documents and ideas. Rather than treating writing as a solitary endeavor, it transforms the process into a collaborative dialogue between human creativity and artificial intelligence...",
-      bullets: "**Key Points:**\n\n• AI Workspace provides a distraction-free writing environment\n• Multiple AI transformation modes available (improve, expand, summarize)\n• Direct integration with your knowledge base for contextual assistance\n• Templates available for common document types\n• Export and share capabilities built in",
-      quiz: "**Quiz Generated:**\n\n**Q1:** What is the primary purpose of the AI Workspace?\n*A: To provide an AI-enhanced writing and thinking environment*\n\n**Q2:** Which AI actions are available in the workspace?\n*A: Improve, Summarize, Expand, Bullets, Quiz, and Chat*\n\n**Q3:** How does the workspace connect to your knowledge base?\n*A: Through integrated RAG (Retrieval-Augmented Generation)*",
-      chat: "**AI Analysis:**\n\nBased on your current content, I can see you're working on an introduction to the workspace. Your writing establishes context well. I'd suggest:\n\n1. Adding specific use cases to make it more concrete\n2. Including a call-to-action for the reader\n3. Perhaps referencing your existing documents for more depth\n\nWould you like me to expand on any of these suggestions?",
-    };
-
-    setAiOutput(outputs[actionId] ?? "AI response generated successfully.");
-    setLoading(false);
-    setActiveAction(null);
+    try {
+      const res = await fetch("/api/workspace/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content,
+          action: actionId,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAiOutput(data.response);
+      } else {
+        const errData = await res.json();
+        setAiOutput(`Error: ${errData.error || "Failed to generate AI response"}`);
+      }
+    } catch (err) {
+      console.error("Error executing workspace AI action:", err);
+      setAiOutput("An unexpected error occurred while communicating with the AI brain.");
+    } finally {
+      setLoading(false);
+      setActiveAction(null);
+    }
   };
 
   const copyAiOutput = () => {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/db/session";
 import { db } from "@/lib/db/client";
+import { enqueueGraphExtraction } from "@/lib/queue";
 
 export async function GET() {
   try {
@@ -60,6 +61,38 @@ export async function GET() {
     return NextResponse.json({ nodes, edges });
   } catch (err) {
     console.error("[KnowledgeGraphAPI GET] Error:", err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
+export async function POST() {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Find documents in the workspace that are ready
+    const documents = await db.document.findMany({
+      where: { workspaceId: session.workspace.id, status: "READY" },
+      include: { versions: { take: 1, orderBy: { versionNumber: "desc" } } },
+    });
+
+    // Enqueue graph extraction for each document
+    for (const doc of documents) {
+      const extractedText = doc.versions[0]?.extractedText;
+      if (extractedText) {
+        await enqueueGraphExtraction({
+          documentId: doc.id,
+          workspaceId: session.workspace.id,
+          extractedText: extractedText.slice(0, 15000),
+        });
+      }
+    }
+
+    return NextResponse.json({ success: true, count: documents.length });
+  } catch (err) {
+    console.error("[KnowledgeGraphAPI POST] Error:", err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -70,11 +70,10 @@ export default function KnowledgeGraphPage() {
   const triggerAIExpand = async () => {
     setExpanding(true);
     try {
-      // Simulate quick trigger or trigger flashcard/analytics sync
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await fetch("/api/knowledge-graph", { method: "POST" });
       await fetchGraph();
     } catch (err) {
-      console.error(err);
+      console.error("Error triggering AI graph sync:", err);
     } finally {
       setExpanding(false);
     }
