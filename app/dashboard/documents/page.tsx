@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Upload, FileText, File, Loader2, CheckCircle2,
@@ -95,7 +95,7 @@ function DropZone({ onFiles }: { onFiles: (files: File[]) => void }) {
   );
 }
 
-function DocumentCard({ doc, view }: { doc: Document; view: "grid" | "list" }) {
+function DocumentCard({ doc, view, onFavorite, onDelete }: { doc: Document; view: "grid" | "list"; onFavorite: () => void; onDelete: () => void }) {
   const status = STATUS_CONFIG[doc.status];
   const StatusIcon = status.icon;
   const isProcessing = ["PENDING", "EXTRACTING", "EMBEDDING", "GRAPHING"].includes(doc.status);
@@ -110,13 +110,22 @@ function DocumentCard({ doc, view }: { doc: Document; view: "grid" | "list" }) {
         className="bg-white border-2 border-[#121212] flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-4 cursor-pointer shadow-[3px_3px_0px_0px_#121212] rounded-none hover:translate-x-1 transition-all group"
       >
         <div className="flex items-center gap-4 min-w-0">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onFavorite(); }} 
+            className="p-1 border border-transparent hover:border-[#121212] hover:bg-gray-50 rounded-none shrink-0"
+          >
+            {doc.isFavorite ? (
+              <Star className="w-4.5 h-4.5 text-[#F0C020] fill-[#F0C020] stroke-[#121212] stroke-2" />
+            ) : (
+              <StarOff className="w-4.5 h-4.5 text-gray-400 stroke-2" />
+            )}
+          </button>
           <div className="w-10 h-10 border-2 border-[#121212] bg-[#F0C020] text-[#121212] flex items-center justify-center shrink-0 shadow-[2px_2px_0px_0px_#121212]">
             <FileText className="w-5 h-5" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[#121212] font-extrabold truncate" style={{ fontFamily: "'Outfit', sans-serif" }}>{doc.title}</span>
-              {doc.isFavorite && <Star className="w-4 h-4 text-[#F0C020] fill-[#F0C020] stroke-[#121212] stroke-2 shrink-0" />}
             </div>
             <span className="text-xs text-gray-500 font-bold uppercase tracking-wider block mt-0.5" style={B.labelStyle}>
               {doc.fileName} · {formatBytes(doc.fileSize)}
@@ -129,10 +138,11 @@ function DocumentCard({ doc, view }: { doc: Document; view: "grid" | "list" }) {
             <span className="text-xs font-black uppercase tracking-wider" style={{ color: status.color, fontFamily: "'Outfit', sans-serif" }}>{status.label}</span>
           </div>
           <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-            <button className="p-2 border-2 border-[#121212] bg-white text-[#121212] hover:bg-[#1040C0] hover:text-white transition-all cursor-pointer shadow-[2px_2px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] rounded-none" title="View">
-              <Eye className="w-4 h-4" />
-            </button>
-            <button className="p-2 border-2 border-[#121212] bg-white text-[#121212] hover:bg-[#D02020] hover:text-white transition-all cursor-pointer shadow-[2px_2px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] rounded-none" title="Delete">
+            <button 
+              onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              className="p-2 border-2 border-[#121212] bg-white text-[#121212] hover:bg-[#D02020] hover:text-white transition-all cursor-pointer shadow-[2px_2px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] rounded-none" 
+              title="Delete"
+            >
               <Trash2 className="w-4 h-4" />
             </button>
           </div>
@@ -154,10 +164,16 @@ function DocumentCard({ doc, view }: { doc: Document; view: "grid" | "list" }) {
           <FileText className="w-5 h-5" />
         </div>
         <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-          <button className="p-1.5 border border-[#121212] bg-white text-[#121212] hover:bg-[#F0C020] transition-colors cursor-pointer rounded-none">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onFavorite(); }} 
+            className="p-1.5 border border-[#121212] bg-white text-[#121212] hover:bg-[#F0C020] transition-colors cursor-pointer rounded-none"
+          >
             {doc.isFavorite ? <Star className="w-4 h-4 text-[#F0C020] fill-[#F0C020]" /> : <StarOff className="w-4 h-4" />}
           </button>
-          <button className="p-1.5 border border-[#121212] bg-white text-[#121212] hover:bg-[#D02020] hover:text-white transition-colors cursor-pointer rounded-none">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            className="p-1.5 border border-[#121212] bg-white text-[#121212] hover:bg-[#D02020] hover:text-white transition-colors cursor-pointer rounded-none"
+          >
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -166,7 +182,7 @@ function DocumentCard({ doc, view }: { doc: Document; view: "grid" | "list" }) {
         <h3 className="text-[#121212] font-extrabold text-sm leading-snug mb-1 line-clamp-2" style={{ fontFamily: "'Outfit', sans-serif" }}>{doc.title}</h3>
         <p className="text-gray-500 text-xs font-bold uppercase tracking-wider" style={B.labelStyle}>{formatBytes(doc.fileSize)}</p>
       </div>
-      {doc.tags.length > 0 && (
+      {doc.tags && doc.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {doc.tags.slice(0, 2).map((tag, idx) => (
             <span key={tag} className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 border border-[#121212] rounded-none text-white ${idx % 2 === 0 ? "bg-[#1040C0]" : "bg-[#D02020]"}`} style={{ fontFamily: "'Outfit', sans-serif" }}>
@@ -183,32 +199,107 @@ function DocumentCard({ doc, view }: { doc: Document; view: "grid" | "list" }) {
   );
 }
 
-const DEMO_DOCS: Document[] = [
-  { id: "1", title: "Machine Learning Fundamentals", fileName: "ml-fundamentals.pdf", fileSize: 2456000, status: "READY", isFavorite: true, tags: ["AI", "ML"], createdAt: "2024-01-15", mimeType: "application/pdf" },
-  { id: "2", title: "Deep Learning with PyTorch", fileName: "deep-learning.pdf", fileSize: 5123000, status: "READY", isFavorite: false, tags: ["Deep Learning", "PyTorch"], createdAt: "2024-01-14", mimeType: "application/pdf" },
-  { id: "3", title: "Neural Architecture Search", fileName: "nas-paper.pdf", fileSize: 890000, status: "EMBEDDING", isFavorite: false, tags: ["Research"], createdAt: "2024-01-13", mimeType: "application/pdf" },
-];
-
 export default function DocumentsPage() {
-  const [docs] = useState<Document[]>(DEMO_DOCS);
+  const [docs, setDocs] = useState<Document[]>([]);
   const [view, setView] = useState<"grid" | "list">("grid");
   const [search, setSearch] = useState("");
   const [showUpload, setShowUpload] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+  const fetchDocs = async () => {
+    try {
+      const res = await fetch("/api/documents");
+      if (res.ok) {
+        const data = await res.json();
+        setDocs(data);
+      }
+    } catch (err) {
+      console.error("Error loading documents:", err);
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    fetchDocs();
+  }, []);
+
+  // Poll status of processing documents
+  useEffect(() => {
+    const isProcessing = docs.some((d) => ["PENDING", "EXTRACTING", "EMBEDDING", "GRAPHING"].includes(d.status));
+    if (!isProcessing) return;
+
+    const interval = setInterval(() => {
+      fetchDocs();
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [docs]);
+
   const filtered = docs.filter(
     (d) =>
       d.title.toLowerCase().includes(search.toLowerCase()) ||
-      d.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()))
+      (d.tags && d.tags.some((t) => t.toLowerCase().includes(search.toLowerCase())))
   );
 
   const handleFiles = async (files: File[]) => {
+    if (files.length === 0) return;
     setUploading(true);
-    // Simulate upload
-    await new Promise((r) => setTimeout(r, 2000));
-    setUploading(false);
-    setShowUpload(false);
+
+    try {
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        await fetch("/api/documents", {
+          method: "POST",
+          body: formData,
+        });
+      }
+      await fetchDocs();
+    } catch (err) {
+      console.error("Error uploading file:", err);
+    } finally {
+      setUploading(false);
+      setShowUpload(false);
+    }
   };
+
+  const handleFavorite = async (id: string) => {
+    try {
+      const doc = docs.find((d) => d.id === id);
+      if (!doc) return;
+
+      const res = await fetch(`/api/documents/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isFavorite: !doc.isFavorite }),
+      });
+
+      if (res.ok) {
+        setDocs((prev) =>
+          prev.map((d) => (d.id === id ? { ...d, isFavorite: !d.isFavorite } : d))
+        );
+      }
+    } catch (err) {
+      console.error("Error toggling favorite:", err);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this document? This will remove all chunks and embeddings.")) return;
+    try {
+      const res = await fetch(`/api/documents/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setDocs((prev) => prev.filter((d) => d.id !== id));
+      }
+    } catch (err) {
+      console.error("Error deleting document:", err);
+    }
+  };
+
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-12">
@@ -330,13 +421,25 @@ export default function DocumentsPage() {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           >
             {filtered.map((doc) => (
-              <DocumentCard key={doc.id} doc={doc} view="grid" />
+              <DocumentCard 
+                key={doc.id} 
+                doc={doc} 
+                view="grid" 
+                onFavorite={() => handleFavorite(doc.id)}
+                onDelete={() => handleDelete(doc.id)}
+              />
             ))}
           </motion.div>
         ) : (
           <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
             {filtered.map((doc) => (
-              <DocumentCard key={doc.id} doc={doc} view="list" />
+              <DocumentCard 
+                key={doc.id} 
+                doc={doc} 
+                view="list" 
+                onFavorite={() => handleFavorite(doc.id)}
+                onDelete={() => handleDelete(doc.id)}
+              />
             ))}
           </motion.div>
         )}

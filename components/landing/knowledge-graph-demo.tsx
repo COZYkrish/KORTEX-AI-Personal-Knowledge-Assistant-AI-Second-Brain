@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { ReactFlow, Background, Controls, MiniMap, type Node, type Edge } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { B } from "@/lib/bauhaus";
 
 const demoNodes: Node[] = [
   { id: "1", position: { x: 400, y: 200 }, data: { label: "Artificial Intelligence" }, style: { background: "#ffffff", border: "1px solid #ffffff", color: "#000000", borderRadius: "12px", padding: "10px 16px", fontWeight: 600, fontSize: "13px", boxShadow: "0 0 20px rgba(255,255,255,0.2)" } },
@@ -31,25 +32,25 @@ export function KnowledgeGraphDemo() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section ref={ref} className="relative py-32 px-6 overflow-hidden bg-black">
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#333] to-transparent" />
+    <section ref={ref} className="landing-section" style={{ background: B.BLACK }}>
+      <div className="absolute inset-0 bg-dot-grid-white opacity-10 pointer-events-none" />
 
-      <div className="relative z-10 max-w-7xl mx-auto">
+      <div className="site-shell relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          className="mb-12"
         >
-          <span className="text-sm font-medium text-[#71717a] uppercase tracking-widest mb-4 block">
+          <span className="section-label mb-4 block" style={{ color: B.YELLOW }}>
             Knowledge Graph
           </span>
-          <h2 className="font-display text-5xl font-bold mb-4 text-white">
+          <h2 className="section-heading mb-4 text-white">
             Watch Your Knowledge{" "}
             <span className="text-[#a1a1aa]">Come Alive</span>
           </h2>
-          <p className="text-xl text-[#71717a] max-w-2xl mx-auto">
+          <p className="text-lg text-[#a1a1aa] max-w-2xl">
             AI automatically extracts concepts from your documents and builds an
             interactive knowledge universe you can explore.
           </p>
@@ -60,11 +61,11 @@ export function KnowledgeGraphDemo() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 1, delay: 0.3 }}
-          className="bg-[#0a0a0a] border border-[#222] rounded-xl overflow-hidden shadow-2xl shadow-black/50"
-          style={{ height: 500 }}
+          className="overflow-hidden"
+          style={{ height: "clamp(420px, 55vw, 560px)", border: "3px solid white", boxShadow: "6px 6px 0px 0px #ffffff", background: "#0a0a0a" }}
         >
           {/* Fake toolbar */}
-          <div className="px-4 py-3 border-b border-[#222] flex items-center gap-3 bg-[#0a0a0a]">
+          <div className="px-4 py-3 border-b border-[#333] flex items-center gap-3 bg-[#0a0a0a]">
             <div className="flex gap-1.5">
               <div className="w-3 h-3 rounded-full bg-[#333]" />
               <div className="w-3 h-3 rounded-full bg-[#333]" />
@@ -97,7 +98,7 @@ export function KnowledgeGraphDemo() {
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ delay: 0.8 }}
-          className="text-center text-sm text-[#444] mt-4"
+          className="text-sm text-[#777] mt-5"
         >
           ↑ Interactive demo — drag nodes, zoom, and pan to explore
         </motion.p>

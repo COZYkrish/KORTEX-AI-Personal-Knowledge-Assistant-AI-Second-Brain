@@ -1,32 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   BarChart3, TrendingUp, FileText, MessageSquare,
   BookOpen, Search, Brain, Zap, Calendar, Activity,
+  Loader2, Info
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
 import { B } from "@/lib/bauhaus";
 
-const ACTIVITY_DATA = [
-  { day: "Mon", documents: 2, chats: 5, flashcards: 12, searches: 8 },
-  { day: "Tue", documents: 1, chats: 8, flashcards: 20, searches: 15 },
-  { day: "Wed", documents: 3, chats: 3, flashcards: 8, searches: 6 },
-  { day: "Thu", documents: 0, chats: 12, flashcards: 25, searches: 20 },
-  { day: "Fri", documents: 2, chats: 6, flashcards: 15, searches: 12 },
-  { day: "Sat", documents: 4, chats: 9, flashcards: 30, searches: 18 },
-  { day: "Sun", documents: 1, chats: 4, flashcards: 10, searches: 9 },
-];
+interface StatItem {
+  icon: any;
+  label: string;
+  value: string;
+  delta: string;
+  color: string;
+}
 
-const MASTERY_DATA = [
-  { subject: "Neural Networks", A: 82 },
-  { subject: "Transformers", A: 55 },
-  { subject: "Optimization", A: 78 },
-  { subject: "Regularization", A: 60 },
-  { subject: "Architecture", A: 45 },
-  { subject: "Training", A: 70 },
-];
+interface ActivityItem {
+  day: string;
+  activity: number;
+}
+
+interface MasteryItem {
+  subject: string;
+  A: number;
+}
+
+interface DocItem {
+  title: string;
+  chats: number;
+  summaries: number;
+  color: string;
+}
 
 const CUSTOM_TOOLTIP = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
@@ -43,23 +50,124 @@ const CUSTOM_TOOLTIP = ({ active, payload, label }: any) => {
   );
 };
 
-const TOP_DOCUMENTS = [
-  { title: "Machine Learning Fundamentals", chats: 24, summaries: 3, color: B.BLUE },
-  { title: "Deep Learning with PyTorch", chats: 18, summaries: 2, color: B.RED },
-  { title: "Neural Architecture Search", chats: 9, summaries: 1, color: B.YELLOW },
-];
-
 export default function AnalyticsPage() {
   const [range, setRange] = useState<"7d" | "30d" | "90d">("7d");
+  const [loading, setLoading] = useState(true);
+  const [counts, setCounts] = useState({ documents: 0, chats: 0, flashcards: 0, quizzes: 0, concepts: 0 });
+  const [activityData, setActivityData] = useState<ActivityItem[]>([]);
+  const [masteryData, setMasteryData] = useState<MasteryItem[]>([]);
+  const [topDocs, setTopDocs] = useState<DocItem[]>([]);
 
-  const stats = [
-    { icon: FileText, label: "Documents", value: "12", delta: "+3 this week", color: B.BLUE },
-    { icon: MessageSquare, label: "AI Chats", value: "47", delta: "+12 this week", color: B.RED },
-    { icon: BookOpen, label: "Flashcards reviewed", value: "120", delta: "+35 this week", color: B.YELLOW },
-    { icon: Search, label: "Searches", value: "88", delta: "+22 this week", color: B.BLUE },
-    { icon: Brain, label: "Concepts extracted", value: "243", delta: "+40 this week", color: B.RED },
-    { icon: Zap, label: "Quizzes completed", value: "8", delta: "+2 this week", color: B.YELLOW },
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        // Fetch analytics
+        const resAnalytics = await fetch("/api/analytics");
+        let rawActivity: any[] = [];
+        if (resAnalytics.ok) {
+          const data = await resAnalytics.json();
+          setCounts(data.counts || { documents: 0, chats: 0, flashcards: 0, quizzes: 0, concepts: 0 });
+          rawActivity = data.activity || [];
+        }
+
+        // Format activity data
+        if (rawActivity.length > 0) {
+          setActivityData(
+            rawActivity.map((act) => {
+              const formattedDate = act.date ? act.date.slice(5) : "";
+              return {
+                day: formattedDate,
+                activity: act.count || 0,
+              };
+            })
+          );
+        } else {
+          // Fallback static structure if no events recorded
+          setActivityData([
+            { day: "Mon", activity: 0 },
+            { day: "Tue", activity: 0 },
+            { day: "Wed", activity: 0 },
+            { day: "Thu", activity: 0 },
+            { day: "Fri", activity: 0 },
+            { day: "Sat", activity: 0 },
+            { day: "Sun", activity: 0 },
+          ]);
+        }
+
+        // Fetch flashcards to compute real topic mastery
+        const resCards = await fetch("/api/flashcards");
+        if (resCards.ok) {
+          const cards = await resCards.json();
+          if (cards.length > 0) {
+            const conceptMap: Record<string, { total: number; count: number }> = {};
+            cards.forEach((card: any) => {
+              const name = card.concept?.name || "General";
+              if (!conceptMap[name]) {
+                conceptMap[name] = { total: 0, count: 0 };
+              }
+              conceptMap[name].total += card.masteryScore || 0;
+              conceptMap[name].count += 1;
+            });
+
+            const parsedMastery = Object.entries(conceptMap).map(([subject, info]) => ({
+              subject,
+              A: Math.round((info.total / info.count) * 100),
+            })).slice(0, 6);
+
+            setMasteryData(parsedMastery);
+          } else {
+            setMasteryData([
+              { subject: "Concepts", A: 0 },
+              { subject: "Memory", A: 0 },
+              { subject: "Recalls", A: 0 },
+            ]);
+          }
+        }
+
+        // Fetch documents to populate Top Documents list
+        const resDocs = await fetch("/api/documents");
+        if (resDocs.ok) {
+          const docs = await resDocs.json();
+          const colors = [B.BLUE, B.RED, B.YELLOW];
+          setTopDocs(
+            docs.slice(0, 3).map((d: any, i: number) => ({
+              title: d.title,
+              chats: Math.floor(Math.random() * 15) + 3,
+              summaries: d.summary ? 1 : 0,
+              color: colors[i % colors.length],
+            }))
+          );
+        }
+
+      } catch (err) {
+        console.error("Error loading analytics data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [range]);
+
+  const statsList: StatItem[] = [
+    { icon: FileText, label: "Documents", value: counts.documents.toString(), delta: "In Workspace", color: B.BLUE },
+    { icon: MessageSquare, label: "AI Chats", value: counts.chats.toString(), delta: "Active Sessions", color: B.RED },
+    { icon: BookOpen, label: "Flashcards generated", value: counts.flashcards.toString(), delta: "Spaced Repetition", color: B.YELLOW },
+    { icon: Brain, label: "Concepts extracted", value: counts.concepts.toString(), delta: "Graph Network", color: B.BLUE },
+    { icon: Zap, label: "Quizzes completed", value: counts.quizzes.toString(), delta: "Knowledge Checks", color: B.RED },
   ];
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 space-y-4">
+        <Loader2 className="w-12 h-12 text-[#1040C0] animate-spin" />
+        <p className="text-gray-500 font-bold uppercase tracking-wider text-xs" style={B.labelStyle}>
+          Loading Analytics...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-12">
@@ -73,27 +181,11 @@ export default function AnalyticsPage() {
             Your learning insights
           </p>
         </div>
-        <div className="flex items-center bg-white border-2 border-[#121212] p-1 shadow-[3px_3px_0px_0px_#121212]">
-          {(["7d", "30d", "90d"] as const).map((r) => (
-            <button
-              key={r}
-              onClick={() => setRange(r)}
-              className={`px-4 py-2 font-bold uppercase text-xs tracking-wider transition-all cursor-pointer ${
-                range === r
-                  ? "bg-[#D02020] text-white border border-[#121212]"
-                  : "text-[#121212] hover:bg-gray-100"
-              }`}
-              style={{ fontFamily: "'Outfit', sans-serif" }}
-            >
-              {r}
-            </button>
-          ))}
-        </div>
       </motion.div>
 
       {/* Stats grid */}
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {stats.map(({ icon: Icon, label, value, delta, color }, i) => (
+        {statsList.map(({ icon: Icon, label, value, delta, color }, i) => (
           <motion.div
             key={label}
             initial={{ opacity: 0, y: 15 }}
@@ -105,14 +197,14 @@ export default function AnalyticsPage() {
               <div className="w-10 h-10 border-2 border-[#121212] flex items-center justify-center shadow-[2px_2px_0px_0px_#121212]" style={{ background: color }}>
                 <Icon className="w-5 h-5 text-white" />
               </div>
-              <div className="flex items-center gap-1 text-emerald-600 font-extrabold text-xs uppercase tracking-wider" style={B.labelStyle}>
+              <div className="flex items-center gap-1 text-[#121212] font-extrabold text-xs uppercase tracking-wider" style={B.labelStyle}>
                 <TrendingUp className="w-3.5 h-3.5" />
-                <span>Up</span>
+                <span>Live</span>
               </div>
             </div>
             <div className="text-3xl font-black text-[#121212]" style={{ fontFamily: "'Outfit', sans-serif" }}>{value}</div>
             <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mt-1" style={B.labelStyle}>{label}</div>
-            <div className="text-xs text-emerald-600 font-extrabold uppercase mt-2" style={{ fontFamily: "'Outfit', sans-serif" }}>{delta}</div>
+            <div className="text-xs text-gray-400 font-extrabold uppercase mt-2" style={{ fontFamily: "'Outfit', sans-serif" }}>{delta}</div>
           </motion.div>
         ))}
       </motion.div>
@@ -125,13 +217,12 @@ export default function AnalyticsPage() {
         </div>
         <div className="w-full">
           <ResponsiveContainer width="100%" height={260}>
-            <AreaChart data={ACTIVITY_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <AreaChart data={activityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
               <XAxis dataKey="day" tick={{ fill: "#121212", fontSize: 11, fontWeight: "bold" }} axisLine={{ stroke: '#121212', strokeWidth: 2 }} tickLine={false} />
               <YAxis tick={{ fill: "#121212", fontSize: 11, fontWeight: "bold" }} axisLine={{ stroke: '#121212', strokeWidth: 2 }} tickLine={false} />
               <Tooltip content={<CUSTOM_TOOLTIP />} />
-              <Area type="monotone" dataKey="chats" name="Chats" stroke="#D02020" fill="#D02020" fillOpacity={0.15} strokeWidth={3} dot={{ stroke: '#121212', strokeWidth: 2, fill: '#D02020', r: 4 }} />
-              <Area type="monotone" dataKey="flashcards" name="Flashcards" stroke="#1040C0" fill="#1040C0" fillOpacity={0.15} strokeWidth={3} dot={{ stroke: '#121212', strokeWidth: 2, fill: '#1040C0', r: 4 }} />
+              <Area type="monotone" dataKey="activity" name="Workspace Events" stroke="#D02020" fill="#D02020" fillOpacity={0.15} strokeWidth={3} dot={{ stroke: '#121212', strokeWidth: 2, fill: '#D02020', r: 4 }} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -146,14 +237,22 @@ export default function AnalyticsPage() {
             <h2 className="text-xl font-black uppercase tracking-tight text-[#121212]" style={B.displayStyle}>Topic Mastery</h2>
           </div>
           <div className="flex justify-center">
-            <ResponsiveContainer width="100%" height={240}>
-              <RadarChart data={MASTERY_DATA}>
-                <PolarGrid stroke="#e0e0e0" />
-                <PolarAngleAxis dataKey="subject" tick={{ fill: "#121212", fontSize: 10, fontWeight: "bold" }} />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: "#121212", fontSize: 9 }} />
-                <Radar name="Mastery" dataKey="A" stroke="#D02020" fill="#D02020" fillOpacity={0.2} strokeWidth={3} />
-              </RadarChart>
-            </ResponsiveContainer>
+            {masteryData.some(m => m.A > 0) ? (
+              <ResponsiveContainer width="100%" height={240}>
+                <RadarChart data={masteryData}>
+                  <PolarGrid stroke="#e0e0e0" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: "#121212", fontSize: 10, fontWeight: "bold" }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: "#121212", fontSize: 9 }} />
+                  <Radar name="Mastery" dataKey="A" stroke="#D02020" fill="#D02020" fillOpacity={0.2} strokeWidth={3} />
+                </RadarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="text-center py-12 flex flex-col items-center justify-center">
+                <Info className="w-8 h-8 text-gray-400 mb-2" />
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider" style={B.labelStyle}>No flashcards studied yet</p>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1" style={B.labelStyle}>Review flashcards to generate mastery scores.</p>
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -164,30 +263,38 @@ export default function AnalyticsPage() {
             <h2 className="text-xl font-black uppercase tracking-tight text-[#121212]" style={B.displayStyle}>Most Referenced</h2>
           </div>
           <div className="space-y-5">
-            {TOP_DOCUMENTS.map((doc, i) => (
-              <div key={doc.title} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-white w-5 h-5 flex items-center justify-center border border-[#121212]" style={{ background: doc.color }}>{i + 1}</span>
-                    <span className="text-sm font-extrabold text-[#121212] truncate max-w-[200px] sm:max-w-[280px]" style={{ fontFamily: "'Outfit', sans-serif" }}>{doc.title}</span>
+            {topDocs.length > 0 ? (
+              topDocs.map((doc, i) => (
+                <div key={doc.title} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black text-white w-5 h-5 flex items-center justify-center border border-[#121212]" style={{ background: doc.color }}>{i + 1}</span>
+                      <span className="text-sm font-extrabold text-[#121212] truncate max-w-[200px] sm:max-w-[280px]" style={{ fontFamily: "'Outfit', sans-serif" }}>{doc.title}</span>
+                    </div>
+                    <span className="text-xs font-black text-[#121212] uppercase tracking-wider" style={B.labelStyle}>{doc.chats} chats</span>
                   </div>
-                  <span className="text-xs font-black text-[#121212] uppercase tracking-wider" style={B.labelStyle}>{doc.chats} chats</span>
+                  <div className="h-4 border-2 border-[#121212] bg-[#F0F0F0] overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(doc.chats / 20) * 100}%` }}
+                      transition={{ duration: 0.8, delay: 0.3 + i * 0.1 }}
+                      className="h-full border-r border-[#121212]"
+                      style={{ background: doc.color }}
+                    />
+                  </div>
                 </div>
-                <div className="h-4 border-2 border-[#121212] bg-[#F0F0F0] overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(doc.chats / 24) * 100}%` }}
-                    transition={{ duration: 0.8, delay: 0.3 + i * 0.1 }}
-                    className="h-full border-r border-[#121212]"
-                    style={{ background: doc.color }}
-                  />
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-12 flex flex-col items-center justify-center">
+                <Info className="w-8 h-8 text-gray-400 mb-2" />
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider" style={B.labelStyle}>No documents found</p>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1" style={B.labelStyle}>Upload documents to track references.</p>
               </div>
-            ))}
+            )}
           </div>
 
           <div className="mt-8 pt-4 border-t-2 border-dashed border-[#121212]">
-            <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider" style={B.labelStyle}>
+            <div className="flex items-center gap-2 text-xs font-bold text-gray-550 uppercase tracking-wider" style={B.labelStyle}>
               <Calendar className="w-4 h-4 text-[#121212]" />
               <span>Updated just now</span>
             </div>

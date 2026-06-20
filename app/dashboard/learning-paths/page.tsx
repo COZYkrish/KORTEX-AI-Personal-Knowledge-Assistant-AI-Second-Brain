@@ -62,7 +62,7 @@ const NODE_CONFIG = {
   LOCKED: { icon: Lock, color: "#999999", bg: "#99999910", label: "Locked" },
 };
 
-function PathNodeCard({ node, isLast }: { node: PathNode; isLast: boolean }) {
+function PathNodeCard({ node, isLast, onUpdateStatus }: { node: PathNode; isLast: boolean; onUpdateStatus: (nodeId: string, status: "IN_PROGRESS" | "COMPLETED") => void }) {
   const [open, setOpen] = useState(node.status === "IN_PROGRESS");
   const config = NODE_CONFIG[node.status];
   const Icon = config.icon;
@@ -103,7 +103,7 @@ function PathNodeCard({ node, isLast }: { node: PathNode; isLast: boolean }) {
                 </span>
                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1 ml-auto shrink-0" style={B.labelStyle}>
                   <Clock className="w-3.5 h-3.5 text-[#121212]" />
-                  {node.estimatedMinutes} min
+                  {node.estimatedMinutes || 30} min
                 </span>
               </div>
               <p className="text-xs font-bold text-gray-600 uppercase tracking-wider mt-1.5 line-clamp-1" style={B.labelStyle}>{node.description}</p>
@@ -126,11 +126,11 @@ function PathNodeCard({ node, isLast }: { node: PathNode; isLast: boolean }) {
               >
                 <div className="px-5 pb-5 pt-4 space-y-4">
                   <p className="text-sm font-semibold text-gray-700 leading-relaxed" style={{ fontFamily: "'Outfit', sans-serif" }}>{node.description}</p>
-                  {node.resources && node.resources.length > 0 && (
+                  {node.resources && (node.resources as string[]).length > 0 && (
                     <div>
                       <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2" style={B.labelStyle}>Source documents:</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {node.resources.map((r) => (
+                        {(node.resources as string[]).map((r) => (
                           <span key={r} className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 bg-white border border-[#121212] text-[#121212] rounded-none" style={{ fontFamily: "'Outfit', sans-serif" }}>
                             {r}
                           </span>
@@ -139,13 +139,19 @@ function PathNodeCard({ node, isLast }: { node: PathNode; isLast: boolean }) {
                     </div>
                   )}
                   {node.status === "IN_PROGRESS" && (
-                    <button className="inline-flex items-center justify-center gap-2 bg-[#D02020] text-white border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[2px_2px_0px_0px_#121212] hover:bg-[#b01a1a] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] rounded-none px-4 py-2 mt-2 cursor-pointer transition-all">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); onUpdateStatus(node.id, "COMPLETED"); }}
+                      className="inline-flex items-center justify-center gap-2 bg-[#D02020] text-white border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[2px_2px_0px_0px_#121212] hover:bg-[#b01a1a] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] rounded-none px-4 py-2 mt-2 cursor-pointer transition-all"
+                    >
                       <Zap className="w-4 h-4 text-white" />
-                      Continue Learning
+                      Mark Completed
                     </button>
                   )}
                   {node.status === "PENDING" && (
-                    <button className="inline-flex items-center justify-center gap-2 bg-[#1040C0] text-white border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[2px_2px_0px_0px_#121212] hover:bg-[#0c30a0] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] rounded-none px-4 py-2 mt-2 cursor-pointer transition-all">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); onUpdateStatus(node.id, "IN_PROGRESS"); }}
+                      className="inline-flex items-center justify-center gap-2 bg-[#1040C0] text-white border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[2px_2px_0px_0px_#121212] hover:bg-[#0c30a0] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] rounded-none px-4 py-2 mt-2 cursor-pointer transition-all"
+                    >
                       <Play className="w-4 h-4 text-white" />
                       Start Module
                     </button>
@@ -160,24 +166,82 @@ function PathNodeCard({ node, isLast }: { node: PathNode; isLast: boolean }) {
   );
 }
 
+import { useEffect } from "react";
+
 export default function LearningPathsPage() {
-  const [paths] = useState<LearningPath[]>(DEMO_PATHS);
-  const [selectedPath, setSelectedPath] = useState<LearningPath>(DEMO_PATHS[0]);
+  const [paths, setPaths] = useState<LearningPath[]>([]);
+  const [selectedPath, setSelectedPath] = useState<LearningPath | null>(null);
   const [generating, setGenerating] = useState(false);
   const [topic, setTopic] = useState("");
   const [showCreate, setShowCreate] = useState(false);
 
-  const completedNodes = selectedPath.nodes.filter((n) => n.status === "COMPLETED").length;
-  const totalMinutes = selectedPath.nodes.reduce((sum, n) => sum + n.estimatedMinutes, 0);
+  const fetchPaths = async () => {
+    try {
+      const res = await fetch("/api/learning-paths");
+      if (res.ok) {
+        const data = await res.json();
+        setPaths(data);
+        if (data.length > 0) {
+          // Keep current selection or default to first
+          setSelectedPath((curr) => data.find((p: any) => p.id === curr?.id) || data[0]);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching paths:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchPaths();
+  }, []);
+
+  const completedNodes = selectedPath ? selectedPath.nodes.filter((n) => n.status === "COMPLETED").length : 0;
+  const totalMinutes = selectedPath ? selectedPath.nodes.reduce((sum, n) => sum + (n.estimatedMinutes || 30), 0) : 0;
 
   const createPath = async () => {
     if (!topic.trim()) return;
     setGenerating(true);
-    await new Promise((r) => setTimeout(r, 2500));
-    setGenerating(false);
-    setShowCreate(false);
-    setTopic("");
+    try {
+      const res = await fetch("/api/learning-paths", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic }),
+      });
+      if (res.ok) {
+        const newPath = await res.json();
+        await fetchPaths();
+        setSelectedPath(newPath);
+        setShowCreate(false);
+        setTopic("");
+      } else {
+        const errData = await res.json();
+        alert(errData.error || "Failed to generate path");
+      }
+    } catch (err) {
+      console.error("Error creating path:", err);
+    } finally {
+      setGenerating(false);
+    }
   };
+
+  const handleUpdateNodeStatus = async (nodeId: string, status: "IN_PROGRESS" | "COMPLETED") => {
+    if (!selectedPath) return;
+    try {
+      const res = await fetch(`/api/learning-paths/${selectedPath.id}/nodes/${nodeId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) {
+        const updatedPath = await res.json();
+        setPaths((prev) => prev.map((p) => (p.id === selectedPath.id ? updatedPath : p)));
+        setSelectedPath(updatedPath);
+      }
+    } catch (err) {
+      console.error("Error updating node status:", err);
+    }
+  };
+
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-12">
@@ -298,7 +362,7 @@ export default function LearningPathsPage() {
           <p className="text-xs font-black uppercase tracking-wider text-gray-500" style={B.labelStyle}>Your Paths</p>
           <div className="space-y-3">
             {paths.map((path) => {
-              const isSelected = selectedPath.id === path.id;
+              const isSelected = selectedPath?.id === path.id;
               return (
                 <button
                   key={path.id}
@@ -331,56 +395,71 @@ export default function LearningPathsPage() {
           transition={{ delay: 0.1 }}
           className="lg:col-span-3 space-y-6"
         >
-          {/* Path stats summary */}
-          <div className="bg-white border-2 border-[#121212] p-6 shadow-[5px_5px_0px_0px_#121212] rounded-none">
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
-              <div>
-                <h2 className="font-display text-2xl font-black uppercase tracking-tight text-[#121212]" style={B.displayStyle}>{selectedPath.topic}</h2>
-                <p className="text-xs font-bold text-gray-600 uppercase tracking-wider mt-1" style={B.labelStyle}>{selectedPath.description}</p>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F0C020] border-2 border-[#121212] text-[#121212] font-black uppercase text-xs tracking-wider shadow-[2px_2px_0px_0px_#121212] shrink-0 self-start" style={{ fontFamily: "'Outfit', sans-serif" }}>
-                <Trophy className="w-3.5 h-3.5" />
-                <span>{Math.round(selectedPath.masteryScore * 100)}% Mastery</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-6">
-              {[
-                { icon: CheckCircle2, label: "Completed Modules", value: `${completedNodes}/${selectedPath.nodes.length}`, color: B.BLUE },
-                { icon: Clock, label: "Est. Time Duration", value: `${totalMinutes} min`, color: B.RED },
-                { icon: Target, label: "Calculated Mastery", value: `${Math.round(selectedPath.masteryScore * 100)}%`, color: B.YELLOW },
-              ].map(({ icon: Icon, label, value, color }) => (
-                <div key={label} className="text-center bg-[#F0F0F0] border-2 border-[#121212] rounded-none p-4 shadow-[3px_3px_0px_0px_#121212]">
-                  <Icon className="w-5 h-5 mx-auto mb-1.5" style={{ color }} />
-                  <div className="text-[#121212] font-black text-lg" style={{ fontFamily: "'Outfit', sans-serif" }}>{value}</div>
-                  <div className="text-xs text-gray-500 font-bold uppercase tracking-wider" style={B.labelStyle}>{label}</div>
+          {selectedPath ? (
+            <>
+              {/* Path stats summary */}
+              <div className="bg-white border-2 border-[#121212] p-6 shadow-[5px_5px_0px_0px_#121212] rounded-none">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+                  <div>
+                    <h2 className="font-display text-2xl font-black uppercase tracking-tight text-[#121212]" style={B.displayStyle}>{selectedPath.topic}</h2>
+                    <p className="text-xs font-bold text-gray-600 uppercase tracking-wider mt-1" style={B.labelStyle}>{selectedPath.description}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F0C020] border-2 border-[#121212] text-[#121212] font-black uppercase text-xs tracking-wider shadow-[2px_2px_0px_0px_#121212] shrink-0 self-start" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                    <Trophy className="w-3.5 h-3.5" />
+                    <span>{Math.round(selectedPath.masteryScore * 100)}% Mastery</span>
+                  </div>
                 </div>
-              ))}
-            </div>
 
-            {/* Overall progress bar */}
-            <div>
-              <div className="flex items-center justify-between text-xs font-bold text-gray-500 uppercase tracking-wider mb-2" style={B.labelStyle}>
-                <span>Overall Journey Progress</span>
-                <span className="text-[#121212] font-black">{Math.round(selectedPath.masteryScore * 100)}%</span>
-              </div>
-              <div className="h-4 border-2 border-[#121212] bg-[#F0F0F0] overflow-hidden rounded-none">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${selectedPath.masteryScore * 100}%` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                  className="h-full border-r border-[#121212] bg-[#1040C0]"
-                />
-              </div>
-            </div>
-          </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-6">
+                  {[
+                    { icon: CheckCircle2, label: "Completed Modules", value: `${completedNodes}/${selectedPath.nodes.length}`, color: B.BLUE },
+                    { icon: Clock, label: "Est. Time Duration", value: `${totalMinutes} min`, color: B.RED },
+                    { icon: Target, label: "Calculated Mastery", value: `${Math.round(selectedPath.masteryScore * 100)}%`, color: B.YELLOW },
+                  ].map(({ icon: Icon, label, value, color }) => (
+                    <div key={label} className="text-center bg-[#F0F0F0] border-2 border-[#121212] rounded-none p-4 shadow-[3px_3px_0px_0px_#121212]">
+                      <Icon className="w-5 h-5 mx-auto mb-1.5" style={{ color }} />
+                      <div className="text-[#121212] font-black text-lg" style={{ fontFamily: "'Outfit', sans-serif" }}>{value}</div>
+                      <div className="text-xs text-gray-500 font-bold uppercase tracking-wider" style={B.labelStyle}>{label}</div>
+                    </div>
+                  ))}
+                </div>
 
-          {/* Nodes tree list */}
-          <div className="space-y-4">
-            {selectedPath.nodes.map((node, i) => (
-              <PathNodeCard key={node.id} node={node} isLast={i === selectedPath.nodes.length - 1} />
-            ))}
-          </div>
+                {/* Overall progress bar */}
+                <div>
+                  <div className="flex items-center justify-between text-xs font-bold text-gray-500 uppercase tracking-wider mb-2" style={B.labelStyle}>
+                    <span>Overall Journey Progress</span>
+                    <span className="text-[#121212] font-black">{Math.round(selectedPath.masteryScore * 100)}%</span>
+                  </div>
+                  <div className="h-4 border-2 border-[#121212] bg-[#F0F0F0] overflow-hidden rounded-none">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${selectedPath.masteryScore * 100}%` }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                      className="h-full border-r border-[#121212] bg-[#1040C0]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Nodes tree list */}
+              <div className="space-y-4">
+                {selectedPath.nodes.map((node, i) => (
+                  <PathNodeCard 
+                    key={node.id} 
+                    node={node} 
+                    isLast={i === selectedPath.nodes.length - 1} 
+                    onUpdateStatus={handleUpdateNodeStatus}
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-24 bg-white border-2 border-dashed border-[#121212] shadow-[4px_4px_0px_0px_#121212]">
+              <Map className="w-12 h-12 text-[#121212] mx-auto mb-4" />
+              <p className="text-[#121212] font-black uppercase tracking-wider text-xs mb-1" style={B.labelStyle}>No learning paths compiled yet</p>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider" style={B.labelStyle}>Click &quot;Create Path&quot; above to compile your first AI study guide!</p>
+            </div>
+          )}
         </motion.div>
       </div>
     </div>

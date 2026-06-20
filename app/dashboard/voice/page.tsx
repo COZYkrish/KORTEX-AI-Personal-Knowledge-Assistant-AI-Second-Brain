@@ -21,7 +21,7 @@ const AGENT_MODES = [
 const EXAMPLE_QUESTIONS = [
   "Explain backpropagation in simple terms",
   "What are the key differences between CNN and RNN?",
-  "Summarize my Machine Learning document",
+  "Summarize my ML documents",
   "Create a quiz about transformer architectures",
   "How does gradient descent work?",
 ];
@@ -32,11 +32,6 @@ interface Transcript {
   text: string;
   timestamp: Date;
 }
-
-const AI_RESPONSES: Record<string, string> = {
-  default: "I heard your question. Based on your knowledge base, I can tell you that this topic is covered extensively in your uploaded documents. The key concept here relates to how neural networks learn through iterative optimization. Would you like me to go deeper on any specific aspect?",
-  "explain backpropagation": "Backpropagation works by computing how much each weight in the network contributed to the error. Think of it like reverse-engineering blame — we start from the output error and work backwards, using the chain rule of calculus to calculate gradients at each layer. These gradients then guide weight updates via gradient descent.",
-};
 
 function WaveformBar({ active, height }: { active: boolean; height: number }) {
   // Rotate colors between Red, Blue, Yellow
@@ -69,10 +64,52 @@ export default function VoicePage() {
   const [supported, setSupported] = useState(true);
   const [loading, setLoading] = useState(false);
   const transcriptEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setSupported("webkitSpeechRecognition" in window || "SpeechRecognition" in window);
+      const SpeechRecognition =
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      
+      const hasSupport = !!SpeechRecognition;
+      setSupported(hasSupport);
+
+      if (hasSupport) {
+        const rec = new SpeechRecognition();
+        rec.continuous = false;
+        rec.interimResults = true;
+        rec.lang = "en-US";
+
+        rec.onstart = () => {
+          setListening(true);
+          setCurrentText("");
+        };
+
+        rec.onresult = (event: any) => {
+          let interimTranscript = "";
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              const text = event.results[i][0].transcript;
+              setCurrentText(text);
+              processVoiceInput(text);
+            } else {
+              interimTranscript += event.results[i][0].transcript;
+              setCurrentText(interimTranscript);
+            }
+          }
+        };
+
+        rec.onerror = (event: any) => {
+          console.error("Speech recognition error:", event);
+          setListening(false);
+        };
+
+        rec.onend = () => {
+          setListening(false);
+        };
+
+        recognitionRef.current = rec;
+      }
     }
   }, []);
 
@@ -85,65 +122,131 @@ export default function VoicePage() {
   const toggleListening = () => {
     if (!supported) return;
     if (listening) {
-      setListening(false);
-      if (currentText.trim()) {
-        processVoiceInput(currentText);
-      }
-      setCurrentText("");
+      recognitionRef.current?.stop();
     } else {
-      setListening(true);
-      // Simulate voice recognition
-      let sampleText = EXAMPLE_QUESTIONS[Math.floor(Math.random() * EXAMPLE_QUESTIONS.length)];
-      let i = 0;
-      const interval = setInterval(() => {
-        if (i <= sampleText.length) {
-          setCurrentText(sampleText.slice(0, i));
-          i++;
-        } else {
-          clearInterval(interval);
-        }
-      }, 40);
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      setSpeaking(false);
+      try {
+        recognitionRef.current?.start();
+      } catch (err) {
+        console.error("Failed to start speech recognition:", err);
+      }
     }
   };
 
   const processVoiceInput = async (text: string) => {
+    if (!text.trim()) return;
+
     const userMsg: Transcript = {
       id: Date.now().toString(),
       role: "user",
       text,
       timestamp: new Date(),
     };
+    
     setTranscript((prev) => [...prev, userMsg]);
     setListening(false);
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
 
-    const lowerText = text.toLowerCase();
-    const response = Object.keys(AI_RESPONSES).find((k) => lowerText.includes(k))
-      ? AI_RESPONSES[Object.keys(AI_RESPONSES).find((k) => lowerText.includes(k))!]
-      : AI_RESPONSES.default;
+    try {
+      const history = transcript
+        .map((t) => ({
+          role: t.role === "user" ? ("user" as const) : ("model" as const),
+          content: t.text,
+        }))
+        .slice(-6);
 
-    const aiMsg: Transcript = {
-      id: (Date.now() + 1).toString(),
-      role: "ai",
-      text: response,
-      timestamp: new Date(),
-    };
-    setTranscript((prev) => [...prev, aiMsg]);
-    setLoading(false);
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: text,
+          history,
+          agent: agentMode,
+        }),
+      });
 
-    // Simulate TTS
-    if (!muted && "speechSynthesis" in window) {
-      setSpeaking(true);
-      const utterance = new SpeechSynthesisUtterance(response);
-      utterance.onend = () => setSpeaking(false);
-      window.speechSynthesis.speak(utterance);
+      if (!res.ok) throw new Error("Failed to send query");
+
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      if (!reader) throw new Error("No body reader");
+
+      let done = false;
+      let buffer = "";
+      let aiText = "";
+
+      const aiMsgId = (Date.now() + 1).toString();
+      setTranscript((prev) => [
+        ...prev,
+        {
+          id: aiMsgId,
+          role: "ai",
+          text: "",
+          timestamp: new Date(),
+        },
+      ]);
+      setLoading(false);
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        if (value) {
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const chunk = JSON.parse(line);
+              if (chunk.type === "chunk") {
+                aiText += chunk.value;
+                setTranscript((prev) =>
+                  prev.map((t) => (t.id === aiMsgId ? { ...t, text: aiText } : t))
+                );
+              }
+            } catch (err) {
+              console.error("Error parsing stream chunk:", err);
+            }
+          }
+        }
+      }
+
+      // Voice synthesis
+      if (aiText && !muted && typeof window !== "undefined" && window.speechSynthesis) {
+        setSpeaking(true);
+        // Clean markdown structures
+        const cleanText = aiText
+          .replace(/\*\*([^*]+)\*\*/g, "$1")
+          .replace(/\* /g, "")
+          .replace(/\[\d+\]/g, ""); // remove inline citations [1]
+
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.onend = () => setSpeaking(false);
+        utterance.onerror = () => setSpeaking(false);
+        window.speechSynthesis.speak(utterance);
+      }
+    } catch (err) {
+      console.error("Error in Voice AI chat execution:", err);
+      setTranscript((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          role: "ai",
+          text: "I experienced an error connecting to the AI brain. Please check your credentials.",
+          timestamp: new Date(),
+        },
+      ]);
+      setLoading(false);
     }
   };
 
   const askExample = (q: string) => {
     setCurrentText(q);
-    setTimeout(() => processVoiceInput(q), 200);
+    processVoiceInput(q);
   };
 
   return (
@@ -161,9 +264,15 @@ export default function VoicePage() {
         <div className="flex items-center gap-3 self-start sm:self-center">
           {/* Mute button */}
           <button
-            onClick={() => setMuted(!muted)}
+            onClick={() => {
+              setMuted(!muted);
+              if (!muted && typeof window !== "undefined" && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+                setSpeaking(false);
+              }
+            }}
             id="voice-mute-button"
-            className="p-3 bg-white border-2 border-[#121212] text-[#121212] font-black shadow-[3px_3px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none hover:bg-gray-50"
+            className="p-3 bg-white border-2 border-[#121212] text-[#121212] font-black shadow-[3px_3px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none hover:bg-gray-55"
             title={muted ? "Unmute AI voice" : "Mute AI voice"}
           >
             {muted ? <VolumeX className="w-5 h-5 text-[#D02020]" /> : <Volume2 className="w-5 h-5 text-[#1040C0]" />}
@@ -174,7 +283,7 @@ export default function VoicePage() {
             <button
               id="voice-agent-selector"
               onClick={() => setShowModes(!showModes)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-[#121212] text-sm text-[#121212] font-bold uppercase tracking-wider shadow-[3px_3px_0px_0px_#121212] cursor-pointer rounded-none hover:bg-gray-50"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-[#121212] text-sm text-[#121212] font-bold uppercase tracking-wider shadow-[3px_3px_0px_0px_#121212] cursor-pointer rounded-none hover:bg-gray-55"
               style={{ fontFamily: "'Outfit', sans-serif" }}
             >
               <activeAgent.icon className="w-4.5 h-4.5 text-[#1040C0]" />
@@ -299,7 +408,7 @@ export default function VoicePage() {
                 const isAI = t.role === "ai";
                 return (
                   <div key={t.id} className={`flex gap-3 ${!isAI ? "flex-row-reverse" : ""}`}>
-                    <div className={`w-8 h-8 border-2 border-[#121212] flex items-center justify-center shrink-0 shadow-[1px_1px_0px_0px_#121212] rounded-none ${isAI ? "bg-[#D02020] text-white" : "bg-[#1040C0] text-white"}`}>
+                     <div className={`w-8 h-8 border-2 border-[#121212] flex items-center justify-center shrink-0 shadow-[1px_1px_0px_0px_#121212] rounded-none ${isAI ? "bg-[#D02020] text-white" : "bg-[#1040C0] text-white"}`}>
                       {isAI ? <Bot className="w-4.5 h-4.5" /> : <User className="w-4.5 h-4.5" />}
                     </div>
                     <div className={`max-w-[80%] border-2 border-[#121212] px-4 py-2.5 shadow-[2px_2px_0px_0px_#121212] text-xs font-bold uppercase tracking-wider rounded-none ${
@@ -346,7 +455,7 @@ export default function VoicePage() {
               <button
                 key={q}
                 onClick={() => askExample(q)}
-                className="w-full text-left px-3 py-3 bg-white border border-[#121212] shadow-[2px_2px_0px_0px_#121212] text-xs font-bold uppercase tracking-wide text-black hover:bg-gray-55 active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none flex items-center justify-between"
+                className="w-full text-left px-3 py-3 bg-white border border-[#121212] shadow-[2px_2px_0px_0px_#121212] text-xs font-bold uppercase tracking-wide text-black hover:bg-gray-50 active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none flex items-center justify-between"
                 style={{ fontFamily: "'Outfit', sans-serif" }}
               >
                 <span>{q}</span>

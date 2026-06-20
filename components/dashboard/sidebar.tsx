@@ -32,18 +32,22 @@ const navItems = [
 export function DashboardSidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const mobileNavItems = navItems.filter((item) =>
+    ["Dashboard", "Documents", "AI Chat", "Search", "Knowledge Graph"].includes(item.label)
+  );
 
   return (
-    <motion.aside
-      animate={{ width: collapsed ? 64 : 220 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-      className="relative flex flex-col h-full overflow-hidden"
-      style={{ background: "white", borderRight: B.border4, flexShrink: 0 }}
-    >
+    <>
+      <motion.aside
+        animate={{ width: collapsed ? 68 : 232 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="sticky top-0 hidden md:flex flex-col h-screen overflow-hidden"
+        style={{ background: "white", borderRight: "3px solid #121212", flexShrink: 0 }}
+      >
       {/* Logo */}
       <div
         className={`flex items-center gap-2 px-4 py-4 ${collapsed ? "justify-center" : ""}`}
-        style={{ borderBottom: B.border4, background: B.CANVAS }}
+        style={{ borderBottom: "3px solid #121212", background: B.CANVAS }}
       >
         <div className="flex items-center gap-1 flex-shrink-0">
           <div style={{ width: 10, height: 10, borderRadius: "50%", background: B.RED,    border: B.border2 }} />
@@ -147,13 +151,66 @@ export function DashboardSidebar() {
           color: B.BLACK,
           cursor: "pointer",
           border: "none",
-          borderTop: B.border4,
+          borderTop: "3px solid #121212",
         }}
         onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = B.BLACK; (e.currentTarget as HTMLButtonElement).style.color = "white"; }}
         onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = B.CANVAS; (e.currentTarget as HTMLButtonElement).style.color = B.BLACK; }}
       >
         {collapsed ? <ChevronRight size={16} /> : <><ChevronLeft size={16} /><span>Collapse</span></>}
       </button>
-    </motion.aside>
+      </motion.aside>
+
+      <nav
+        className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-5 md:hidden"
+        style={{ background: "white", borderTop: "3px solid #121212" }}
+      >
+        {mobileNavItems.map((item, i) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+          const accentColor = ICON_COLORS[i % 3];
+          const iconTextColor = accentColor === B.YELLOW ? B.BLACK : "white";
+
+          return (
+            <Link key={item.href} href={item.href} aria-label={item.label}>
+              <div
+                className="flex min-h-[64px] flex-col items-center justify-center gap-1"
+                style={{
+                  borderRight: i < mobileNavItems.length - 1 ? "1px solid #e0e0e0" : "none",
+                  background: isActive ? B.CANVAS : "white",
+                }}
+              >
+                <div
+                  className="flex items-center justify-center"
+                  style={{
+                    width: 30,
+                    height: 30,
+                    background: isActive ? accentColor : "transparent",
+                    border: isActive ? B.border2 : "2px solid transparent",
+                  }}
+                >
+                  <Icon size={15} color={isActive ? iconTextColor : "#666"} />
+                </div>
+                <span
+                  style={{
+                    fontFamily: "'Outfit', system-ui, sans-serif",
+                    fontWeight: 800,
+                    textTransform: "uppercase" as const,
+                    letterSpacing: 0,
+                    fontSize: "0.55rem",
+                    color: isActive ? B.BLACK : "#666",
+                    maxWidth: 58,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap" as const,
+                  }}
+                >
+                  {item.label.replace("Knowledge Graph", "Graph")}
+                </span>
+              </div>
+            </Link>
+          );
+        })}
+      </nav>
+    </>
   );
 }

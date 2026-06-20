@@ -35,7 +35,7 @@ export class PgVectorProvider implements VectorStore {
     const results = await db.$queryRaw<
       Array<{
         id: string;
-        document_id: string;
+        documentId: string;
         content: string;
         score: number;
         metadata: Record<string, unknown>;
@@ -43,13 +43,13 @@ export class PgVectorProvider implements VectorStore {
     >`
       SELECT
         dc.id,
-        dc.document_id,
+        dc."documentId",
         dc.content,
         dc.metadata,
         1 - (dc.embedding <=> ${embeddingStr}::vector) AS score
       FROM document_chunks dc
-      JOIN documents d ON d.id = dc.document_id
-      WHERE d.workspace_id = ${params.workspaceId}
+      JOIN documents d ON d.id = dc."documentId"
+      WHERE d."workspaceId" = ${params.workspaceId}
         AND dc.embedding IS NOT NULL
         AND 1 - (dc.embedding <=> ${embeddingStr}::vector) > ${threshold}
       ORDER BY dc.embedding <=> ${embeddingStr}::vector
@@ -58,7 +58,7 @@ export class PgVectorProvider implements VectorStore {
 
     return results.map((r: any) => ({
       id: r.id,
-      documentId: r.document_id,
+      documentId: r.documentId,
       content: r.content,
       score: Number(r.score),
       metadata: r.metadata ?? {},

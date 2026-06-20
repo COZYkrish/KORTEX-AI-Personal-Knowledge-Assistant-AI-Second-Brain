@@ -47,13 +47,13 @@ export async function getWorkspaceStats(
 
   const dailyRaw = await db.$queryRaw<Array<{ date: string; count: bigint }>>`
     SELECT
-      DATE(created_at)::text AS date,
+      DATE("createdAt")::text AS date,
       COUNT(*) AS count
     FROM events
-    WHERE workspace_id = ${workspaceId}
-      AND created_at >= ${since}
-    GROUP BY DATE(created_at)
-    ORDER BY DATE(created_at)
+    WHERE "workspaceId" = ${workspaceId}
+      AND "createdAt" >= ${since}
+    GROUP BY DATE("createdAt")
+    ORDER BY DATE("createdAt")
   `;
 
   return {

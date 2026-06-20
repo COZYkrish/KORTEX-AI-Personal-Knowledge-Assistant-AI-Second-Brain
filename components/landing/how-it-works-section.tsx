@@ -21,14 +21,14 @@ export function HowItWorksSection() {
   return (
     <section
       ref={ref}
-      className="py-24 px-8"
-      style={{ background: B.CANVAS, borderBottom: B.border4 }}
+      className="landing-section"
+      style={{ background: B.CANVAS }}
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="site-shell">
         {/* Header */}
-        <div className="pb-10 mb-16" style={{ borderBottom: B.border4 }}>
-          <p style={{ ...B.labelStyle, color: B.BLUE, marginBottom: 12 }}>How It Works</p>
-          <h2 style={{ ...B.displayStyle, fontSize: "clamp(2.5rem, 6vw, 5rem)", color: B.BLACK }}>
+        <div className="pb-8 mb-12" style={{ borderBottom: "3px solid #121212" }}>
+          <p className="section-label" style={{ color: B.BLUE, marginBottom: 12 }}>How It Works</p>
+          <h2 className="section-heading" style={{ color: B.BLACK }}>
             From Upload
             <br />
             to <span style={{ color: B.BLUE }}>Mastery.</span>
@@ -37,8 +37,7 @@ export function HowItWorksSection() {
 
         {/* Steps Grid */}
         <div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5"
-          style={{ borderLeft: B.border4, borderTop: B.border4 }}
+          className="bau-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5"
         >
           {steps.map((step, i) => {
             const color = COLORS[i];
@@ -49,11 +48,9 @@ export function HowItWorksSection() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: i * 0.1, ease: "easeOut" }}
-                className="flex flex-col"
+                className="bau-cell flex flex-col"
                 style={{
                   background: "white",
-                  borderRight: B.border4,
-                  borderBottom: B.border4,
                   transition: "transform 0.2s ease-out",
                 }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-3px)"; }}
@@ -62,7 +59,7 @@ export function HowItWorksSection() {
                 {/* Colored step header with rotated number */}
                 <div
                   className="flex items-center justify-center py-6"
-                  style={{ background: color, borderBottom: B.border4 }}
+                  style={{ background: color, borderBottom: "3px solid #121212" }}
                 >
                   <div
                     className="flex items-center justify-center"

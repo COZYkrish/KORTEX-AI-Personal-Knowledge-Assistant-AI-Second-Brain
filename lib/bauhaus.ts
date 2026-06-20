@@ -19,15 +19,15 @@ export const B = {
     fontFamily: "'Outfit', system-ui, sans-serif",
     fontWeight: 900,
     textTransform: "uppercase" as const,
-    lineHeight: 0.92,
-    letterSpacing: "-0.02em",
+    lineHeight: 0.98,
+    letterSpacing: "0",
   },
   /** Section label — small uppercase spaced */
   labelStyle: {
     fontFamily: "'Outfit', system-ui, sans-serif",
     fontWeight: 700,
     textTransform: "uppercase" as const,
-    letterSpacing: "0.1em",
+    letterSpacing: "0",
     fontSize: "0.7rem",
   },
   /** Bold body */
@@ -35,7 +35,7 @@ export const B = {
     fontFamily: "'Outfit', system-ui, sans-serif",
     fontWeight: 700,
     textTransform: "uppercase" as const,
-    letterSpacing: "0.06em",
+    letterSpacing: "0",
     fontSize: "0.75rem",
   },
 
@@ -55,22 +55,22 @@ export const B = {
 
 /** Bauhaus Button — Red primary CTA */
 export const btnPrimaryClass =
-  "inline-flex items-center justify-center gap-2 bg-[#D02020] text-white border-2 border-[#121212] font-bold uppercase tracking-wider text-sm cursor-pointer select-none transition-all duration-150 hover:bg-[#b01a1a] active:translate-x-[2px] active:translate-y-[2px]";
+  "inline-flex items-center justify-center gap-2 bg-[#D02020] text-white border-2 border-[#121212] font-bold uppercase text-sm cursor-pointer select-none transition-all duration-150 hover:bg-[#b01a1a] active:translate-x-[2px] active:translate-y-[2px]";
 export const btnPrimaryStyle = { boxShadow: "4px 4px 0px 0px #121212" } as const;
 
 /** Bauhaus Button — Blue secondary */
 export const btnSecondaryClass =
-  "inline-flex items-center justify-center gap-2 bg-[#1040C0] text-white border-2 border-[#121212] font-bold uppercase tracking-wider text-sm cursor-pointer select-none transition-all duration-150 hover:bg-[#0c30a0] active:translate-x-[2px] active:translate-y-[2px]";
+  "inline-flex items-center justify-center gap-2 bg-[#1040C0] text-white border-2 border-[#121212] font-bold uppercase text-sm cursor-pointer select-none transition-all duration-150 hover:bg-[#0c30a0] active:translate-x-[2px] active:translate-y-[2px]";
 export const btnSecondaryStyle = { boxShadow: "4px 4px 0px 0px #121212" } as const;
 
 /** Bauhaus Button — Yellow */
 export const btnYellowClass =
-  "inline-flex items-center justify-center gap-2 bg-[#F0C020] text-[#121212] border-2 border-[#121212] font-bold uppercase tracking-wider text-sm cursor-pointer select-none transition-all duration-150 hover:bg-[#d4a818] active:translate-x-[2px] active:translate-y-[2px]";
+  "inline-flex items-center justify-center gap-2 bg-[#F0C020] text-[#121212] border-2 border-[#121212] font-bold uppercase text-sm cursor-pointer select-none transition-all duration-150 hover:bg-[#d4a818] active:translate-x-[2px] active:translate-y-[2px]";
 export const btnYellowStyle = { boxShadow: "4px 4px 0px 0px #121212" } as const;
 
 /** Bauhaus Button — White outline */
 export const btnOutlineClass =
-  "inline-flex items-center justify-center gap-2 bg-white text-[#121212] border-2 border-[#121212] font-bold uppercase tracking-wider text-sm cursor-pointer select-none transition-all duration-150 hover:bg-[#e8e8e8] active:translate-x-[2px] active:translate-y-[2px]";
+  "inline-flex items-center justify-center gap-2 bg-white text-[#121212] border-2 border-[#121212] font-bold uppercase text-sm cursor-pointer select-none transition-all duration-150 hover:bg-[#e8e8e8] active:translate-x-[2px] active:translate-y-[2px]";
 export const btnOutlineStyle = { boxShadow: "4px 4px 0px 0px #121212" } as const;
 
 /** Bauhaus Card */

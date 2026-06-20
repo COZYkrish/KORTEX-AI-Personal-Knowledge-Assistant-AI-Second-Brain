@@ -1,10 +1,10 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { getSession } from "@/lib/db/session";
 import { redirect } from "next/navigation";
 import { DashboardHome } from "@/components/dashboard/dashboard-home";
 
 export default async function DashboardPage() {
-  const user = await currentUser();
-  if (!user) redirect("/sign-in");
+  const session = await getSession();
+  if (!session) redirect("/sign-in");
 
-  return <DashboardHome userName={user.firstName ?? "Explorer"} />;
+  return <DashboardHome userName={session.user.name ?? "Explorer"} />;
 }

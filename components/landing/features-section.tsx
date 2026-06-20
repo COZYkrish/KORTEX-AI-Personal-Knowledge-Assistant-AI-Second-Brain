@@ -39,18 +39,18 @@ export function FeaturesSection() {
     <section
       id="features"
       ref={ref}
-      style={{ background: B.CANVAS, borderBottom: B.border4 }}
-      className="py-24 px-8"
+      style={{ background: B.CANVAS }}
+      className="landing-section"
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="site-shell">
         {/* ── Header ── */}
         <div
-          className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 pb-10"
-          style={{ borderBottom: B.border4 }}
+          className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 pb-8"
+          style={{ borderBottom: "3px solid #121212" }}
         >
           <div>
-            <p style={{ ...B.labelStyle, color: B.RED, marginBottom: 12 }}>Everything You Need</p>
-            <h2 style={{ ...B.displayStyle, fontSize: "clamp(2.5rem, 6vw, 5rem)", color: B.BLACK }}>
+            <p className="section-label" style={{ color: B.RED, marginBottom: 12 }}>Everything You Need</p>
+            <h2 className="section-heading" style={{ color: B.BLACK }}>
               Your
               <br />
               <span style={{ color: B.BLUE }}>Entire</span>
@@ -68,8 +68,7 @@ export function FeaturesSection() {
 
         {/* ── Feature Grid ── */}
         <div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5"
-          style={{ borderLeft: B.border4, borderTop: B.border4 }}
+          className="bau-grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5"
         >
           {features.map((feature, i) => {
             const Icon = feature.icon;
@@ -82,12 +81,10 @@ export function FeaturesSection() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.3, delay: i * 0.05, ease: "easeOut" }}
-                className="relative group"
+                className="bau-cell relative group"
                 style={{
                   background: "white",
-                  borderRight: B.border4,
-                  borderBottom: B.border4,
-                  padding: "1.5rem",
+                  padding: "1.25rem",
                   cursor: "pointer",
                   transition: "transform 0.2s ease-out",
                 }}

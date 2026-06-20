@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @source "../components";
 @source "../app";
+@source "../lib";
 
 @theme {
   --color-bauhaus-red: #D02020;
@@ -30,8 +31,122 @@ body {
   color: #121212;
   font-family: var(--font-outfit), 'Outfit', system-ui, sans-serif;
   font-weight: 500;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  min-width: 0;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@layer components {
+  .site-shell {
+    width: min(100% - 32px, 1200px);
+    margin-inline: auto;
+  }
+
+  @media (min-width: 768px) {
+    .site-shell {
+      width: min(100% - 64px, 1200px);
+    }
+  }
+
+  .landing-section {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 4px solid #121212;
+    padding-block: clamp(64px, 8vw, 112px);
+  }
+
+  .section-heading {
+    font-family: var(--font-outfit), 'Outfit', system-ui, sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 0.98;
+    letter-spacing: 0;
+    font-size: clamp(2.4rem, 7vw, 5.4rem);
+  }
+
+  .section-label {
+    font-family: var(--font-outfit), 'Outfit', system-ui, sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    font-size: 0.72rem;
+  }
+
+  .bau-grid {
+    display: grid;
+    border-left: 3px solid #121212;
+    border-top: 3px solid #121212;
+  }
+
+  .bau-cell {
+    border-right: 3px solid #121212;
+    border-bottom: 3px solid #121212;
+    background: #ffffff;
+  }
+
+  .bau-card {
+    background: #ffffff;
+    border: 3px solid #121212;
+    box-shadow: 5px 5px 0 0 #121212;
+    border-radius: 8px;
+  }
+
+  .bau-button {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 2px solid #121212;
+    border-radius: 8px;
+    box-shadow: 4px 4px 0 0 #121212;
+    font-family: var(--font-outfit), 'Outfit', system-ui, sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    font-size: 0.78rem;
+    transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
+  }
+
+  .tracking-tight,
+  .tracking-wide,
+  .tracking-wider,
+  .tracking-widest {
+    letter-spacing: 0 !important;
+  }
+
+  .bau-button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 0 #121212;
+  }
+
+  .dashboard-page {
+    width: min(100%, 1180px);
+    margin-inline: auto;
+    padding-bottom: 2rem;
+  }
+
+  .dashboard-title {
+    font-family: var(--font-outfit), 'Outfit', system-ui, sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 1;
+    letter-spacing: 0;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+  }
 }
 
 /* Scrollbar */

@@ -22,18 +22,18 @@ export function TestimonialsSection() {
   return (
     <section
       ref={ref}
-      className="relative overflow-hidden py-24 px-8"
-      style={{ background: B.BLUE, borderBottom: B.border4 }}
+      className="landing-section"
+      style={{ background: B.BLUE }}
     >
       <div className="absolute inset-0 bg-dot-grid-white opacity-10 pointer-events-none" />
       <div style={{ position: "absolute", right: -80, top: 40, width: 240, height: 240, border: "4px solid rgba(255,255,255,0.1)", transform: "rotate(45deg)" }} />
       <div style={{ position: "absolute", left: -50, bottom: 40, width: 160, height: 160, borderRadius: "50%", border: "4px solid rgba(255,255,255,0.1)" }} />
 
-      <div className="relative z-10 max-w-7xl mx-auto">
+      <div className="site-shell relative z-10">
         {/* Header */}
-        <div className="pb-10 mb-16" style={{ borderBottom: "4px solid rgba(255,255,255,0.4)" }}>
-          <p style={{ ...B.labelStyle, color: B.YELLOW, marginBottom: 12 }}>Testimonials</p>
-          <h2 style={{ ...B.displayStyle, fontSize: "clamp(2.5rem, 6vw, 5rem)", color: "white" }}>
+        <div className="pb-8 mb-12" style={{ borderBottom: "3px solid rgba(255,255,255,0.4)" }}>
+          <p className="section-label" style={{ color: B.YELLOW, marginBottom: 12 }}>Testimonials</p>
+          <h2 className="section-heading" style={{ color: "white" }}>
             Loved by
             <br />
             <span style={{ color: B.YELLOW }}>Learners.</span>
@@ -43,7 +43,7 @@ export function TestimonialsSection() {
         {/* Grid */}
         <div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-          style={{ borderLeft: "4px solid white", borderTop: "4px solid white" }}
+          style={{ borderLeft: "3px solid white", borderTop: "3px solid white" }}
         >
           {testimonials.map((t, i) => {
             const accentColor = ACCENT_COLORS[i % 3];
@@ -55,9 +55,9 @@ export function TestimonialsSection() {
                 transition={{ duration: 0.4, delay: i * 0.08, ease: "easeOut" }}
                 style={{
                   background: "white",
-                  borderRight: "4px solid white",
-                  borderBottom: "4px solid white",
-                  padding: "1.75rem",
+                  borderRight: "3px solid white",
+                  borderBottom: "3px solid white",
+                  padding: "1.5rem",
                   transition: "transform 0.2s ease-out",
                 }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-3px)"; }}

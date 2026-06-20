@@ -155,6 +155,7 @@ export default function ChatPage() {
   const [agentMode, setAgentMode] = useState("general");
   const [listening, setListening] = useState(false);
   const [showAgents, setShowAgents] = useState(false);
+  const [docsCount, setDocsCount] = useState(0);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -162,50 +163,118 @@ export default function ChatPage() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    fetch("/api/documents")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setDocsCount(data.filter((d) => d.status === "READY").length);
+        }
+      })
+      .catch((err) => console.error("Error loading docs count:", err));
+  }, []);
+
   const activeAgent = AGENT_MODES.find((a) => a.id === agentMode) ?? AGENT_MODES[0];
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
 
+    const queryText = input.trim();
     const userMsg: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: input.trim(),
+      content: queryText,
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
 
-    // Simulate streaming AI response
+    const aiMsgId = (Date.now() + 1).toString();
     const aiMsg: Message = {
-      id: (Date.now() + 1).toString(),
+      id: aiMsgId,
       role: "assistant",
       content: "",
-      citations: [
-        { index: 1, documentTitle: "Machine Learning Fundamentals", pageNumber: 42, excerpt: "Neural networks are computational models inspired by the human brain..." },
-        { index: 2, documentTitle: "Deep Learning with PyTorch", pageNumber: 15, excerpt: "Gradient descent is the primary optimization algorithm used..." },
-      ],
+      citations: [],
       timestamp: new Date(),
     };
-
     setMessages((prev) => [...prev, aiMsg]);
 
-    const response = `Based on your documents, here's what I found [1]:\n\n**Key Concept:** The transformer architecture revolutionized NLP by introducing self-attention mechanisms that allow models to weigh the importance of different input tokens [2].\n\n**From your knowledge base:**\n- Self-attention enables parallel processing of sequences\n- Multi-head attention captures different aspects of relationships\n- Positional encoding preserves sequence order information\n\nWould you like me to generate flashcards or a quiz on this topic?`;
+    try {
+      const history = messages
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .map((m) => ({
+          role: m.role === "user" ? ("user" as const) : ("model" as const),
+          content: m.content,
+        }))
+        .slice(-6); // Last 3 turns of back-and-forth
 
-    // Stream characters
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i < response.length) {
-        setMessages((prev) =>
-          prev.map((m) => m.id === aiMsg.id ? { ...m, content: response.slice(0, i + 1) } : m)
-        );
-        i++;
-      } else {
-        clearInterval(interval);
-        setLoading(false);
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: queryText,
+          history,
+          agent: agentMode,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to send message");
+
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      if (!reader) throw new Error("No reader available");
+
+      let done = false;
+      let buffer = "";
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        if (value) {
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const chunk = JSON.parse(line);
+              if (chunk.type === "chunk") {
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === aiMsgId ? { ...m, content: m.content + chunk.value } : m
+                  )
+                );
+              } else if (chunk.type === "citations") {
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === aiMsgId ? { ...m, citations: chunk.value } : m
+                  )
+                );
+              }
+            } catch (err) {
+              console.error("Error parsing stream line:", err);
+            }
+          }
+        }
       }
-    }, 12);
+    } catch (err) {
+      console.error("Error in chat execution:", err);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === aiMsgId
+            ? {
+                ...m,
+                content:
+                  "Sorry, I experienced an error trying to process this query. Please check that your Gemini API key is configured.",
+              }
+            : m
+        )
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleVoice = () => {
@@ -271,7 +340,7 @@ export default function ChatPage() {
           <Sparkles className="w-3.5 h-3.5" />
           <span>Gemini 2.5 Flash</span>
         </div>
-        <span className="text-xs font-black uppercase tracking-wider text-gray-500" style={B.labelStyle}>3 documents in context</span>
+        <span className="text-xs font-black uppercase tracking-wider text-gray-500" style={B.labelStyle}>{docsCount} documents in context</span>
       </motion.div>
 
       {/* Messages Scroll Area */}

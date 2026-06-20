@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   FileText, MessageSquare, BookOpen, ClipboardList,
@@ -14,13 +15,6 @@ interface DashboardHomeProps {
 
 const ICON_COLORS = [B.RED, B.BLUE, B.YELLOW, B.RED] as const;
 
-const stats = [
-  { icon: FileText,      label: "Documents",  value: "0", href: "/dashboard/documents" },
-  { icon: MessageSquare, label: "Chats",       value: "0", href: "/dashboard/chat"      },
-  { icon: BookOpen,      label: "Flashcards",  value: "0", href: "/dashboard/flashcards"},
-  { icon: ClipboardList, label: "Quizzes",     value: "0", href: "/dashboard/quizzes"  },
-];
-
 const quickActions = [
   { icon: FileText,  label: "Upload Document",  description: "Add PDFs, DOCX or TXT files",      href: "/dashboard/documents"      },
   { icon: MessageSquare, label: "Start AI Chat", description: "Chat with your knowledge base",   href: "/dashboard/chat"           },
@@ -29,6 +23,26 @@ const quickActions = [
 ];
 
 export function DashboardHome({ userName }: DashboardHomeProps) {
+  const [counts, setCounts] = useState({ documents: 0, chats: 0, flashcards: 0, quizzes: 0 });
+
+  useEffect(() => {
+    fetch("/api/analytics")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.counts) {
+          setCounts(data.counts);
+        }
+      })
+      .catch((err) => console.error("Error loading home stats:", err));
+  }, []);
+
+  const stats = [
+    { icon: FileText,      label: "Documents",  value: String(counts.documents), href: "/dashboard/documents" },
+    { icon: MessageSquare, label: "Chats",       value: String(counts.chats), href: "/dashboard/chat"      },
+    { icon: BookOpen,      label: "Flashcards",  value: String(counts.flashcards), href: "/dashboard/flashcards"},
+    { icon: ClipboardList, label: "Quizzes",     value: String(counts.quizzes), href: "/dashboard/quizzes"  },
+  ];
+
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       {/* Greeting */}

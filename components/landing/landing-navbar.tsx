@@ -19,10 +19,10 @@ export function LandingNavbar() {
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-200"
       style={{
         backgroundColor: scrolled ? B.CANVAS : "transparent",
-        borderBottom: scrolled ? `4px solid ${B.BLACK}` : "none",
+        borderBottom: scrolled ? `3px solid ${B.BLACK}` : "none",
       }}
     >
-      <div className="max-w-7xl mx-auto px-8 flex items-center justify-between h-16">
+      <div className="site-shell flex items-center justify-between h-18 py-3">
         {/* ── Logo ── */}
         <Link href="/" className="flex items-center gap-3" id="nav-logo">
           <div className="flex items-center gap-1">
@@ -43,7 +43,7 @@ export function LandingNavbar() {
             <Link
               key={item.label}
               href={item.href}
-              className="px-5 py-5 transition-colors duration-150"
+              className="px-4 py-3 transition-colors duration-150"
               style={{
                 ...B.bodyBoldStyle,
                 color: B.BLACK,
@@ -69,13 +69,12 @@ export function LandingNavbar() {
           </Link>
           <Link href="/sign-up" id="nav-get-started">
             <button
-              className="inline-flex items-center justify-center px-6 py-3 transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px]"
+              className="bau-button px-5"
               style={{
                 ...B.bodyBoldStyle,
                 background: B.RED,
                 color: "#fff",
                 border: `2px solid ${B.BLACK}`,
-                ...btnPrimaryStyle,
                 cursor: "pointer",
               }}
               onMouseEnter={(e) => (e.currentTarget.style.background = "#b01a1a")}
@@ -120,7 +119,7 @@ export function LandingNavbar() {
           <div className="p-6">
             <Link href="/sign-up" onClick={() => setMenuOpen(false)}>
               <button
-                className="w-full py-4 inline-flex items-center justify-center transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px]"
+                className="bau-button w-full py-3"
                 style={{ ...B.bodyBoldStyle, background: B.RED, color: "#fff", border: `2px solid ${B.BLACK}`, ...btnPrimaryStyle, cursor: "pointer" }}
               >
                 Get Started Free

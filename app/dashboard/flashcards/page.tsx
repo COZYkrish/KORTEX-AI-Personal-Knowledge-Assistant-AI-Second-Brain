@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain, ChevronRight, ChevronLeft, RotateCcw,
   ThumbsUp, Minus, ThumbsDown, Sparkles,
   BookOpen, CheckCircle2, Target, Flame, Eye, EyeOff,
+  Loader2
 } from "lucide-react";
 import { B } from "@/lib/bauhaus";
 
@@ -16,15 +17,8 @@ interface Flashcard {
   difficulty: "EASY" | "MEDIUM" | "HARD";
   masteryScore: number;
   nextReviewAt: string;
-  concept: string;
+  concept?: { name: string } | null;
 }
-
-const DEMO_CARDS: Flashcard[] = [
-  { id: "1", front: "What is backpropagation?", back: "Backpropagation is an algorithm used to train neural networks by computing gradients of the loss function with respect to the network weights, propagating the error backwards through the network using the chain rule of calculus.", difficulty: "MEDIUM", masteryScore: 0.65, nextReviewAt: "2024-01-16", concept: "Neural Networks" },
-  { id: "2", front: "What is the attention mechanism in transformers?", back: "The attention mechanism allows transformers to weigh the importance of different input tokens when computing representations. For each token, it computes Query, Key, and Value matrices, then uses scaled dot-product attention: Attention(Q,K,V) = softmax(QK^T/√d_k)V", difficulty: "HARD", masteryScore: 0.3, nextReviewAt: "2024-01-15", concept: "Transformer" },
-  { id: "3", front: "Define gradient descent", back: "Gradient descent is an iterative optimization algorithm that minimizes a loss function by updating parameters in the direction of the negative gradient. The update rule is: θ = θ - α∇J(θ), where α is the learning rate.", difficulty: "EASY", masteryScore: 0.85, nextReviewAt: "2024-01-20", concept: "Optimization" },
-  { id: "4", front: "What is dropout regularization?", back: "Dropout is a regularization technique where randomly selected neurons are ignored (dropped) during training. This prevents co-adaptation of neurons and acts as an ensemble of multiple network architectures, reducing overfitting.", difficulty: "MEDIUM", masteryScore: 0.5, nextReviewAt: "2024-01-17", concept: "Regularization" },
-];
 
 const DIFFICULTY_CONFIG = {
   EASY: { label: "Easy", color: "#1040C0", bg: "#1040C015" },
@@ -34,7 +28,14 @@ const DIFFICULTY_CONFIG = {
 
 function FlipCard({ card }: { card: Flashcard }) {
   const [flipped, setFlipped] = useState(false);
-  const diff = DIFFICULTY_CONFIG[card.difficulty];
+  const diff = DIFFICULTY_CONFIG[card.difficulty || "MEDIUM"];
+
+  // Reset flipped state when card changes
+  useEffect(() => {
+    setFlipped(false);
+  }, [card.id]);
+
+  const conceptName = card.concept?.name || "General";
 
   return (
     <div
@@ -78,7 +79,7 @@ function FlipCard({ card }: { card: Flashcard }) {
             className="mt-6 text-xs font-black uppercase tracking-wider px-3 py-1 border border-[#121212] rounded-none bg-[#F0C020] text-[#121212]"
             style={{ fontFamily: "'Outfit', sans-serif" }}
           >
-            {card.concept}
+            {conceptName}
           </span>
         </div>
       </motion.div>
@@ -87,27 +88,106 @@ function FlipCard({ card }: { card: Flashcard }) {
 }
 
 export default function FlashcardsPage() {
-  const [cards] = useState<Flashcard[]>(DEMO_CARDS);
+  const [cards, setCards] = useState<Flashcard[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [mode, setMode] = useState<"browse" | "review">("browse");
   const [reviewedCount, setReviewedCount] = useState(0);
   const [generating, setGenerating] = useState(false);
 
+  const fetchCards = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/flashcards");
+      if (res.ok) {
+        const data = await res.json();
+        setCards(data);
+      }
+    } catch (err) {
+      console.error("Error loading flashcards:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCards();
+  }, []);
+
   const current = cards[currentIdx];
 
-  const next = () => setCurrentIdx((i) => (i + 1) % cards.length);
-  const prev = () => setCurrentIdx((i) => (i - 1 + cards.length) % cards.length);
+  const next = () => {
+    if (cards.length === 0) return;
+    setCurrentIdx((i) => (i + 1) % cards.length);
+  };
+  
+  const prev = () => {
+    if (cards.length === 0) return;
+    setCurrentIdx((i) => (i - 1 + cards.length) % cards.length);
+  };
 
-  const rate = (rating: "easy" | "medium" | "hard") => {
-    setReviewedCount((c) => c + 1);
-    next();
+  const rate = async (rating: "EASY" | "MEDIUM" | "HARD") => {
+    if (!current) return;
+    try {
+      const res = await fetch(`/api/flashcards/${current.id}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ difficulty: rating }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setCards((prev) =>
+          prev.map((c) => (c.id === updated.id ? { ...updated, concept: c.concept } : c))
+        );
+        setReviewedCount((c) => c + 1);
+        next();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to submit review");
+      }
+    } catch (err) {
+      console.error("Error submitting review:", err);
+    }
   };
 
   const generateCards = async () => {
     setGenerating(true);
-    await new Promise((r) => setTimeout(r, 2000));
-    setGenerating(false);
+    try {
+      const res = await fetch("/api/flashcards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        const newCards = await res.json();
+        // Reload deck and select the first index
+        await fetchCards();
+        setCurrentIdx(0);
+        setMode("review");
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to generate cards. Make sure you have ready documents.");
+      }
+    } catch (err) {
+      console.error("Error generating cards:", err);
+    } finally {
+      setGenerating(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 space-y-4">
+        <Loader2 className="w-12 h-12 text-[#1040C0] animate-spin" />
+        <p className="text-gray-500 font-bold uppercase tracking-wider text-xs" style={B.labelStyle}>
+          Loading Flashcards...
+        </p>
+      </div>
+    );
+  }
+
+  const dueCount = cards.filter(
+    (c) => !c.nextReviewAt || new Date(c.nextReviewAt).getTime() <= Date.now()
+  ).length;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
@@ -122,22 +202,24 @@ export default function FlashcardsPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center bg-white border-2 border-[#121212] p-1 shadow-[3px_3px_0px_0px_#121212] rounded-none">
-            {(["browse", "review"] as const).map((m) => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={`px-4 py-2 font-bold uppercase text-xs tracking-wider transition-all cursor-pointer rounded-none ${
-                  mode === m
-                    ? "bg-[#1040C0] text-white border border-[#121212]"
-                    : "text-[#121212] hover:bg-gray-100"
-                }`}
-                style={{ fontFamily: "'Outfit', sans-serif" }}
-              >
-                {m}
-              </button>
-            ))}
-          </div>
+          {cards.length > 0 && (
+            <div className="flex items-center bg-white border-2 border-[#121212] p-1 shadow-[3px_3px_0px_0px_#121212] rounded-none">
+              {(["browse", "review"] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setMode(m)}
+                  className={`px-4 py-2 font-bold uppercase text-xs tracking-wider transition-all cursor-pointer rounded-none ${
+                    mode === m
+                      ? "bg-[#1040C0] text-white border border-[#121212]"
+                      : "text-[#121212] hover:bg-gray-100"
+                  }`}
+                  style={{ fontFamily: "'Outfit', sans-serif" }}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+          )}
           <button
             onClick={generateCards}
             disabled={generating}
@@ -146,7 +228,7 @@ export default function FlashcardsPage() {
             style={{ fontFamily: "'Outfit', sans-serif" }}
           >
             {generating ? (
-              <RotateCcw className="w-4 h-4 animate-spin text-white" />
+              <Loader2 className="w-4 h-4 animate-spin text-white" />
             ) : (
               <Sparkles className="w-4 h-4 text-white" />
             )}
@@ -155,177 +237,196 @@ export default function FlashcardsPage() {
         </div>
       </motion.div>
 
-      {/* Stats row */}
-      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { icon: BookOpen, label: "Total Deck", value: cards.length, color: B.BLUE },
-          { icon: CheckCircle2, label: "Mastered", value: cards.filter((c) => c.masteryScore >= 0.8).length, color: B.RED },
-          { icon: Target, label: "Due Today", value: 2, color: B.YELLOW },
-          { icon: Flame, label: "Streak", value: "7d", color: B.BLUE },
-        ].map(({ icon: Icon, label, value, color }) => (
-          <div key={label} className="bg-white border-2 border-[#121212] p-4 flex items-center gap-3 shadow-[3px_3px_0px_0px_#121212] rounded-none">
-            <div className="w-10 h-10 border-2 border-[#121212] flex items-center justify-center shadow-[2px_2px_0px_0px_#121212] shrink-0" style={{ background: color }}>
-              <Icon className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <div className="text-xl font-black text-[#121212]" style={{ fontFamily: "'Outfit', sans-serif" }}>{value}</div>
-              <div className="text-xs text-gray-500 font-bold uppercase tracking-wider" style={B.labelStyle}>{label}</div>
-            </div>
-          </div>
-        ))}
-      </motion.div>
-
-      {/* Card viewer */}
-      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-4">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider" style={B.labelStyle}>Card {currentIdx + 1} of {cards.length}</span>
-          <div className="flex gap-2">
-            {cards.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentIdx(i)}
-                className={`w-2.5 h-2.5 border border-[#121212] transition-all rounded-none cursor-pointer ${
-                  i === currentIdx ? "bg-[#D02020] scale-110" : "bg-white"
-                }`}
-              />
-            ))}
-          </div>
-          <span
-            className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 border border-[#121212] rounded-none"
-            style={{
-              background: DIFFICULTY_CONFIG[current.difficulty].bg,
-              color: DIFFICULTY_CONFIG[current.difficulty].color,
-              fontFamily: "'Outfit', sans-serif",
-            }}
-          >
-            {DIFFICULTY_CONFIG[current.difficulty].label}
-          </span>
-        </div>
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentIdx}
-            initial={{ opacity: 0, x: 25 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -25 }}
-          >
-            <FlipCard card={current} />
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Mastery bar */}
-        <div className="bg-white border-2 border-[#121212] p-4 shadow-[4px_4px_0px_0px_#121212] rounded-none">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider" style={B.labelStyle}>Mastery Score</span>
-            <span className="text-xs font-extrabold text-[#121212] uppercase" style={{ fontFamily: "'Outfit', sans-serif" }}>{Math.round(current.masteryScore * 100)}%</span>
-          </div>
-          <div className="h-4 border-2 border-[#121212] bg-[#F0F0F0] overflow-hidden rounded-none">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${current.masteryScore * 100}%` }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="h-full border-r border-[#121212] bg-[#1040C0]"
-            />
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Controls */}
-      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <button
-          id="prev-card-button"
-          onClick={prev}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white border-2 border-[#121212] text-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-gray-50 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
-          style={{ fontFamily: "'Outfit', sans-serif" }}
-        >
-          <ChevronLeft className="w-4 h-4 text-[#121212]" />
-          Previous Card
-        </button>
-
-        {mode === "review" && (
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <button
-              onClick={() => rate("hard")}
-              id="rate-hard-button"
-              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#D02020] text-white border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-[#b01a1a] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
-              style={{ fontFamily: "'Outfit', sans-serif" }}
-            >
-              <ThumbsDown className="w-4 h-4" /> Hard
-            </button>
-            <button
-              onClick={() => rate("medium")}
-              id="rate-medium-button"
-              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#F0C020] text-[#121212] border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-[#d4a818] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
-              style={{ fontFamily: "'Outfit', sans-serif" }}
-            >
-              <Minus className="w-4 h-4" /> Medium
-            </button>
-            <button
-              onClick={() => rate("easy")}
-              id="rate-easy-button"
-              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1040C0] text-white border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-[#0c30a0] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
-              style={{ fontFamily: "'Outfit', sans-serif" }}
-            >
-              <ThumbsUp className="w-4 h-4" /> Easy
-            </button>
-          </div>
-        )}
-
-        <button
-          id="next-card-button"
-          onClick={next}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white border-2 border-[#121212] text-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-gray-50 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_#121212] transition-all cursor-pointer rounded-none ml-auto"
-          style={{ fontFamily: "'Outfit', sans-serif" }}
-        >
-          Next Card
-          <ChevronRight className="w-4 h-4 text-[#121212]" />
-        </button>
-      </motion.div>
-
-      {/* Card list */}
-      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-4">
-        <h2 className="text-2xl font-black uppercase tracking-tight text-[#121212]" style={B.displayStyle}>All Cards</h2>
-        <div className="space-y-3">
-          {cards.map((card, i) => {
-            const diff = DIFFICULTY_CONFIG[card.difficulty];
-            const isSelected = i === currentIdx;
-            return (
-              <button
-                key={card.id}
-                onClick={() => setCurrentIdx(i)}
-                className={`w-full bg-white border-2 border-[#121212] flex items-center justify-between gap-4 px-5 py-4 text-left shadow-[3px_3px_0px_0px_#121212] rounded-none hover:translate-x-1 transition-all cursor-pointer ${
-                  isSelected ? "bg-red-50 border-r-8 border-r-[#D02020]" : ""
-                }`}
-              >
-                <div className="flex items-center gap-4 min-w-0">
-                  <div className="w-8 h-8 border-2 border-[#121212] bg-[#1040C0] text-white flex items-center justify-center shrink-0 shadow-[2px_2px_0px_0px_#121212] font-black" style={{ fontFamily: "'Outfit', sans-serif" }}>
-                    {i + 1}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[#121212] text-sm font-extrabold truncate" style={{ fontFamily: "'Outfit', sans-serif" }}>{card.front}</p>
-                    <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mt-0.5" style={B.labelStyle}>{card.concept}</p>
-                  </div>
+      {cards.length > 0 && (
+        <>
+          {/* Stats row */}
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { icon: BookOpen, label: "Total Deck", value: cards.length, color: B.BLUE },
+              { icon: CheckCircle2, label: "Mastered", value: cards.filter((c) => c.masteryScore >= 0.8).length, color: B.RED },
+              { icon: Target, label: "Due Today", value: dueCount, color: B.YELLOW },
+              { icon: Flame, label: "Reviewed", value: reviewedCount, color: B.BLUE },
+            ].map(({ icon: Icon, label, value, color }) => (
+              <div key={label} className="bg-white border-2 border-[#121212] p-4 flex items-center gap-3 shadow-[3px_3px_0px_0px_#121212] rounded-none">
+                <div className="w-10 h-10 border-2 border-[#121212] flex items-center justify-center shadow-[2px_2px_0px_0px_#121212] shrink-0" style={{ background: color }}>
+                  <Icon className="w-5 h-5 text-white" />
                 </div>
-                <div className="flex items-center gap-4 shrink-0">
-                  <div className="w-16 h-2 border border-[#121212] bg-gray-100 overflow-hidden rounded-none hidden sm:block">
-                    <div className="h-full bg-[#1040C0]" style={{ width: `${card.masteryScore * 100}%` }} />
+                <div>
+                  <div className="text-xl font-black text-[#121212]" style={{ fontFamily: "'Outfit', sans-serif" }}>{value}</div>
+                  <div className="text-xs text-gray-500 font-bold uppercase tracking-wider" style={B.labelStyle}>{label}</div>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+
+          {current && (
+            <>
+              {/* Card viewer */}
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider" style={B.labelStyle}>Card {currentIdx + 1} of {cards.length}</span>
+                  <div className="flex gap-2">
+                    {cards.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setCurrentIdx(i)}
+                        className={`w-2.5 h-2.5 border border-[#121212] transition-all rounded-none cursor-pointer ${
+                          i === currentIdx ? "bg-[#D02020] scale-110" : "bg-white"
+                        }`}
+                      />
+                    ))}
                   </div>
                   <span
-                    className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 border border-[#121212] rounded-none"
+                    className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 border border-[#121212] rounded-none"
                     style={{
-                      background: diff.bg,
-                      color: diff.color,
+                      background: DIFFICULTY_CONFIG[current.difficulty || "MEDIUM"].bg,
+                      color: DIFFICULTY_CONFIG[current.difficulty || "MEDIUM"].color,
                       fontFamily: "'Outfit', sans-serif",
                     }}
                   >
-                    {diff.label}
+                    {DIFFICULTY_CONFIG[current.difficulty || "MEDIUM"].label}
                   </span>
                 </div>
-              </button>
-            );
-          })}
+
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={current.id}
+                    initial={{ opacity: 0, x: 25 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -25 }}
+                  >
+                    <FlipCard card={current} />
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* Mastery bar */}
+                <div className="bg-white border-2 border-[#121212] p-4 shadow-[4px_4px_0px_0px_#121212] rounded-none">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider" style={B.labelStyle}>Mastery Score</span>
+                    <span className="text-xs font-extrabold text-[#121212] uppercase" style={{ fontFamily: "'Outfit', sans-serif" }}>{Math.round((current.masteryScore || 0) * 100)}%</span>
+                  </div>
+                  <div className="h-4 border-2 border-[#121212] bg-[#F0F0F0] overflow-hidden rounded-none">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(current.masteryScore || 0) * 100}%` }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
+                      className="h-full border-r border-[#121212] bg-[#1040C0]"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Controls */}
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <button
+                  id="prev-card-button"
+                  onClick={prev}
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white border-2 border-[#121212] text-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-gray-50 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
+                  style={{ fontFamily: "'Outfit', sans-serif" }}
+                >
+                  <ChevronLeft className="w-4 h-4 text-[#121212]" />
+                  Previous Card
+                </button>
+
+                {mode === "review" && (
+                  <div className="flex flex-wrap items-center justify-center gap-3">
+                    <button
+                      onClick={() => rate("HARD")}
+                      id="rate-hard-button"
+                      className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#D02020] text-white border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-[#b01a1a] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
+                      style={{ fontFamily: "'Outfit', sans-serif" }}
+                    >
+                      <ThumbsDown className="w-4 h-4" /> Hard
+                    </button>
+                    <button
+                      onClick={() => rate("MEDIUM")}
+                      id="rate-medium-button"
+                      className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#F0C020] text-[#121212] border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-[#d4a818] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
+                      style={{ fontFamily: "'Outfit', sans-serif" }}
+                    >
+                      <Minus className="w-4 h-4" /> Medium
+                    </button>
+                    <button
+                      onClick={() => rate("EASY")}
+                      id="rate-easy-button"
+                      className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1040C0] text-white border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-[#0c30a0] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
+                      style={{ fontFamily: "'Outfit', sans-serif" }}
+                    >
+                      <ThumbsUp className="w-4 h-4" /> Easy
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  id="next-card-button"
+                  onClick={next}
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white border-2 border-[#121212] text-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-gray-50 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_#121212] transition-all cursor-pointer rounded-none ml-auto"
+                  style={{ fontFamily: "'Outfit', sans-serif" }}
+                >
+                  Next Card
+                  <ChevronRight className="w-4 h-4 text-[#121212]" />
+                </button>
+              </motion.div>
+            </>
+          )}
+
+          {/* Card list */}
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-4">
+            <h2 className="text-2xl font-black uppercase tracking-tight text-[#121212]" style={B.displayStyle}>All Cards</h2>
+            <div className="space-y-3">
+              {cards.map((card, i) => {
+                const diff = DIFFICULTY_CONFIG[card.difficulty || "MEDIUM"];
+                const isSelected = i === currentIdx;
+                const conceptName = card.concept?.name || "General";
+                return (
+                  <button
+                    key={card.id}
+                    onClick={() => setCurrentIdx(i)}
+                    className={`w-full bg-white border-2 border-[#121212] flex items-center justify-between gap-4 px-5 py-4 text-left shadow-[3px_3px_0px_0px_#121212] rounded-none hover:translate-x-1 transition-all cursor-pointer ${
+                      isSelected ? "bg-red-50 border-r-8 border-r-[#D02020]" : ""
+                    }`}
+                  >
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="w-8 h-8 border-2 border-[#121212] bg-[#1040C0] text-white flex items-center justify-center shrink-0 shadow-[2px_2px_0px_0px_#121212] font-black" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                        {i + 1}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[#121212] text-sm font-extrabold truncate" style={{ fontFamily: "'Outfit', sans-serif" }}>{card.front}</p>
+                        <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mt-0.5" style={B.labelStyle}>{conceptName}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 shrink-0">
+                      <div className="w-16 h-2 border border-[#121212] bg-gray-100 overflow-hidden rounded-none hidden sm:block">
+                        <div className="h-full bg-[#1040C0]" style={{ width: `${(card.masteryScore || 0) * 100}%` }} />
+                      </div>
+                      <span
+                        className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 border border-[#121212] rounded-none"
+                        style={{
+                          background: diff.bg,
+                          color: diff.color,
+                          fontFamily: "'Outfit', sans-serif",
+                        }}
+                      >
+                        {diff.label}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        </>
+      )}
+
+      {cards.length === 0 && (
+        <div className="text-center py-24 bg-white border-2 border-dashed border-[#121212] shadow-[4px_4px_0px_0px_#121212] rounded-none">
+          <Brain className="w-12 h-12 text-[#121212] mx-auto mb-4" />
+          <p className="text-[#121212] font-black uppercase tracking-wider text-sm mb-1" style={B.labelStyle}>No flashcards generated yet</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider max-w-md mx-auto" style={B.labelStyle}>
+            Click &quot;AI Generate&quot; above to scan your uploaded documents and create a customized spaced-repetition deck!
+          </p>
         </div>
-      </motion.div>
+      )}
     </div>
   );
 }

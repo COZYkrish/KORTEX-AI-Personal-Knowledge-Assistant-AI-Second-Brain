@@ -21,8 +21,8 @@ export function ProblemSection() {
   return (
     <section
       ref={ref}
-      className="relative overflow-hidden py-24 px-8"
-      style={{ background: B.RED, borderBottom: B.border4 }}
+      className="landing-section"
+      style={{ background: B.RED }}
     >
       {/* Dot grid overlay */}
       <div className="absolute inset-0 bg-dot-grid-white opacity-10 pointer-events-none" />
@@ -30,8 +30,8 @@ export function ProblemSection() {
       <div style={{ position: "absolute", right: -100, top: -100, width: 300, height: 300, borderRadius: "50%", border: "4px solid rgba(255,255,255,0.12)" }} />
       <div style={{ position: "absolute", left: -60, bottom: -60, width: 200, height: 200, border: "4px solid rgba(255,255,255,0.12)", transform: "rotate(45deg)" }} />
 
-      <div className="relative z-10 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div className="site-shell relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-10 lg:gap-16 items-center">
 
           {/* LEFT — story */}
           <motion.div
@@ -39,8 +39,8 @@ export function ProblemSection() {
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            <p style={{ ...B.labelStyle, color: "rgba(255,255,255,0.7)", marginBottom: 16 }}>The Problem</p>
-            <h2 style={{ ...B.displayStyle, fontSize: "clamp(2.5rem, 7vw, 5.5rem)", color: "white", marginBottom: 32 }}>
+            <p className="section-label" style={{ color: "rgba(255,255,255,0.72)", marginBottom: 16 }}>The Problem</p>
+            <h2 className="section-heading" style={{ color: "white", marginBottom: 28 }}>
               Knowledge
               <br />
               <span style={{ color: B.YELLOW }}>Chaos</span>
@@ -48,7 +48,7 @@ export function ProblemSection() {
               Is Real.
             </h2>
 
-            <div className="space-y-5 mb-10" style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 500, fontSize: "1.05rem", color: "white", lineHeight: 1.7 }}>
+            <div className="space-y-4 mb-8" style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 500, fontSize: "clamp(0.98rem, 1.6vw, 1.08rem)", color: "white", lineHeight: 1.7 }}>
               <p>
                 The average knowledge worker reads{" "}
                 <span style={{ fontWeight: 900, background: "white", color: B.RED, padding: "0 6px" }}>
@@ -66,7 +66,7 @@ export function ProblemSection() {
             </div>
 
             {/* Stats */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", border: "2px solid white" }}>
+            <div className="grid grid-cols-1 sm:grid-cols-3" style={{ border: "2px solid white" }}>
               {[
                 { value: "500+", label: "Too Many Files" },
                 { value: "73%",  label: "Lost Insights"  },
@@ -74,7 +74,7 @@ export function ProblemSection() {
               ].map((stat, i) => (
                 <div
                   key={stat.label}
-                  className="py-5 text-center"
+                  className="py-4 text-center"
                   style={{ borderRight: i < 2 ? "2px solid white" : "none" }}
                 >
                   <div style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 900, fontSize: "1.75rem", color: "white", textTransform: "uppercase" }}>
@@ -91,10 +91,10 @@ export function ProblemSection() {
             initial={{ opacity: 0, x: 40 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
-            className="flex flex-col gap-4"
+            className="flex flex-col gap-4 min-w-0"
           >
             {/* BEFORE */}
-            <div style={{ background: "white", border: `4px solid ${B.BLACK}`, boxShadow: B.shadowWhiteLg, padding: "1.5rem" }}>
+            <div className="bau-card" style={{ background: "white", boxShadow: B.shadowWhiteMd, padding: "1.25rem" }}>
               <div className="flex items-center gap-2 mb-4" style={{ ...B.labelStyle, color: B.RED }}>
                 <AlertTriangle size={14} />
                 Before Kortex AI
@@ -136,7 +136,7 @@ export function ProblemSection() {
             </div>
 
             {/* AFTER */}
-            <div style={{ background: B.BLACK, border: "4px solid white", boxShadow: B.shadowWhiteLg, padding: "1.5rem" }}>
+            <div className="bau-card" style={{ background: B.BLACK, borderColor: "white", boxShadow: B.shadowWhiteMd, padding: "1.25rem" }}>
               <div style={{ ...B.labelStyle, color: B.YELLOW, marginBottom: 16 }}>After Kortex AI</div>
               <div className="space-y-3">
                 {[

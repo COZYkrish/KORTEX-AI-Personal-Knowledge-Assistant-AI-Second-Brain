@@ -7,15 +7,15 @@ import { B } from "@/lib/bauhaus";
 export function DashboardHeader() {
   return (
     <header
-      className="flex items-center justify-between px-6 shrink-0"
-      style={{ height: 56, background: "white", borderBottom: B.border4 }}
+      className="sticky top-0 z-40 flex items-center justify-between gap-3 px-4 md:px-6 shrink-0"
+      style={{ height: 64, background: "white", borderBottom: "3px solid #121212" }}
     >
       {/* Search */}
       <button
         id="global-search-trigger"
-        className="flex items-center gap-2 transition-colors duration-200"
+        className="flex min-w-0 items-center gap-2 transition-colors duration-200"
         style={{
-          padding: "8px 16px",
+          padding: "8px 12px",
           border: "2px solid #e0e0e0",
           background: B.CANVAS,
           fontFamily: "'Outfit', system-ui, sans-serif",
@@ -30,9 +30,9 @@ export function DashboardHeader() {
         onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#e0e0e0"; (e.currentTarget as HTMLButtonElement).style.color = "#888"; }}
       >
         <Search size={14} />
-        <span>Search</span>
+        <span className="hidden sm:inline">Search</span>
         <span
-          className="ml-2"
+          className="ml-1 hidden sm:inline"
           style={{ background: B.BLACK, color: "white", padding: "1px 6px", fontSize: "0.65rem", fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 700 }}
         >
           ⌘K

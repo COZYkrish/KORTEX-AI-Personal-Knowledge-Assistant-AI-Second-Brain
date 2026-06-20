@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Settings, User, Bell, Palette, Shield, Database,
@@ -117,11 +117,47 @@ export default function SettingsPage() {
   const [weeklyReport, setWeeklyReport] = useState(true);
   const [documentProcessed, setDocumentProcessed] = useState(true);
 
+  const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.name) {
+          setDisplayName(data.name);
+        }
+        if (data.settings) {
+          setLanguage(data.settings.defaultLanguage ?? "en");
+          setDarkMode(data.settings.theme === "dark");
+          setEmailDigest(data.settings.emailDigest ?? true);
+        }
+      })
+      .catch((err) => console.error("Error loading settings:", err));
+  }, []);
+
   const handleSave = async () => {
-    await new Promise((r) => setTimeout(r, 600));
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: displayName,
+          theme: darkMode ? "dark" : "light",
+          emailDigest,
+          defaultLanguage: language,
+        }),
+      });
+      if (res.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+      }
+    } catch (err) {
+      console.error("Error saving settings:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const ACCENT_COLORS = [B.BLUE, B.RED, B.YELLOW, "#121212"];

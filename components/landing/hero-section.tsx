@@ -10,22 +10,22 @@ export function HeroSection() {
     <section
       className="relative flex flex-col overflow-hidden"
       style={{
-        minHeight: "100vh",
+        minHeight: "min(860px, 100vh)",
         background: B.CANVAS,
-        borderBottom: B.border4,
-        paddingTop: 64,
+        borderBottom: "3px solid #121212",
+        paddingTop: 72,
       }}
     >
       {/* Dot Grid */}
       <div className="absolute inset-0 bg-dot-grid opacity-40 pointer-events-none" />
 
       {/* ── Main Split ── */}
-      <div className="relative z-10 flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full px-8">
+      <div className="site-shell relative z-10 flex-1 grid lg:grid-cols-[minmax(0,1fr)_minmax(360px,44%)] gap-8 lg:gap-0 items-stretch">
 
         {/* LEFT — Typography & CTA */}
         <div
-          className="flex-1 flex flex-col justify-center py-16 lg:py-24"
-          style={{ paddingRight: 0 }}
+          className="flex flex-col justify-center py-16 lg:py-20"
+          style={{ maxWidth: 680 }}
         >
           {/* Badge */}
           <motion.div
@@ -39,7 +39,7 @@ export function HeroSection() {
               style={{
                 background: B.YELLOW,
                 border: B.border2,
-                boxShadow: B.shadowMd,
+                boxShadow: B.shadowSm,
                 ...B.labelStyle,
                 color: B.BLACK,
               }}
@@ -57,7 +57,7 @@ export function HeroSection() {
             className="mb-6"
             style={{
               ...B.displayStyle,
-              fontSize: "clamp(3.5rem, 10vw, 7rem)",
+              fontSize: "clamp(3rem, 8vw, 6.25rem)",
               color: B.BLACK,
             }}
           >
@@ -73,11 +73,11 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-            className="mb-10 max-w-lg"
+            className="mb-8 max-w-xl"
             style={{
               fontFamily: "'Outfit', system-ui, sans-serif",
               fontWeight: 500,
-              fontSize: "1.1rem",
+              fontSize: "clamp(1rem, 2vw, 1.2rem)",
               color: B.BLACK,
               lineHeight: 1.6,
             }}
@@ -91,11 +91,11 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
-            className="flex flex-col sm:flex-row gap-4 mb-10"
+            className="flex flex-col sm:flex-row gap-4 mb-8"
           >
             <Link href="/sign-up" id="hero-cta-primary">
               <button
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px]"
+                className="bau-button px-6 py-3"
                 style={{
                   ...B.bodyBoldStyle,
                   fontSize: "0.9rem",
@@ -114,7 +114,7 @@ export function HeroSection() {
             </Link>
             <Link href="#features" id="hero-cta-secondary">
               <button
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px]"
+                className="bau-button px-6 py-3"
                 style={{
                   ...B.bodyBoldStyle,
                   fontSize: "0.9rem",
@@ -159,9 +159,9 @@ export function HeroSection() {
           transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
           className="hidden lg:flex items-center justify-center relative overflow-hidden"
           style={{
-            width: 480,
             background: B.BLUE,
-            borderLeft: B.border4,
+            borderLeft: "3px solid #121212",
+            minHeight: 520,
           }}
         >
           <div className="absolute inset-0 bg-dot-grid-white opacity-20 pointer-events-none" />
@@ -169,11 +169,11 @@ export function HeroSection() {
           <div style={{ position: "absolute", bottom: -80, right: -80, width: 280, height: 280, borderRadius: "50%", border: "4px solid rgba(255,255,255,0.15)" }} />
           <div style={{ position: "absolute", top: -40, left: -40, width: 160, height: 160, borderRadius: "50%", border: "4px solid rgba(255,255,255,0.15)" }} />
 
-          <div className="relative z-10 flex flex-col items-center gap-10 px-10">
+          <div className="relative z-10 flex flex-col items-center gap-8 px-10">
             {/* Central geometric composition */}
-            <div className="relative flex items-center justify-center" style={{ width: 240, height: 240 }}>
+            <div className="relative flex items-center justify-center" style={{ width: 260, height: 260 }}>
               {/* Large circle */}
-              <div style={{ position: "absolute", width: 240, height: 240, borderRadius: "50%", border: "4px solid rgba(255,255,255,0.9)" }} />
+              <div style={{ position: "absolute", width: 260, height: 260, borderRadius: "50%", border: "4px solid rgba(255,255,255,0.9)" }} />
               {/* Rotated square */}
               <div style={{ position: "absolute", width: 150, height: 150, border: "4px solid rgba(255,255,255,0.9)", transform: "rotate(45deg)" }} />
               {/* Inner white square */}
@@ -215,16 +215,16 @@ export function HeroSection() {
       {/* ── Stats Bar ── */}
       <div
         className="relative z-10"
-        style={{ background: B.BLACK, borderTop: B.border4 }}
+        style={{ background: B.BLACK, borderTop: "3px solid #121212" }}
       >
-        <div className="max-w-7xl mx-auto px-8 grid grid-cols-3 divide-x divide-[#333]">
+        <div className="site-shell grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[#333]">
           {[
             { value: "10+",  label: "AI Features"     },
             { value: "500MB", label: "Document Limit" },
             { value: "100%", label: "Privacy First"   },
           ].map((stat) => (
-            <div key={stat.label} className="py-5 text-center">
-              <div style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 900, fontSize: "2rem", color: "white", textTransform: "uppercase" }}>
+            <div key={stat.label} className="py-4 text-center">
+              <div style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 900, fontSize: "clamp(1.5rem, 4vw, 2rem)", color: "white", textTransform: "uppercase", letterSpacing: 0 }}>
                 {stat.value}
               </div>
               <div style={{ ...B.labelStyle, color: "#a1a1aa" }}>{stat.label}</div>

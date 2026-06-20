@@ -13,8 +13,8 @@ export function FinalCTASection() {
   return (
     <section
       ref={ref}
-      className="relative overflow-hidden py-32 px-8"
-      style={{ background: B.YELLOW, borderBottom: B.border4 }}
+      className="landing-section"
+      style={{ background: B.YELLOW }}
     >
       <div className="absolute inset-0 bg-dot-grid opacity-15 pointer-events-none" />
       <div style={{ position: "absolute", left: -80, top: -80, width: 256, height: 256, borderRadius: "50%", border: `4px solid ${B.BLACK}`, opacity: 0.25 }} />
@@ -26,11 +26,12 @@ export function FinalCTASection() {
         initial={{ opacity: 0, y: 40 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative z-10 text-center max-w-5xl mx-auto"
+        className="site-shell relative z-10 text-center"
+        style={{ maxWidth: 900 }}
       >
         <p style={{ ...B.labelStyle, color: B.RED, marginBottom: 24 }}>Start Today — It&apos;s Free</p>
 
-        <h2 style={{ ...B.displayStyle, fontSize: "clamp(3rem, 9vw, 7rem)", color: B.BLACK, marginBottom: 40 }}>
+        <h2 className="section-heading" style={{ fontSize: "clamp(3rem, 8vw, 6.4rem)", color: B.BLACK, marginBottom: 32 }}>
           Never Lose
           <br />
           An <span style={{ color: B.BLUE }}>Idea</span>
@@ -45,7 +46,7 @@ export function FinalCTASection() {
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-center mb-12">
           <Link href="/sign-up" id="final-cta-button">
             <button
-              className="inline-flex items-center justify-center gap-2 px-10 py-5 transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px]"
+              className="bau-button px-8 py-4"
               style={{
                 ...B.bodyBoldStyle,
                 fontSize: "0.9rem",
@@ -64,7 +65,7 @@ export function FinalCTASection() {
           </Link>
           <Link href="/sign-in">
             <button
-              className="inline-flex items-center justify-center gap-2 px-10 py-5 transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px]"
+              className="bau-button px-8 py-4"
               style={{
                 ...B.bodyBoldStyle,
                 fontSize: "0.9rem",

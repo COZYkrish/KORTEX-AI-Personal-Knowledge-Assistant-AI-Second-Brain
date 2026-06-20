@@ -61,23 +61,23 @@ export async function hybridSearch(
     db.$queryRaw<
       Array<{
         id: string;
-        document_id: string;
+        documentId: string;
         content: string;
-        page_number: number | null;
+        pageNumber: number | null;
         metadata: Record<string, unknown>;
         rank: number;
       }>
     >`
       SELECT
         dc.id,
-        dc.document_id,
+        dc."documentId",
         dc.content,
-        dc.page_number,
+        dc."pageNumber",
         dc.metadata,
         ts_rank(to_tsvector('english', dc.content), plainto_tsquery('english', ${query})) AS rank
       FROM document_chunks dc
-      JOIN documents d ON d.id = dc.document_id
-      WHERE d.workspace_id = ${workspaceId}
+      JOIN documents d ON d.id = dc."documentId"
+      WHERE d."workspaceId" = ${workspaceId}
         AND to_tsvector('english', dc.content) @@ plainto_tsquery('english', ${query})
       ORDER BY rank DESC
       LIMIT ${topK * 2}
@@ -112,11 +112,11 @@ export async function hybridSearch(
         score: rrf,
         result: {
           id: r.id,
-          documentId: r.document_id,
+          documentId: r.documentId,
           documentTitle: "",
           content: r.content,
           score: rrf,
-          pageNumber: r.page_number ?? undefined,
+          pageNumber: r.pageNumber ?? undefined,
           metadata: r.metadata ?? {},
         },
       });

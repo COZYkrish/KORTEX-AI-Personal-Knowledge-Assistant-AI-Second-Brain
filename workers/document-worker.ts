@@ -1,3 +1,6 @@
+import { loadEnvConfig } from "@next/env";
+loadEnvConfig(process.cwd());
+
 import { Worker } from "bullmq";
 import { redisConnection, QUEUE_NAMES } from "@/lib/queue";
 import { db } from "@/lib/db/client";
@@ -6,8 +9,7 @@ import { vectorStore } from "@/lib/vector-store/pgvector-provider";
 import { enqueueGraphExtraction } from "@/lib/queue";
 import { chunkText } from "@/lib/rag/pipeline";
 import type { DocumentIngestionPayload } from "@/lib/queue";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require("pdf-parse") as (buf: Buffer) => Promise<{ text: string }>;
+import { PDFParse } from "pdf-parse";
 import * as mammoth from "mammoth";
 
 async function extractText(fileUrl: string, mimeType: string): Promise<string> {
@@ -15,7 +17,9 @@ async function extractText(fileUrl: string, mimeType: string): Promise<string> {
   const buffer = Buffer.from(await response.arrayBuffer());
 
   if (mimeType === "application/pdf") {
-    const data = await pdfParse(buffer);
+    const parser = new PDFParse({ data: buffer });
+    const data = await parser.getText();
+    await parser.destroy();
     return data.text;
   } else if (
     mimeType ===

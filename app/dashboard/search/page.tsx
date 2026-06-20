@@ -125,9 +125,28 @@ export default function SearchPage() {
     setLoading(true);
     setSearched(true);
     setSelectedResult(null);
-    await new Promise((r) => setTimeout(r, 900));
-    setResults(DEMO_RESULTS.filter((r) => r.excerpt.toLowerCase().includes(q.toLowerCase().split(" ")[0]) || Math.random() > 0.3));
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      if (res.ok) {
+        const data = await res.json();
+        // Map HybridSearchResult from API to the local SearchResult shape
+        const mapped = data.map((r: any) => ({
+          id: r.id,
+          documentTitle: r.documentTitle || "Untitled Document",
+          excerpt: r.content,
+          pageNumber: r.pageNumber,
+          score: r.score,
+          tags: r.metadata?.tags || [],
+          date: r.metadata?.date || new Date().toISOString().split("T")[0],
+          type: r.metadata?.type || "pdf",
+        }));
+        setResults(mapped);
+      }
+    } catch (err) {
+      console.error("Error running semantic search:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const activeFilterCount = Object.values(activeFilters).filter(Boolean).length;

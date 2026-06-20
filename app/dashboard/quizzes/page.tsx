@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ClipboardList, Sparkles, CheckCircle2, XCircle,
@@ -121,44 +121,127 @@ function OptionButton({
 }
 
 export default function QuizzesPage() {
-  const [quiz] = useState<Quiz>(DEMO_QUIZ);
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [done, setDone] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [timeTaken, setTimeTaken] = useState(0);
+  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
 
-  const q = quiz.questions[currentQ];
-  const isAnswered = !!answers[q.id];
-  const isRevealed = !!revealed[q.id];
+  const fetchQuizzes = async () => {
+    try {
+      const res = await fetch("/api/quizzes");
+      if (res.ok) {
+        const data = await res.json();
+        setQuizzes(data);
+        if (data.length > 0) {
+          setQuiz((curr) => data.find((q: any) => q.id === curr?.id) || data[0]);
+        }
+      }
+    } catch (err) {
+      console.error("Error loading quizzes:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchQuizzes();
+  }, []);
+
+  // Timer logic for active quiz
+  useEffect(() => {
+    if (quiz && !done && !generating) {
+      const interval = setInterval(() => {
+        setTimeTaken((t) => t + 1);
+      }, 1000);
+      setTimerInterval(interval);
+      return () => clearInterval(interval);
+    } else {
+      if (timerInterval) clearInterval(timerInterval);
+    }
+  }, [quiz, done, generating]);
 
   const select = (option: string) => {
-    if (isRevealed) return;
+    if (!quiz) return;
+    const q = quiz.questions[currentQ];
+    if (revealed[q.id]) return;
     setAnswers((prev) => ({ ...prev, [q.id]: option }));
   };
 
   const check = () => {
+    if (!quiz) return;
+    const q = quiz.questions[currentQ];
     setRevealed((prev) => ({ ...prev, [q.id]: true }));
   };
 
-  const next = () => {
+  const next = async () => {
+    if (!quiz) return;
     if (currentQ < quiz.questions.length - 1) {
       setCurrentQ((i) => i + 1);
     } else {
+      // Calculate final score
+      const finalScore = quiz.questions.filter((q) => answers[q.id] === q.correctAnswer).length;
+      const finalPct = Math.round((finalScore / quiz.questions.length) * 100);
+
+      // Submit results to backend
+      try {
+        await fetch(`/api/quizzes/${quiz.id}/results`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            score: finalPct,
+            timeTaken,
+            answers,
+          }),
+        });
+      } catch (err) {
+        console.error("Error submitting quiz results:", err);
+      }
+
       setDone(true);
     }
   };
 
-  const score = quiz.questions.filter((q) => answers[q.id] === q.correctAnswer).length;
-  const pct = Math.round((score / quiz.questions.length) * 100);
-
   const generate = async () => {
     setGenerating(true);
-    await new Promise((r) => setTimeout(r, 2000));
-    setGenerating(false);
+    try {
+      const res = await fetch("/api/quizzes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (res.ok) {
+        const newQuiz = await res.json();
+        await fetchQuizzes();
+        setQuiz(newQuiz);
+        setCurrentQ(0);
+        setAnswers({});
+        setRevealed({});
+        setDone(false);
+        setTimeTaken(0);
+      } else {
+        const errData = await res.json();
+        alert(errData.error || "Failed to generate quiz");
+      }
+    } catch (err) {
+      console.error("Error generating quiz:", err);
+    } finally {
+      setGenerating(false);
+    }
   };
 
-  if (done) {
+  const formatTime = (secs: number) => {
+    const mins = Math.floor(secs / 60);
+    const remainingSecs = secs % 60;
+    return `${mins}:${remainingSecs.toString().padStart(2, "0")}`;
+  };
+
+  if (done && quiz) {
+    const score = quiz.questions.filter((q) => answers[q.id] === q.correctAnswer).length;
+    const pct = Math.round((score / quiz.questions.length) * 100);
+
     return (
       <div className="max-w-2xl mx-auto pb-12">
         <motion.div
@@ -180,7 +263,7 @@ export default function QuizzesPage() {
             {[
               { label: "Final Score", value: `${pct}%`, color: pct >= 80 ? B.BLUE : pct >= 60 ? B.YELLOW : B.RED },
               { label: "Correct Answers", value: `${score}/${quiz.questions.length}`, color: B.RED },
-              { label: "Elapsed Time", value: "4:32", color: B.BLUE },
+              { label: "Elapsed Time", value: formatTime(timeTaken), color: B.BLUE },
             ].map(({ label, value, color }) => (
               <div key={label} className="bg-[#F0F0F0] border-2 border-[#121212] p-4 shadow-[3px_3px_0px_0px_#121212] rounded-none">
                 <div className="text-2xl font-black" style={{ color, fontFamily: "'Outfit', sans-serif" }}>{value}</div>
@@ -190,7 +273,7 @@ export default function QuizzesPage() {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4 border-t-2 border-dashed border-[#121212] pt-6">
             <button
-              onClick={() => { setDone(false); setCurrentQ(0); setAnswers({}); setRevealed({}); }}
+              onClick={() => { setDone(false); setCurrentQ(0); setAnswers({}); setRevealed({}); setTimeTaken(0); }}
               className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-[#121212] text-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_#121212] transition-colors cursor-pointer rounded-none"
               style={{ fontFamily: "'Outfit', sans-serif" }}
             >
@@ -209,6 +292,11 @@ export default function QuizzesPage() {
       </div>
     );
   }
+
+  // Active question variables
+  const q = quiz?.questions[currentQ];
+  const isAnswered = q ? !!answers[q.id] : false;
+  const isRevealed = q ? !!revealed[q.id] : false;
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 pb-12">
@@ -238,137 +326,146 @@ export default function QuizzesPage() {
         </button>
       </motion.div>
 
-      {/* Progress tracking */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05 }} className="bg-white border-2 border-[#121212] p-5 shadow-[4px_4px_0px_0px_#121212] rounded-none">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <ClipboardList className="w-5 h-5 text-[#1040C0]" />
-            <span className="text-sm font-extrabold text-[#121212] uppercase" style={{ fontFamily: "'Outfit', sans-serif" }}>{quiz.title}</span>
-          </div>
-          <span className="text-xs font-black uppercase tracking-wider text-gray-500" style={B.labelStyle}>
-            {currentQ + 1} of {quiz.questions.length} Questions
-          </span>
-        </div>
-        <div className="h-4 border-2 border-[#121212] bg-[#F0F0F0] overflow-hidden rounded-none">
-          <motion.div
-            animate={{ width: `${((currentQ + (isRevealed ? 1 : 0)) / quiz.questions.length) * 100}%` }}
-            transition={{ duration: 0.4 }}
-            className="h-full bg-[#1040C0]"
-          />
-        </div>
-        <div className="flex gap-2 mt-4">
-          {quiz.questions.map((question, i) => {
-            const isCorrect = answers[question.id] === question.correctAnswer;
-            const isWrong = answers[question.id] && answers[question.id] !== question.correctAnswer;
-            let barBg = "bg-white border border-[#121212]";
-            if (revealed[question.id]) {
-              barBg = isCorrect ? "bg-[#1040C0]" : "bg-[#D02020]";
-            } else if (i === currentQ) {
-              barBg = "bg-[#F0C020]";
-            }
-            return (
-              <div
-                key={question.id}
-                className={`h-2 flex-1 rounded-none border border-[#121212] ${barBg}`}
-              />
-            );
-          })}
-        </div>
-      </motion.div>
-
-      {/* Question card */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentQ}
-          initial={{ opacity: 0, x: 25 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -25 }}
-          className="bg-white border-4 border-[#121212] p-8 shadow-[6px_6px_0px_0px_#121212] rounded-none space-y-6"
-        >
-          <div className="flex items-start gap-4">
-            <div className="w-9 h-9 border-2 border-[#121212] bg-[#1040C0] text-white flex items-center justify-center shrink-0 shadow-[2px_2px_0px_0px_#121212] font-black rounded-none" style={{ fontFamily: "'Outfit', sans-serif" }}>
-              Q{currentQ + 1}
-            </div>
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 border border-[#121212] bg-[#F0C020] text-[#121212] mb-3 inline-block" style={{ fontFamily: "'Outfit', sans-serif" }}>
-                {q.type.replace("_", " ")}
+      {quiz && q ? (
+        <>
+          {/* Progress tracking */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05 }} className="bg-white border-2 border-[#121212] p-5 shadow-[4px_4px_0px_0px_#121212] rounded-none">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="w-5 h-5 text-[#1040C0]" />
+                <span className="text-sm font-extrabold text-[#121212] uppercase" style={{ fontFamily: "'Outfit', sans-serif" }}>{quiz.title}</span>
+              </div>
+              <span className="text-xs font-black uppercase tracking-wider text-gray-500" style={B.labelStyle}>
+                {currentQ + 1} of {quiz.questions.length} Questions
               </span>
-              <p className="text-[#121212] font-black text-lg leading-relaxed" style={{ fontFamily: "'Outfit', sans-serif" }}>{q.content}</p>
             </div>
-          </div>
-
-          {q.options && (
-            <div className="space-y-3">
-              {q.options.map((option) => (
-                <OptionButton
-                  key={option}
-                  option={option}
-                  selected={answers[q.id] === option}
-                  correct={q.correctAnswer === option}
-                  revealed={isRevealed}
-                  onClick={() => select(option)}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Explanation drawer */}
-          <AnimatePresence>
-            {isRevealed && (
+            <div className="h-4 border-2 border-[#121212] bg-[#F0F0F0] overflow-hidden rounded-none">
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="bg-[#F0F0F0] border-2 border-[#121212] p-5 flex gap-3 rounded-none shadow-[3px_3px_0px_0px_#121212]"
-              >
-                {answers[q.id] === q.correctAnswer ? (
-                  <CheckCircle2 className="w-5 h-5 text-[#1040C0] shrink-0 mt-0.5" />
-                ) : (
-                  <AlertCircle className="w-5 h-5 text-[#D02020] shrink-0 mt-0.5" />
-                )}
-                <div>
-                  <p className="text-sm font-black uppercase tracking-wide mb-1" style={{ color: answers[q.id] === q.correctAnswer ? "#1040C0" : "#D02020", fontFamily: "'Outfit', sans-serif" }}>
-                    {answers[q.id] === q.correctAnswer ? "Correct Choice!" : `Incorrect Choice — Correct Answer: ${q.correctAnswer}`}
-                  </p>
-                  <p className="text-xs font-semibold text-gray-700 leading-relaxed" style={{ fontFamily: "'Outfit', sans-serif" }}>{q.explanation}</p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                animate={{ width: `${((currentQ + (isRevealed ? 1 : 0)) / quiz.questions.length) * 100}%` }}
+                transition={{ duration: 0.4 }}
+                className="h-full bg-[#1040C0]"
+              />
+            </div>
+            <div className="flex gap-2 mt-4">
+              {quiz.questions.map((question, i) => {
+                const isCorrect = answers[question.id] === question.correctAnswer;
+                let barBg = "bg-white border border-[#121212]";
+                if (revealed[question.id]) {
+                  barBg = isCorrect ? "bg-[#1040C0]" : "bg-[#D02020]";
+                } else if (i === currentQ) {
+                  barBg = "bg-[#F0C020]";
+                }
+                return (
+                  <div
+                    key={question.id}
+                    className={`h-2 flex-1 rounded-none border border-[#121212] ${barBg}`}
+                  />
+                );
+              })}
+            </div>
+          </motion.div>
 
-          {/* Action Footer */}
-          <div className="flex items-center justify-between pt-4 border-t-2 border-dashed border-[#121212]">
-            <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider" style={B.labelStyle}>
-              <Clock className="w-4 h-4 text-[#121212]" />
-              <span>Paced learning active</span>
-            </div>
-            <div className="flex gap-3">
-              {isAnswered && !isRevealed && (
-                <button
-                  onClick={check}
-                  id="check-answer-button"
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#F0C020] text-[#121212] border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-[#d4a818] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
-                  style={{ fontFamily: "'Outfit', sans-serif" }}
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  Check Answer
-                </button>
+          {/* Question card */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentQ}
+              initial={{ opacity: 0, x: 25 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -25 }}
+              className="bg-white border-4 border-[#121212] p-8 shadow-[6px_6px_0px_0px_#121212] rounded-none space-y-6"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-9 h-9 border-2 border-[#121212] bg-[#1040C0] text-white flex items-center justify-center shrink-0 shadow-[2px_2px_0px_0px_#121212] font-black rounded-none" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                  Q{currentQ + 1}
+                </div>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 border border-[#121212] bg-[#F0C020] text-[#121212] mb-3 inline-block" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                    {q.type.replace("_", " ")}
+                  </span>
+                  <p className="text-[#121212] font-black text-lg leading-relaxed" style={{ fontFamily: "'Outfit', sans-serif" }}>{q.content}</p>
+                </div>
+              </div>
+
+              {q.options && (
+                <div className="space-y-3">
+                  {(q.options as string[]).map((option) => (
+                    <OptionButton
+                      key={option}
+                      option={option}
+                      selected={answers[q.id] === option}
+                      correct={q.correctAnswer === option}
+                      revealed={isRevealed}
+                      onClick={() => select(option)}
+                    />
+                  ))}
+                </div>
               )}
-              {isRevealed && (
-                <button
-                  onClick={next}
-                  id="next-question-button"
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#D02020] text-white border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-[#b01a1a] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
-                  style={{ fontFamily: "'Outfit', sans-serif" }}
-                >
-                  {currentQ < quiz.questions.length - 1 ? "Next Question" : "See Results"}
-                  <ChevronRight className="w-4 h-4 text-white" />
-                </button>
-              )}
-            </div>
-          </div>
-        </motion.div>
-      </AnimatePresence>
+
+              {/* Explanation drawer */}
+              <AnimatePresence>
+                {isRevealed && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="bg-[#F0F0F0] border-2 border-[#121212] p-5 flex gap-3 rounded-none shadow-[3px_3px_0px_0px_#121212]"
+                  >
+                    {answers[q.id] === q.correctAnswer ? (
+                      <CheckCircle2 className="w-5 h-5 text-[#1040C0] shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-[#D02020] shrink-0 mt-0.5" />
+                    )}
+                    <div>
+                      <p className="text-sm font-black uppercase tracking-wide mb-1" style={{ color: answers[q.id] === q.correctAnswer ? "#1040C0" : "#D02020", fontFamily: "'Outfit', sans-serif" }}>
+                        {answers[q.id] === q.correctAnswer ? "Correct Choice!" : `Incorrect Choice — Correct Answer: ${q.correctAnswer}`}
+                      </p>
+                      <p className="text-xs font-semibold text-gray-700 leading-relaxed" style={{ fontFamily: "'Outfit', sans-serif" }}>{q.explanation}</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Action Footer */}
+              <div className="flex items-center justify-between pt-4 border-t-2 border-dashed border-[#121212]">
+                <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider" style={B.labelStyle}>
+                  <Clock className="w-4 h-4 text-[#121212]" />
+                  <span>Time elapsed: {formatTime(timeTaken)}</span>
+                </div>
+                <div className="flex gap-3">
+                  {isAnswered && !isRevealed && (
+                    <button
+                      onClick={check}
+                      id="check-answer-button"
+                      className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#F0C020] text-[#121212] border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-[#d4a818] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
+                      style={{ fontFamily: "'Outfit', sans-serif" }}
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      Check Answer
+                    </button>
+                  )}
+                  {isRevealed && (
+                    <button
+                      onClick={next}
+                      id="next-question-button"
+                      className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#D02020] text-white border-2 border-[#121212] font-black uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#121212] hover:bg-[#b01a1a] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#121212] transition-all cursor-pointer rounded-none"
+                      style={{ fontFamily: "'Outfit', sans-serif" }}
+                    >
+                      {currentQ < quiz.questions.length - 1 ? "Next Question" : "See Results"}
+                      <ChevronRight className="w-4 h-4 text-white" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </>
+      ) : (
+        <div className="text-center py-24 bg-white border-2 border-dashed border-[#121212] shadow-[4px_4px_0px_0px_#121212] rounded-none">
+          <ClipboardList className="w-12 h-12 text-[#121212] mx-auto mb-4" />
+          <p className="text-[#121212] font-black uppercase tracking-wider text-sm mb-1" style={B.labelStyle}>No quizzes generated yet</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider" style={B.labelStyle}>Click &quot;Generate Quiz&quot; above to create one from your documents!</p>
+        </div>
+      )}
     </div>
   );
 }

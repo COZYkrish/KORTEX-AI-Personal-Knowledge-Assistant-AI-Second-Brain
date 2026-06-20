@@ -35,18 +35,18 @@ export function PricingSection() {
     <section
       id="pricing"
       ref={ref}
-      className="relative overflow-hidden py-24 px-8"
-      style={{ background: B.YELLOW, borderBottom: B.border4 }}
+      className="landing-section"
+      style={{ background: B.YELLOW }}
     >
       <div className="absolute inset-0 bg-dot-grid opacity-10 pointer-events-none" />
       <div style={{ position: "absolute", right: 48, top: 48, width: 120, height: 120, borderRadius: "50%", border: `4px solid ${B.BLACK}`, opacity: 0.2 }} />
       <div style={{ position: "absolute", left: 32, bottom: 32, width: 88, height: 88, border: `4px solid ${B.BLACK}`, opacity: 0.2, transform: "rotate(45deg)" }} />
 
-      <div className="relative z-10 max-w-6xl mx-auto">
+      <div className="site-shell relative z-10" style={{ maxWidth: 1100 }}>
         {/* Header */}
-        <div className="pb-10 mb-16" style={{ borderBottom: B.border4 }}>
-          <p style={{ ...B.labelStyle, color: B.RED, marginBottom: 12 }}>Pricing</p>
-          <h2 style={{ ...B.displayStyle, fontSize: "clamp(2.5rem, 6vw, 5rem)", color: B.BLACK }}>
+        <div className="pb-8 mb-12" style={{ borderBottom: "3px solid #121212" }}>
+          <p className="section-label" style={{ color: B.RED, marginBottom: 12 }}>Pricing</p>
+          <h2 className="section-heading" style={{ color: B.BLACK }}>
             Simple,
             <br />
             <span style={{ color: B.BLUE }}>Transparent.</span>
@@ -55,8 +55,7 @@ export function PricingSection() {
 
         {/* Plans */}
         <div
-          className="grid grid-cols-1 md:grid-cols-3"
-          style={{ borderLeft: B.border4, borderTop: B.border4 }}
+          className="bau-grid grid-cols-1 md:grid-cols-3"
         >
           {plans.map((plan, i) => (
             <motion.div
@@ -64,15 +63,14 @@ export function PricingSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.4, delay: i * 0.1, ease: "easeOut" }}
-              className="flex flex-col"
-              style={{ borderRight: B.border4, borderBottom: B.border4 }}
+              className="bau-cell flex flex-col"
             >
               {/* Plan header */}
               <div
                 style={{
                   padding: "1.75rem",
                   background: plan.popular ? B.BLACK : "white",
-                  borderBottom: B.border4,
+                  borderBottom: "3px solid #121212",
                 }}
               >
                 {plan.popular && (
@@ -111,10 +109,10 @@ export function PricingSection() {
               </div>
 
               {/* CTA */}
-              <div style={{ padding: "1.5rem", borderTop: B.border4, background: plan.popular ? B.BLACK : "white" }}>
+              <div style={{ padding: "1.5rem", borderTop: "3px solid #121212", background: plan.popular ? B.BLACK : "white" }}>
                 <Link href={plan.href}>
                   <button
-                    className="w-full py-4 inline-flex items-center justify-center transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px]"
+                    className="bau-button w-full py-3"
                     style={{
                       ...B.labelStyle,
                       fontSize: "0.8rem",
