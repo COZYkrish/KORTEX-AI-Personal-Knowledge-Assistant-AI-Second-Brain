@@ -1,7 +1,7 @@
 import { db } from "@/lib/db/client";
 import { embeddingProvider } from "@/lib/embeddings";
 import { vectorStore } from "@/lib/vector-store/pgvector-provider";
-import { aiProvider } from "@/lib/ai";
+import { aiProvider, groqService } from "@/lib/ai";
 import type { VectorSearchResult } from "@/lib/vector-store/types";
 
 export interface HybridSearchResult {
@@ -196,7 +196,10 @@ ${context}
     },
   ];
 
-  for await (const chunk of aiProvider.generateStream(messages, fullSystemPrompt)) {
+  // Use Groq for fast streaming chat if API key is configured, fallback to Gemini
+  const streamingProvider = process.env.GROQ_API_KEY ? groqService : aiProvider;
+
+  for await (const chunk of streamingProvider.generateStream(messages, fullSystemPrompt)) {
     yield { type: "chunk", value: chunk };
   }
 

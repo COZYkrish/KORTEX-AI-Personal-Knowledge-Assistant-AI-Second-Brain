@@ -5,6 +5,7 @@
 // ============================================================
 
 export { GeminiProvider, geminiService } from "./gemini";
+export { GroqProvider, groqService } from "./groq";
 export type { AIProvider, AIMessage } from "./types";
 
 // Default provider singleton for use across the application

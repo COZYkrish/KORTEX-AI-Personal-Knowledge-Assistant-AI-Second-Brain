@@ -58,7 +58,10 @@ export class GeminiProvider implements AIProvider {
   ): AsyncGenerator<string> {
     const chat = this.model.startChat({
       history: messages.slice(0, -1),
-      systemInstruction: systemPrompt,
+      systemInstruction: {
+        role: "system",
+        parts: [{ text: systemPrompt }],
+      },
     });
 
     const lastMessage = messages[messages.length - 1];
