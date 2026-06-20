@@ -7,22 +7,21 @@
 [![BullMQ](https://img.shields.io/badge/Queue-BullMQ%20+%20Redis-red?style=for-the-badge&logo=redis)](https://bullmq.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
+![Kortex AI Banner](./public/images/kortex_ai_banner.png)
+
 Kortex AI is a production-grade, multi-tenant AI-powered Personal Knowledge Assistant and AI Second Brain platform. Built on Next.js 16, Neon Postgres, pgvector, and BullMQ, and powered by Google Gemini 2.5 Flash, it brings advanced retrieval-augmented generation (RAG), semantic graph extraction, spaced repetition learning, and analytics into a cohesive, cinematic, dark-themed Bauhaus workspace.
 
 ---
 
 ## 📸 Workspace Walkthrough
 
-Here is a visual overview of the Kortex AI dashboard, analytics interface, and active workspace in action:
+Here is a visual overview of the Kortex AI dashboard mockup and semantic knowledge graph visualizations:
 
-![Kortex AI Main Dashboard](./public/images/media__1781935454896.png)
-*Figure 1: Cinematic, high-contrast dark-themed documents list dashboard showing ingested files and processing status.*
+![Kortex AI Dashboard UI](./public/images/dashboard_ui_mockup.png)
+*Figure 1: Premium, high-contrast dark-themed productivity dashboard design showcasing files and workspace metrics.*
 
-![Semantic Search & AI Assistance](./public/images/media__1781935708695.png)
-*Figure 2: Real-time document ingestion pipeline, updating document versions and chunk indexing.*
-
-![Knowledge Graph and AI Canvas](./public/images/media__1781936391054.png)
-*Figure 3: Next.js dev server terminal trace showcasing Clerk authentication middleware resolving along with Prisma queries.*
+![Semantic Knowledge Graph Visual](./public/images/knowledge_graph_visual.png)
+*Figure 2: Conceptual semantic graph representation mapping nodes and connecting relationship vectors.*
 
 ---
 
