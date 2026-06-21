@@ -16,37 +16,37 @@
   --font-display: var(--font-outfit), system-ui, sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
 
-html {
-  scroll-behavior: smooth;
-}
+  html {
+    scroll-behavior: smooth;
+  }
 
-body {
-  background-color: #F0F0F0;
-  color: #121212;
-  font-family: var(--font-outfit), 'Outfit', system-ui, sans-serif;
-  font-weight: 500;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-}
+  body {
+    background-color: #F0F0F0;
+    color: #121212;
+    font-family: var(--font-outfit), 'Outfit', system-ui, sans-serif;
+    font-weight: 500;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
 
-button,
-a,
-input,
-textarea,
-select {
-  min-width: 0;
-}
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    min-width: 0;
+  }
 
-button,
-a {
-  -webkit-tap-highlight-color: transparent;
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 @layer components {
